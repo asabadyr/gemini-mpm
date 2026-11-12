@@ -1,0 +1,18 @@
+{
+  "name": "agy-mpm-core",
+  "displayName": "AGY MPM Core Kit",
+  "version": "1.2.0",
+  "author": {
+    "name": "asabadyr",
+    "url": "https://github.com/asabadyr"
+  },
+  "homepage": "https://github.com/asabadyr/gemini-mpm",
+  "repository": "https://github.com/asabadyr/gemini-mpm",
+  "description": "Portable Multi-Agent Project Management (MPM) rule, skill, and adversarial code-critic bundle for Google Antigravity (EN + RU editions) with --lite, --full, and --migrate project adapter scaffolding.",
+  "logo": "assets/logo.svg",
+  "suggestedPrompts": [
+    "/kit-bootstrap --migrate",
+    "/kit-bootstrap --full",
+    "/kit-handoff pause"
+  ]
+}
