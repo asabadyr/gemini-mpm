@@ -2,7 +2,7 @@
 
 {{TWO_SENTENCE_WORKSPACE_OVERVIEW}}
 
-> **Профиль правил (`Full`-адаптер + `agy-mpm-core`)**: Универсальные правила MPM (`00..04`, `20..24`), `/kit-bootstrap`, `/kit-handoff` и ревьюер `code-critic` загружаются из глобального плагина `agy-mpm-core` (`agy-mpm-core-ru`). Правила CI/CD, выкатки и эксплуатации проекта находятся в [`.agents/rules/10-project-operations.md`](file://{{WORKSPACE_PATH}}/.agents/rules/10-project-operations.md) (а границы конфиденциальности — в [`.agents/rules/11-project-confidentiality.md`](file://{{WORKSPACE_PATH}}/.agents/rules/11-project-confidentiality.md), если модуль включён).
+> **Профиль правил (`Full`-адаптер + `agy-mpm-core`)**: Универсальные правила MPM (`00..04`, `20..28`), `/kit-bootstrap`, `/kit-architecture`, `/kit-handoff` и ревьюер `code-critic` загружаются из глобального плагина `agy-mpm-core` (`agy-mpm-core-ru`). Правила CI/CD, выкатки и эксплуатации проекта находятся в [`.agents/rules/10-project-operations.md`](file://{{WORKSPACE_PATH}}/.agents/rules/10-project-operations.md) (а границы конфиденциальности — в [`.agents/rules/11-project-confidentiality.md`](file://{{WORKSPACE_PATH}}/.agents/rules/11-project-confidentiality.md), если модуль включён).
 
 ---
 

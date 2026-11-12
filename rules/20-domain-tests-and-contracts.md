@@ -1,6 +1,6 @@
 ---
 trigger: glob
-globs: "**/*test*.py, **/*_test.go, **/*.test.ts, **/*.test.tsx, **/*.spec.ts, **/*.spec.js, **/tests/**"
+globs: "**/tests/**, **/test/**, **/__tests__/**, **/*test*.*, **/*spec*.*"
 description: "Test quality inspector, anti-tautology assertions, mental mutation check, no-sleep condition polling, no test-only prod methods, and 3-level contract testing."
 ---
 
@@ -12,6 +12,7 @@ description: "Test quality inspector, anti-tautology assertions, mental mutation
 | **Existence-Only Assertion** | `assert res is not None`, `expect(out).toBeDefined()`, `expect(arr.length).toBeGreaterThan(0)` | Assert exact values, state transitions, error codes/messages, and relational postconditions |
 | **Mock Echoing** | Mocking a helper to return `X` and asserting output equals `X` without exercising business logic | Assert transformation, branching, boundary handling, and side-effect payloads |
 | **Mental Mutation Check** | Writing a green test without checking fault sensitivity | Before finishing, ask: *"If I invert the target `if` branch or shift `<` to `<=` in prod code, does at least one test fail?"* If not, tighten assertions |
+| **Parameterized Test Deduplication** | Copy-pasting repetitive per-input test functions; scaling test count to `4x3` copy-paste permutations | Use `@pytest.mark.parametrize`, `it.each`/`test.each`, or Go table-driven subtests instead of duplicating test bodies; scale test count to behavior/branch count |
 
 ## 2. Async Determinism & SUT Isolation (`🔴`)
 | Rule | Enforcement |

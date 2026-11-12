@@ -2,7 +2,7 @@
 
 {{ONE_SENTENCE_PROJECT_PURPOSE}}
 
-> **Rule Profile (`Lite` Adapter + `agy-mpm-core`)**: Universal MPM guardrails (`00..04`, `20..24`), `/kit-bootstrap`, `/kit-handoff`, and `code-critic` load automatically from global plugin `agy-mpm-core`. Persistent project facts live in [`.agents/knowledge/memories.md`](file://{{WORKSPACE_PATH}}/.agents/knowledge/memories.md).
+> **Rule Profile (`Lite` Adapter + `agy-mpm-core`)**: Universal MPM guardrails (`00..04`, `20..28`), `/kit-bootstrap`, `/kit-architecture`, `/kit-handoff`, and `code-critic` load automatically from global plugin `agy-mpm-core`. Persistent project facts live in [`.agents/knowledge/memories.md`](file://{{WORKSPACE_PATH}}/.agents/knowledge/memories.md).
 
 ---
 

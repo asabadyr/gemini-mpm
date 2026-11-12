@@ -2,7 +2,7 @@
 
 {{ONE_SENTENCE_PROJECT_PURPOSE}}
 
-> **Профиль правил (`Lite`-адаптер + `agy-mpm-core`)**: Универсальные правила MPM (`00..04`, `20..24`), `/kit-bootstrap`, `/kit-handoff` и ревьюер `code-critic` подгружаются автоматически из глобального плагина `agy-mpm-core` (`agy-mpm-core-ru`). Долгоживущие факты о проекте хранятся в [`.agents/knowledge/memories.md`](file://{{WORKSPACE_PATH}}/.agents/knowledge/memories.md).
+> **Профиль правил (`Lite`-адаптер + `agy-mpm-core`)**: Универсальные правила MPM (`00..04`, `20..28`), `/kit-bootstrap`, `/kit-architecture`, `/kit-handoff` и ревьюер `code-critic` подгружаются автоматически из глобального плагина `agy-mpm-core` (`agy-mpm-core-ru`). Долгоживущие факты о проекте хранятся в [`.agents/knowledge/memories.md`](file://{{WORKSPACE_PATH}}/.agents/knowledge/memories.md).
 
 ---
 

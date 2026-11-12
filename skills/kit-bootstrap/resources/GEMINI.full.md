@@ -2,7 +2,7 @@
 
 {{TWO_SENTENCE_WORKSPACE_OVERVIEW}}
 
-> **Rule Profile (`Full` Adapter + `agy-mpm-core`)**: Universal MPM guardrails (`00..04`, `20..24`), `/kit-bootstrap`, `/kit-handoff`, and `code-critic` load from global plugin `agy-mpm-core`. Project CI/CD, rollout, and ops runbooks live in [`.agents/rules/10-project-operations.md`](file://{{WORKSPACE_PATH}}/.agents/rules/10-project-operations.md) (and confidentiality boundaries in [`.agents/rules/11-project-confidentiality.md`](file://{{WORKSPACE_PATH}}/.agents/rules/11-project-confidentiality.md) when enabled).
+> **Rule Profile (`Full` Adapter + `agy-mpm-core`)**: Universal MPM guardrails (`00..04`, `20..28`), `/kit-bootstrap`, `/kit-architecture`, `/kit-handoff`, and `code-critic` load from global plugin `agy-mpm-core`. Project CI/CD, rollout, and ops runbooks live in [`.agents/rules/10-project-operations.md`](file://{{WORKSPACE_PATH}}/.agents/rules/10-project-operations.md) (and confidentiality boundaries in [`.agents/rules/11-project-confidentiality.md`](file://{{WORKSPACE_PATH}}/.agents/rules/11-project-confidentiality.md) when enabled).
 
 ---
 

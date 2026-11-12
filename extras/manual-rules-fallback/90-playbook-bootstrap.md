@@ -5,7 +5,7 @@ description: "Pure-rules fallback for IDE/App (@90-playbook-bootstrap.md): scan 
 
 # Manual Playbook: Project Adapter Bootstrap & Migration (`90`)
 
-> **Surface Note**: Invoked in Antigravity IDE / App via `@90-playbook-bootstrap.md`. (`agy` CLI does not support `@` rule mentions—prefer `/kit-bootstrap` when the `agy-mpm-core` plugin or `skills/kit-bootstrap/` is available.)
+> **Surface Note**: Invoked in Antigravity IDE / App via `@90-playbook-bootstrap.md`. (`agy` CLI does not support `@` rule mentions—prefer `/kit-bootstrap`, `/kit-architecture`, or `/kit-handoff` when the `agy-mpm-core` plugin or `skills/` directory is available.)
 
 ## Execution Modes & Auto-Switch
 - **`--lite`**: Single library, CLI, or small utility (`<5` modules, no prod cluster ops).
@@ -39,7 +39,7 @@ description: "Pure-rules fallback for IDE/App (@90-playbook-bootstrap.md): scan 
 
 ## Step 2: 4-Bucket Triage Matrix (For `--migrate`)
 Categorize all discovered rules into 4 distinct buckets:
-1. **Bucket 1 (Universal Core Duplicates)**: Generic guardrails, item-by-item coverage, verification gates, git WIP protection, secret patterns, 3-strike stop, maker-checker escalation. -> **Drop / Omit** from adapter (provided globally by `00..04`, `20..24`).
+1. **Bucket 1 (Universal Core Duplicates)**: Generic guardrails, clean-code/LOC/DRY/OOP rules, item-by-item coverage, verification gates, git WIP protection, secret patterns, 3-strike stop, maker-checker escalation. -> **Drop / Omit** from adapter (provided globally by `00..04`, `20..28`).
 2. **Bucket 2 (Behavioral Conflicts)**: Rules conflicting with core safety (auto-committing without staging, skipping tests, modifying user WIP). -> **Highlight and resolve** explicitly with the user.
 3. **Bucket 3 (Always-On Repo Identity & Red Lines)**: Repo identity, directory map, canonical commands (`install`, `lint`, `typecheck`, `test`, `build`), top 3–5 non-negotiable `🔴` Red Lines. -> Migrate to thin `<workspace>/GEMINI.md` (or shared `<workspace>/AGENTS.md`) without frontmatter (`~1.8–3.8 KB`).
 4. **Bucket 4 (Ops, Subdir Rules, Lore & Workflows)**:
@@ -64,7 +64,7 @@ Present discovery summary, triage matrix, and prompt user **once** via `ask_ques
 ---
 
 ## Step 4: Scaffold Project Adapter (Zero Universal Core Copies!)
-> **Anti-Duplication Invariant**: Never `cp` Universal Core rules (`00..04`, `20..24`) into `<workspace>/.agents/rules/` while global `agy-mpm-core` is enabled (`realpath` deduplication only deduplicates identical physical files!).
+> **Anti-Duplication Invariant**: Never `cp` Universal Core rules (`00..04`, `20..28`) into `<workspace>/.agents/rules/` while global `agy-mpm-core` is enabled (`realpath` deduplication only deduplicates identical physical files!).
 
 1. **`--lite`, `--full`, & `--migrate`**:
    - Write `<workspace>/GEMINI.md` (**plain Markdown, NO YAML frontmatter**, `~1.8–3.8 KB`): Workspace Identity, Top 3–5 `🔴` Project Red Lines, Directory/Sub-Project Map, Canonical Commands, and `.agents/knowledge/` links.

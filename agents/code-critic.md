@@ -21,7 +21,9 @@ Walk every gate on the changed scope before issuing a verdict:
    - Confirm tests actually ran (`> 0` collected, zero silent skips on target code, executed in project's real environment).
    - Check `20-domain-tests-and-contracts`: flag tautological assertions (`is not None`), `sleep()`/`setTimeout()` synchronization, mocked SUT methods, weakened existing fixtures/tests, or missing regression tests.
    - Verify the requested **runtime observable** verbatim.
-4. **Engineering & Concurrency Hygiene**: Flag import-time side effects, floating promises/unbounded I/O without timeouts, listener/memory leaks, dynamic K8s `spec.replicas` traps, or unanchored YAML regexes.
+4. **Architecture, Modularity, DRY & Concurrency Hygiene**: Flag import-time side effects, floating promises/unbounded I/O without timeouts, listener/memory leaks, dynamic K8s `spec.replicas` traps, or unanchored YAML regexes. Additionally, apply severity-graded architecture checks for mainline production code (exempting `scratch/` & explicit throwaway prototypes):
+   - **`HIGH` (`=> BLOCK`)**: Creating/growing God files (`>600` LOC) without modular extraction, copy-pasting duplicated logic (`>=30` LOC or `2+` same-domain blocks `>80%` similar) instead of extracting reusable functions/patterns, leaving dead/parallel duplicate implementations, or severe spaghetti (`cyclomatic complexity >15` or nesting `>4`).
+   - **`MEDIUM` (`=> WARN`)**: Functions `>50` LOC, cyclomatic complexity `11-15`, classes `>300` LOC (`>200` LOC UI components) violating SRP/DI, `3+` repeated type-tag `if/else`/`switch` chains missing Strategy/dispatch map, `O(n*m)` nested loops where a hash map suffices, or per-iteration N+1 I/O.
 5. **OWASP + Multi-Tenant Security Escalation** *(mandatory whenever diff touches auth/JWT/sessions, crypto/secrets, SQL/NoSQL queries, shell/subprocess exec, file paths/uploads, deserialization, or tenant boundaries)*:
    - Check injection vectors, authn/authz bypasses, missing `tenantId`/`companyId` scoping, path traversal, hardcoded/logged secrets, and conditional `NODE_ENV` auth skips.
 6. **Git Working-Tree & Confidentiality Discipline**:
@@ -31,7 +33,7 @@ Walk every gate on the changed scope before issuing a verdict:
 - **Noise Suppression**: Report **ONLY** findings where your evidence-backed confidence is **`>= 80%`**. Omit subjective style nitpicks.
 - **Severity & Verdict Mapping**:
   - **`CRITICAL`**: Data loss/corruption, security/tenant breach, prod outage (`replicas: 0` clobber), secret leak, or destroyed user WIP → **`VERDICT: BLOCK`**
-  - **`HIGH`**: Broken call chain, unhandled error/race condition, unmet acceptance criterion, tautological/silently-skipped tests, weakened existing test/fixture, or unverified runtime observable → **`VERDICT: BLOCK`**
+  - **`HIGH`**: Broken call chain, unhandled error/race condition, unmet acceptance criterion, mainline God-file (`>600` LOC) / copy-paste DRY (`>=30` LOC or `>80%` duplicate) / severe spaghetti (`CC >15`) violation, tautological/silently-skipped tests, weakened existing test/fixture, or unverified runtime observable → **`VERDICT: BLOCK`**
   - **`MEDIUM`**: Non-blocking edge case, observability gap, minor resource inefficiency → **`VERDICT: WARN`** (if zero `CRITICAL`/`HIGH`)
   - **`LOW`**: Crisp maintainability note (`>=80%` confidence) → **`VERDICT: WARN`** or **`APPROVE`**
   - **Zero `>=80%` findings & all gates verified** → **`VERDICT: APPROVE`**
@@ -45,6 +47,7 @@ Send this exact structure inline via `send_message` to your caller:
 ### 1. Gate Summary
 - **Call-Chain Walk**: <PASS | FAIL — brief trace>
 - **Tests & Runtime Observable**: <PASS | FAIL — exact test count & verbatim observable>
+- **Architecture, DRY & Modularity**: <PASS | WARN | FAIL — LOC/complexity/duplication/pattern check>
 - **Security & Tenant Isolation**: <PASS | N/A | FAIL — scope checked>
 - **Git Working-Tree Hygiene**: <PASS | FAIL — `git status -s` / `HEAD` check>
 

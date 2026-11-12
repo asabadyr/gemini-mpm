@@ -25,7 +25,7 @@ REPO_ROOT="$(resolve_script_dir)"
 
 usage() {
   cat <<'EOF'
-agy-mpm-kit — Installer & Edition Switcher (v1.2.0)
+agy-mpm-kit — Installer & Edition Switcher (v1.3.0)
 
 Usage:
   ./install.sh [--lang en|ru] [--force]
@@ -172,7 +172,7 @@ cmd_install() {
   printf "  %s -> %s\n" "${TARGET_LINK}" "${source_dir}"
   printf "\nNext steps in Google Antigravity:\n"
   printf "  1. Manage or toggle live via /plugin (customization://%s)\n" "${PLUGIN_DIR_NAME}"
-  printf "  2. Open any project and run: /kit-bootstrap --lite | --full | --migrate\n"
+  printf "  2. Open any project and run: /kit-bootstrap --lite | --full | --migrate or /kit-architecture\n"
 }
 
 ACTION="install"

@@ -6,11 +6,11 @@
 
 **[🇬🇧 English](README.md) | [🇷🇺 Русский](README.ru.md)**
 
-`v1.2.0` · **MIT License** · **0 Lines of Wrapper Code** · **`~2.8K` Startup Tokens (`<15%` Budget)** · **EN + RU Editions**
+`v1.3.0` · **MIT License** · **0 Lines of Wrapper Code** · **`~2.9K` Startup Tokens (`<15%` Budget)** · **EN + RU Editions**
 
 ---
 
-`gemini-mpm` (`agy-mpm-kit`) packages battle-tested multi-agent engineering discipline into **100% native Google Antigravity primitives**: Caveman-compressed `rules/`, cross-surface `/kit-bootstrap` & `/kit-handoff` `skills/`, and a context-isolated adversarial `code-critic` subagent (`agents/code-critic.md`). Install it once globally as a local plugin, scaffold thin per-repository adapters in ~90 seconds, and keep full safety and verification rigor across every repository on your machine without bloating your context window.
+`gemini-mpm` (`agy-mpm-kit`) packages battle-tested multi-agent engineering discipline into **100% native Google Antigravity primitives**: Caveman-compressed `rules/` (including zero-idle-cost polyglot best-practice `glob` packs `20..28`), cross-surface `/kit-bootstrap`, `/kit-architecture` & `/kit-handoff` `skills/`, and a context-isolated adversarial `code-critic` subagent (`agents/code-critic.md`). Install it once globally as a local plugin, scaffold thin per-repository adapters in ~90 seconds, and keep full architectural cleanliness, safety, and verification rigor across every repository on your machine without bloating your context window.
 
 ### 30-Second Quickstart
 
@@ -29,6 +29,7 @@ Then open any repository in **Google Antigravity** (IDE, App, or `agy` CLI) and 
 /kit-bootstrap --migrate    # Losslessly migrate existing GEMINI.md / CLAUDE.md / .cursorrules
 /kit-bootstrap --full       # Scaffold a production / multi-service / K8s workspace adapter
 /kit-bootstrap --lite       # Scaffold a lightweight library / CLI adapter
+/kit-architecture audit     # Scan for God files (>400/600 LOC), DRY duplicates & pattern gaps
 ```
 
 ---
@@ -37,7 +38,7 @@ Then open any repository in **Google Antigravity** (IDE, App, or `agy` CLI) and 
 
 1. [Motivation: Why Monolithic Instruction Files Break at Scale](#1-motivation-why-monolithic-instruction-files-break-at-scale)
 2. [Origins & Inspiration (`bobmatnyc/claude-mpm`) — Why `0` Wrapper Code](#2-origins--inspiration-bobmatnycclaude-mpm--why-0-wrapper-code)
-3. [Nine Core Innovations Inside `agy-mpm-kit`](#3-nine-core-innovations-inside-agy-mpm-kit)
+3. [Ten Core Innovations Inside `agy-mpm-kit`](#3-ten-core-innovations-inside-agy-mpm-kit)
 4. [Architecture Diagram & Token Budget](#4-architecture-diagram--token-budget)
 5. [Native Bilingual Support (`EN` Root vs `RU` `./ru/` Edition)](#5-native-bilingual-support-en-root-vs-ru-ru-edition)
 6. [Four Installation & Multi-Project Topologies (`realpath` Guide)](#6-four-installation--multi-project-topologies-realpath-guide)
@@ -81,18 +82,18 @@ In Claude Code, `claude-mpm` had to grow into a ~250-file Click/FastAPI/Socket.I
 | **Pre-Turn Rule Loading & Progressive Disclosure** | Python CLI wrapper assembling system prompts + `build-agent.py` | Native pre-turn `GEMINI.md` / `.agents/rules/*.md` / Plugin `rules/` with `always_on`, `model_decision`, `glob`, and `manual` triggers + `@[label](path)` includes |
 | **Dynamic Subagent Model & Sandbox Routing** | Python `PreToolUse` hook (`model_tier_hook.py`) | Native `invoke_subagent(Model="flash_lite"\|"flash"\|"pro"\|"inherit", Workspace="inherit"\|"branch"\|"share")` |
 | **Rework Continuation & Live Subagent UI** | Stateless re-dispatch + external Socket.IO/Svelte monitor | Stateful subagents woken reactively via **`send_message(Recipient=conversationId)`** (zero cold reload!) + native Subagents/Tasks UI |
-| **Strategic Planning, Autonomous & Learning Flows** | Custom CLI commands & hook scripts | Native `/plan`, `/grill-me`, `/boost`, `/teamwork`, `/goal`, `/compact`, `/learn` + cross-surface `/kit-bootstrap` & `/kit-handoff` skills |
+| **Strategic Planning, Autonomous & Learning Flows** | Custom CLI commands & hook scripts | Native `/plan`, `/grill-me`, `/boost`, `/teamwork`, `/goal`, `/compact`, `/learn` + cross-surface `/kit-bootstrap`, `/kit-architecture` & `/kit-handoff` skills |
 | **Real-World Dirty-Tree & Multi-Repo Safety** | Mandates `ONE FILE PER COMMIT`, auto-commits every phase, and assumes root `.git` | **Upgraded**: Protects dirty user WIP, enforces explicit-path `git add <file>`, and checks `<workspace>/.git` for multi-repo non-git umbrellas |
 
 ---
 
-## 3. Nine Core Innovations Inside `agy-mpm-kit`
+## 3. Ten Core Innovations Inside `agy-mpm-kit`
 
 ### 1. Caveman Table-Driven Prompt Compression & HSDF Messaging
 Grounded in empirical MPM benchmarks where converting verbose prose rules (`47 KB` / `~12.7K` tokens) into dense decision tables (`10.8 KB` / `~2.7K` tokens) cut system-prompt tokens by **`-77%`**, reduced total session tokens by **`-47%`**, and **improved QA rubric adherence by `+17%` (`3.75/5 -> 4.40/5`)**. Subagent delegations use **HSDF (Hybrid Structured Delegation Format)** (`Effort`, `task`, `scope_allowlist`, `contracts`, `observable`, `return`, `context`), keeping prompts compact while never compressing exact file paths, line numbers, tool names, or stack traces.
 
 ### 2. Two-Tier Architecture (Universal Core vs Thin Project Adapter)
-Separates **Tier 1 (`agy-mpm-core` Global Plugin)**—which is byte-for-byte identical across Python, TypeScript, Go, Rust, and Kubernetes projects—from **Tier 2 (Thin Per-Repo Project Adapter)** generated by `/kit-bootstrap`. Session-start baseline overhead stays at **`~2.8K` tokens** (`<15%` of Antigravity's `20,000`-token `defaultRulesBudget`), while stack-specific `glob` rules (`20..24`) consume **`0` tokens** until matching files are active.
+Separates **Tier 1 (`agy-mpm-core` Global Plugin)**—which is byte-for-byte identical across Python, TypeScript, Go, Rust, JVM/.NET, Frontend UI, and Kubernetes projects—from **Tier 2 (Thin Per-Repo Project Adapter)** generated by `/kit-bootstrap`. Session-start baseline overhead stays at **`~2.9K` tokens** (`<15%` of Antigravity's `20,000`-token `defaultRulesBudget`), while stack-specific `glob` rules (`20..28`) consume **`0` tokens** until matching files are active.
 
 ### 3. Context-Isolated Adversarial `code-critic`
 `agents/code-critic.md` defines a dedicated Checker subagent restricted to `[read_file, run_command, manage_task, send_message]` (omitting `edit_file` and `write_file` for tool-surface hygiene). When invoked, the orchestrator **strips the Maker's narrative rationale and commit prose**, supplying only requirements, contracts, `git diff`, raw test stdout, and the exact runtime observable. `code-critic` applies a strict **`>=80%` confidence filter**, enforces a strictness-upgraded verdict rule (**any `CRITICAL` or `HIGH` defect => mandatory `BLOCK`**), and runs automatic **OWASP + multi-tenant security audits** whenever diffs touch auth/JWT, crypto/secrets, SQL/NoSQL queries, shell execution, file uploads/paths, deserialization, or tenant boundaries.
@@ -121,6 +122,13 @@ Built for real developer workspaces with uncommitted WIP and multi-repository pa
 ### 9. Redacted 7-Section Session Handoffs (`LATEST.md`)
 `/kit-handoff pause` is advisory and fail-open (never killing in-flight background subagents). It scans and redacts secrets to `<REDACTED:VAR_NAME>` before writing a compact, gitignored 7-section snapshot (`.agents/handoffs/LATEST.md`, `<=10K` tokens). On `/kit-handoff resume`, the agent **mandatory-reconciles `LATEST.md` against live `git status -s` and `git log --oneline -10`** so live repository state always overrides stale handoff prose.
 
+### 10. Clean Architecture, Anti-God-File, DRY, OOP/Design Patterns & Polyglot Packs (`20..28` + `/kit-architecture`)
+Prevents AI-generated spaghetti, copy-paste proliferation, and monolithic files while distinguishing **Production Mainline** code (default) from **Throwaway Prototypes / `scratch/`** (`<200–300` LOC single-file allowed, banned from mainline imports):
+- **Hard Size & Complexity Caps (`02` + `code-critic`)**: Plans modular splits at **`400` LOC** (hard cap **`600` LOC** per file), **`<=300` LOC** per class (`<=200` LOC UI components), **`<=30/50` LOC** per function, cyclomatic complexity **`<=10`**, and nesting depth **`<=3`** via guard clauses.
+- **Search-Before-Create & DRY Consolidation**: Mandates searching existing helpers first, **One Implementation Per Feature** (deleting superseded dead code), and extracting reusable functions/collaborators whenever **`2+` same-domain blocks exceed `>80%` similarity** or **`>=30` LOC** (while guarding against wrong-DRY cross-domain coupling).
+- **Problem-First OOP, SOLID & Design Patterns**: Enforces Composition over Inheritance (`depth <=2`), Constructor Dependency Injection, and concrete smell-to-pattern mappings (`3+` repeated `if/else`/`switch` chains -> **Strategy / Handler Registry**, persistence leakage -> **Repository**, external 3rd-party APIs -> **Adapter / Anti-Corruption Layer**, complex assembly -> **Factory / Builder**, cyclic calls -> **Domain Events**, slow upstream cascades -> **Circuit Breaker**).
+- **Zero-Idle-Cost Polyglot Best Practices**: Ships `9` `trigger: glob` domain packs (`20..28`: Tests/Contracts, Python, TypeScript/Node.js, K8s/Infra, SQL/MongoDB, Go, Rust, Java/Kotlin/C# `.NET`, and React/Next/Vue/Svelte Frontend UI) plus the progressive-disclosure `/kit-architecture` skill covering **12 language ecosystems** (`+ PHP, Ruby, Elixir/OTP, Swift/Dart, C/C++`) and safe `<=200`-LOC chunked God-file refactoring.
+
 ---
 
 ## 4. Architecture Diagram & Token Budget
@@ -130,11 +138,11 @@ flowchart TD
     subgraph Tier1["Tier 1: Global Plugin agy-mpm-core (~2.2K Startup Tokens)"]
         A00["00-core-guardrails.md (always_on: Tiers, Verification, Git/WIP, 3-Strike)"]
         A01["01-orchestration.md (always_on: Escalation Ladder, Model/Effort, Wave 0-2)"]
-        M02["02-code-debug-and-critic.md (model_decision: HSDF, 5-Phase Debug, Critic)"]
+        M02["02-code-debug-and-critic.md (model_decision: Clean Arch, DRY, OOP/Patterns, 5-Phase Debug)"]
         M03["03-analytical-forensics.md (model_decision: 6-Point Visible Self-Check)"]
         M04["04-memory-knowledge-adr.md (model_decision: FIFO memories.md, 00-INDEX, ADR)"]
-        G20["20..24-domain-*.md (glob: Tests, Python, TS/Node, K8s/Infra, SQL/Mongo - 0 Idle Tok)"]
-        SK["Slash Skills: /kit-bootstrap & /kit-handoff (IDE + App + agy CLI)"]
+        G20["20..28-domain-*.md (glob: Tests, Py, TS, K8s, DB, Go, Rust, JVM/.NET, UI - 0 Idle Tok)"]
+        SK["Slash Skills: /kit-bootstrap, /kit-architecture & /kit-handoff (IDE + App + agy CLI)"]
         CC["Subagent: code-critic (Read-Only Tool Surface, >=80% Filter, Inline send_message)"]
     end
 
@@ -149,12 +157,12 @@ flowchart TD
     subgraph Exec["Execution & Verification Loop"]
         MA["Main Agent (Direct <=3 Files / <20 LOC, or Non-Blocking Coordinator)"]
         MK["Maker Subagent (flash / pro + HSDF Allowlist + Stage 3.5 Lint/Test Gate)"]
-        CR["Checker Subagent: code-critic (Unanchored Diff + Observable Audit)"]
+        CR["Checker Subagent: code-critic (Unanchored Diff + Architecture/DRY + Observable Audit)"]
     end
 
     Tier1 --> MA
     Tier2 --> MA
-    SK -. "Scaffolds & Reconciles" .-> Tier2
+    SK -. "Scaffolds, Audits & Reconciles" .-> Tier2
     MA -- "1. invoke_subagent (Wave 1)" --> MK
     MK -- "2. Raw Test Output + Diff" --> MA
     MA -- "3. invoke_subagent (Strips Maker Rationale)" --> CR
@@ -164,43 +172,48 @@ flowchart TD
 
 ### Complete File & Token Budget Breakdown
 
-Every rule file sits well under `<20%` of Antigravity's `24,000`-byte per-file hard cap, and aggregate session-start context consumes **`<15%` of Antigravity's `20,000`-token `defaultRulesBudget`**:
+Every rule file sits well under `<32%` of Antigravity's `24,000`-byte per-file hard cap, and aggregate session-start context consumes **`<15%` of Antigravity's `20,000`-token `defaultRulesBudget`**:
 
 | Layer | File | Trigger | Disk Size (EN) | Startup Tokens | On-Demand Tokens |
 |---|---|---|---|---|---|
 | **Tier 1 Core** | `rules/00-core-guardrails.md` | `always_on` | `4,402 B` (`4.4 KB`) | `~1,100` | *(Already loaded)* |
 | **Tier 1 Core** | `rules/01-orchestration.md` | `always_on` | `4,264 B` (`4.3 KB`) | `~1,065` | *(Already loaded)* |
-| **Tier 1 Core** | `rules/02-code-debug-and-critic.md` | `model_decision` | `4,444 B` (`4.4 KB`) | `~35` *(desc)* | `~1,110` |
+| **Tier 1 Core** | `rules/02-code-debug-and-critic.md` | `model_decision` | `7,599 B` (`7.6 KB`) | `~45` *(desc)* | `~1,900` |
 | **Tier 1 Core** | `rules/03-analytical-forensics.md` | `model_decision` | `2,542 B` (`2.5 KB`) | `~35` *(desc)* | `~635` |
 | **Tier 1 Core** | `rules/04-memory-knowledge-adr.md` | `model_decision` | `3,344 B` (`3.3 KB`) | `~35` *(desc)* | `~835` |
-| **Tier 1 Domain** | `rules/20-domain-tests-and-contracts.md` | `glob` *(test files)* | `2,804 B` (`2.8 KB`) | **`0`** | `~700` |
-| **Tier 1 Domain** | `rules/21-domain-python.md` | `glob` (`*.py`, `pyproject.toml`) | `2,162 B` (`2.2 KB`) | **`0`** | `~540` |
-| **Tier 1 Domain** | `rules/22-domain-typescript-node.md` | `glob` (`*.ts`, `*.tsx`, `*.js`) | `2,055 B` (`2.1 KB`) | **`0`** | `~515` |
+| **Tier 1 Domain** | `rules/20-domain-tests-and-contracts.md` | `glob` *(test files)* | `3,082 B` (`3.1 KB`) | **`0`** | `~770` |
+| **Tier 1 Domain** | `rules/21-domain-python.md` | `glob` (`*.py`, `pyproject.toml`) | `2,978 B` (`3.0 KB`) | **`0`** | `~745` |
+| **Tier 1 Domain** | `rules/22-domain-typescript-node.md` | `glob` (`*.ts`, `*.tsx`, `*.js`) | `2,890 B` (`2.9 KB`) | **`0`** | `~725` |
 | **Tier 1 Domain** | `rules/23-domain-k8s-and-infra.md` | `glob` (`*.yaml`, `Dockerfile`, `*.tf`, `*.sh`) | `2,235 B` (`2.2 KB`) | **`0`** | `~560` |
 | **Tier 1 Domain** | `rules/24-domain-sql-mongo-migrations.md` | `glob` (`migrations/**`, `*.sql`, `*schema*`) | `2,186 B` (`2.2 KB`) | **`0`** | `~545` |
-| **Tier 1 Skills** | `skills/kit-bootstrap/SKILL.md` (+ 8 templates) | Slash `/kit-bootstrap` | `12,122 B` (`12.1 KB`) | `~45` *(desc)* | `~3,030` |
+| **Tier 1 Domain** | `rules/25-domain-go.md` | `glob` (`*.go`, `go.mod`, `go.sum`) | `3,286 B` (`3.3 KB`) | **`0`** | `~820` |
+| **Tier 1 Domain** | `rules/26-domain-rust.md` | `glob` (`*.rs`, `Cargo.toml`) | `3,080 B` (`3.1 KB`) | **`0`** | `~770` |
+| **Tier 1 Domain** | `rules/27-domain-jvm-and-dotnet.md` | `glob` (`*.java`, `*.kt`, `*.cs`, `pom.xml`, `*.csproj`) | `3,170 B` (`3.2 KB`) | **`0`** | `~795` |
+| **Tier 1 Domain** | `rules/28-domain-frontend-ui.md` | `glob` (`*.tsx`, `*.jsx`, `*.vue`, `*.svelte`, `*.css`) | `3,395 B` (`3.4 KB`) | **`0`** | `~850` |
+| **Tier 1 Skills** | `skills/kit-architecture/SKILL.md` (+ 3 guides) | Slash `/kit-architecture` | `4,287 B` (`4.3 KB`) | `~40` *(desc)* | `~1,070` *(+ refs)* |
+| **Tier 1 Skills** | `skills/kit-bootstrap/SKILL.md` (+ 8 templates) | Slash `/kit-bootstrap` | `12,152 B` (`12.2 KB`) | `~45` *(desc)* | `~3,040` |
 | **Tier 1 Skills** | `skills/kit-handoff/SKILL.md` (+ 1 template) | Slash `/kit-handoff` | `4,238 B` (`4.2 KB`) | `~35` *(desc)* | `~1,060` |
-| **Tier 1 Agent** | `agents/code-critic.md` | Subagent `code-critic` | `4,925 B` (`4.9 KB`) | `~40` *(desc)* | `~1,230` *(isolated)* |
-| **Tier 1 Extras** | `extras/manual-rules-fallback/90 & 91` | `manual` (`@90...`, `@91...`) | `9,811 B` *(2 files)* | **`0`** | *IDE/App fallback* |
+| **Tier 1 Agent** | `agents/code-critic.md` | Subagent `code-critic` | `5,962 B` (`6.0 KB`) | `~40` *(desc)* | `~1,490` *(isolated)* |
+| **Tier 1 Extras** | `extras/manual-rules-fallback/90..92` | `manual` (`@90...`, `@91...`, `@92...`) | `12,878 B` *(3 files)* | **`0`** | *IDE/App fallback* |
 | **Tier 2 Adapter** | `<repo>/GEMINI.md` *(or `AGENTS.md`)* | Plain MD (`always_on`) | `~1.8–2.5 KB` | `~450–625` | *(Already loaded)* |
 | **Tier 2 Adapter** | `.agents/rules/10-project-operations.md` | `model_decision` *(`--full`)* | `~2.0–5.0 KB` | `~35` *(desc)* | `~500–1,250` |
 | **Tier 2 Adapter** | `.agents/rules/11-project-confidentiality.md` | `always_on` *(optional)* | `~1.1–1.5 KB` | `~275–375` *(opt)* | *(Already loaded)* |
 | **Tier 2 Lore** | `.agents/knowledge/*` & `handoffs/LATEST.md` | Read on demand | `<=4 KB` (`memories.md`) | **`0`** | Read selectively |
-| **TOTAL** | **Baseline Session Start (`Core + Adapter`)** | — | — | **`~2,840` tokens** (`~3.2K` w/ `11-*`) | **`14.2%` of `20K` budget** |
+| **TOTAL** | **Baseline Session Start (`Core + Adapter`)** | — | — | **`~2,890` tokens** (`~3.2K` w/ `11-*`) | **`14.5%` of `20K` budget** |
 
 ---
 
 ## 5. Native Bilingual Support (`EN` Root vs `RU` `./ru/` Edition)
 
 `agy-mpm-kit` ships two complete, self-contained plugin trees inside the same repository:
-- **English Edition (`/` repository root)** — English rules (`00..04`, `20..24`), English skills, English `code-critic`, and English project adapter templates.
+- **English Edition (`/` repository root)** — English rules (`00..04`, `20..28`), English skills (`/kit-bootstrap`, `/kit-architecture`, `/kit-handoff`), English `code-critic`, and English project adapter templates.
 - **Russian Edition (`./ru/` directory)** — 100% native Russian translations of every rule, skill, `code-critic` prompt, fallback playbook, and `/kit-bootstrap` + `/kit-handoff` template (`GEMINI.md`, `memories.md`, `00-INDEX.md`, `LATEST.md`).
 
 Because `~/.gemini/config/plugins/agy-mpm-core` is a **single symlink** pointing to *either* `<repo>` (`EN`) *or* `<repo>/ru` (`RU`), **both editions never load at the same time**—guaranteeing zero rule duplication.
 
 | Aspect | `EN` Edition (`--lang en`, Default) | `RU` Edition (`--lang ru`, `./ru/`) |
 |---|---|---|
-| **Session-Start Token Cost** | **`~2.8K` tokens** (~35–40% fewer BPE tokens per rule) | **`~3.8K–4.4K` tokens** (Cyrillic BPE tokenization; still `<22%` of `20K` budget) |
+| **Session-Start Token Cost** | **`~2.9K` tokens** (~35–40% fewer BPE tokens per rule) | **`~3.9K–4.5K` tokens** (Cyrillic BPE tokenization; still `<23%` of `20K` budget) |
 | **Chat Response Language** | Agent still answers fluently in **English, Russian, or any language** you prompt in | Agent answers in Russian with Russian audit/self-check headers |
 | **Generated Repo Templates (`/kit-bootstrap`)** | Scaffolds `GEMINI.md`, `memories.md`, `00-INDEX.md`, `LATEST.md` in **English** | Scaffolds `GEMINI.md`, `memories.md`, `00-INDEX.md`, `LATEST.md` in **Russian** |
 | **Best For** | Maximum context-window efficiency, OSS/international repos, mixed-language coding | Russian-first engineering teams wanting native Russian project docs & memory files |
@@ -236,7 +249,7 @@ ln -s ~/Projects/gemini-mpm/ru ~/.gemini/config/plugins/agy-mpm-core
 > [!CAUTION]
 > **Critical Antigravity Invariant: `realpath`-Only Deduplication & Cumulative Rules**
 > Antigravity deduplicates rule files **strictly by resolved physical path on disk (`realpath`)**—never by content hash—and Global + Workspace rules are **cumulative**.
-> **NEVER run `cp` to copy Universal Core rules (`00..04`, `20..24`) into `<repo>/.agents/rules/` while the global `agy-mpm-core` plugin is enabled!** Two physical files have two distinct `realpath`s and will be injected into your prompt **twice**, doubling token consumption.
+> **NEVER run `cp` to copy Universal Core rules (`00..04`, `20..28`) into `<repo>/.agents/rules/` while the global `agy-mpm-core` plugin is enabled!** Two physical files have two distinct `realpath`s and will be injected into your prompt **twice**, doubling token consumption.
 
 Choose the topology that matches each repository's collaboration model:
 
@@ -258,8 +271,8 @@ When contributing to a company or open-source repo where you do **not** want to 
 
 ### Mode D (Pure-Rules Zero-Skill Fallback for IDE & App)
 If your environment permits `.agents/rules/*.md` only (no `skills/` directory):
-1. Copy or symlink `extras/manual-rules-fallback/90-playbook-bootstrap.md` and `91-playbook-handoff.md` (`trigger: manual`, `0` idle tokens) into `.agents/rules/`.
-2. Invoke them in **Antigravity IDE** or **Antigravity 2.0 App** chat via `@90-playbook-bootstrap.md` and `@91-playbook-handoff.md`.
+1. Copy or symlink `extras/manual-rules-fallback/90-playbook-bootstrap.md`, `91-playbook-handoff.md`, and `92-playbook-architecture.md` (`trigger: manual`, `0` idle tokens) into `.agents/rules/`.
+2. Invoke them in **Antigravity IDE** or **Antigravity 2.0 App** chat via `@90-playbook-bootstrap.md`, `@91-playbook-handoff.md`, and `@92-playbook-architecture.md`.
 3. *Platform Note*: The **`agy` CLI does not support `@` rule mentions**—use Modes A–C (`skills/`) whenever working in `agy` CLI.
 
 | Topology | Where Tier-1 Core Lives | Where Tier-2 Adapter Lives | Prevents Double-Loading Via | `agy` CLI Support |
@@ -267,7 +280,7 @@ If your environment permits `.agents/rules/*.md` only (no `skills/` directory):
 | **Mode A: Global Plugin** *(Recommended)* | `~/.gemini/config/plugins/agy-mpm-core` symlink | `<repo>/GEMINI.md` + `.agents/{rules/10-*,knowledge}` | Single physical Core copy | Yes (`/kit-*`) |
 | **Mode B: Team Repo in Git** | `<team-repo>/.agents/{rules,skills,agents}` | `<team-repo>/GEMINI.md` + `.agents/{rules/10-*,knowledge}` | Toggle `agy-mpm-core` off in `/plugin` (or `ln -s` same `realpath`) | Yes (`/kit-*`) |
 | **Mode C: Stealth Overlay** | `~/.gemini/config/plugins/agy-mpm-core` symlink | Local `<repo>/GEMINI.md` + `.agents/` in `.git/info/exclude` | Single physical Core copy + local Git exclude | Yes (`/kit-*`) |
-| **Mode D: Zero-Skill Fallback** | `rules/` + `90/91-playbook-*.md` (`manual`) | `<repo>/GEMINI.md` + `.agents/knowledge/` | Single rule directory | IDE & App only (`@90...`) |
+| **Mode D: Zero-Skill Fallback** | `rules/` + `90..92-playbook-*.md` (`manual`) | `<repo>/GEMINI.md` + `.agents/knowledge/` | Single rule directory | IDE & App only (`@90...`) |
 
 ---
 
@@ -287,7 +300,7 @@ Consolidates legacy or cross-agent setups into a clean Tier-2 Project Adapter in
 1. **Exhaustive Discovery**: Scans `GEMINI.md`, `AGENTS.md` (root & nested), `.agents/rules/*.md`, legacy `.agents/workflows/*.md`, `CLAUDE.md`, `.claude/**`, `.cursorrules`, `.cursor/rules/**`, `.windsurfrules`, `CODEX.md`, `.remember/**`, and agent sections in `CONTRIBUTING.md`.
 2. **Lossless Backup Gate**: Copies every discovered file preserving relative paths into `<appDataDir>/brain/<conversation-id>/scratch/rule-migration-backup/` before touching a single workspace byte.
 3. **4-Bucket Triage Matrix**:
-   - *Bucket 1 (Universal Core Duplicates)* -> **Dropped** (already covered by `00..04` & `20..24`, immediately reclaiming prompt tokens).
+   - *Bucket 1 (Universal Core Duplicates)* -> **Dropped** (already covered by `00..04` & `20..28`, immediately reclaiming prompt tokens).
    - *Bucket 2 (Behavioral Conflicts)* -> **Surfaced via `ask_question`** (e.g., unsafe auto-commits or skipped tests).
    - *Bucket 3 (Always-On Identity & Red Lines)* -> **Condensed** into plain-Markdown `GEMINI.md` (or shared `AGENTS.md` for multi-tool Claude + Cursor + Antigravity teams).
    - *Bucket 4 (Ops, Subdir Rules, Lore & Workflows)* -> **Structured** into `10-project-operations.md` (`model_decision`), `11-project-confidentiality.md` (`always_on`), optional `12-<subproject>.md` (`trigger: glob`, `globs: "**/<subdir>/**"`), `.agents/knowledge/*`, and converts legacy `.agents/workflows/*.md` into `.agents/skills/<name>/SKILL.md`.
@@ -300,7 +313,13 @@ Consolidates legacy or cross-agent setups into a clean Tier-2 Project Adapter in
 - **`/kit-handoff resume`**: Reads `LATEST.md` + `memories.md` and **reconciles them against live `git status -s` and `git log --oneline -10`** (across root `.git` or child `*/*/.git` sub-repos). Live Git state always wins over stale handoff notes.
 - **`/kit-handoff postmortem`**: Audits session errors, `code-critic` `BLOCK` verdicts, and 3-strike pivots from session logs, records 1-line `FIFO`-bounded lessons in `memories.md` (+ detailed timelines in `postmortems.md`), and recommends Antigravity's native **`/learn`** command when a lesson warrants a permanent cross-repo rule or skill.
 
-### 7.4 Synergy with Built-In Antigravity Slash Commands
+### 7.4 Clean Architecture, Safe God-File Refactoring & Polyglot Best Practices (`/kit-architecture`)
+
+- **`/kit-architecture audit [path]`**: Quantitatively scans files `>400/600` LOC, classes `>300` LOC, functions `>50` LOC, deep nesting `>3`, `>80%` duplicated blocks, concrete I/O coupled inside domain classes, and repeated type-tag switches, separating **Production Mainline** from `scratch/` prototypes.
+- **`/kit-architecture refactor <target>`**: Decomposes monolithic `600–5,000+` LOC files in behavior-preserving **`<=200` LOC chunks** with pre/post test gates, **One Implementation Per Feature** dead-code cleanup, and `Added / Removed / Net LOC` reporting.
+- **`/kit-architecture patterns [problem]` & `/kit-architecture lang <stack>`**: Consults progressive-disclosure references for problem-first OOP/SOLID pattern selection and idiomatic engineering across **12 language ecosystems** (`Python`, `TypeScript/Node`, `Go`, `Rust`, `Java/Kotlin`, `C#/.NET`, `React/Next/Vue/Svelte`, `PHP`, `Ruby`, `Elixir/OTP`, `Swift/Dart`, `C/C++`).
+
+### 7.5 Synergy with Built-In Antigravity Slash Commands
 
 | Scenario | Recommended Command |
 |---|---|
@@ -316,7 +335,7 @@ Consolidates legacy or cross-agent setups into a clean Tier-2 Project Adapter in
 
 ```text
 gemini-mpm/
-├── plugin.json                                     # EN plugin manifest (agy-mpm-core v1.2.0)
+├── plugin.json                                     # EN plugin manifest (agy-mpm-core v1.3.0)
 ├── install.sh                                      # Safe symlink installer & EN/RU switcher (--lang en|ru, --status, --uninstall)
 ├── LICENSE                                         # MIT License + claude-mpm conceptual attribution
 ├── README.md                                       # English flagship documentation
@@ -326,15 +345,22 @@ gemini-mpm/
 ├── rules/                                          # FLAT 1-level directory (Antigravity scans 1 level deep!)
 │   ├── 00-core-guardrails.md                       # always_on: severity tiers, item-by-item, verification, Git/WIP, 3-strike
 │   ├── 01-orchestration.md                         # always_on: escalation ladder, Maker-Checker, Model/Effort, Wave 0-2, .git check
-│   ├── 02-code-debug-and-critic.md                 # model_decision: right-level code, HSDF, 5-phase debug, code-critic protocol
+│   ├── 02-code-debug-and-critic.md                 # model_decision: Clean Arch, LOC/DRY caps, OOP/patterns, HSDF, 5-phase debug
 │   ├── 03-analytical-forensics.md                  # model_decision: mandatory 6-point Visible Self-Check for metrics/logs/DB
 │   ├── 04-memory-knowledge-adr.md                  # model_decision: FIFO memories.md (<=4KB), 00-INDEX matrix, 3-gate ADRs
-│   ├── 20-domain-tests-and-contracts.md            # glob: anti-tautology, mental mutation, no sleep(), 3-level contracts
-│   ├── 21-domain-python.md                         # glob: uv/ruff/mypy, import purity, no bare security assert, async timeouts
-│   ├── 22-domain-typescript-node.md                # glob: unknown narrowing, promise/listener hygiene, AbortSignal, server auth
+│   ├── 20-domain-tests-and-contracts.md            # glob: anti-tautology, mental mutation, parameterized DRY, 3-level contracts
+│   ├── 21-domain-python.md                         # glob: uv/ruff/mypy, Protocol/DI, frozen dataclasses, import purity, async timeouts
+│   ├── 22-domain-typescript-node.md                # glob: unknown narrowing, discriminated unions, interface DI, no barrel cycles
 │   ├── 23-domain-k8s-and-infra.md                  # glob: dynamic spec.replicas guard, registry-anchored regex, shell safety
-│   └── 24-domain-sql-mongo-migrations.md           # glob: ID/timestamp units, driver shapes, tenant/survival filters, ESR, expand-contract
+│   ├── 24-domain-sql-mongo-migrations.md           # glob: ID/timestamp units, driver shapes, tenant/survival filters, ESR
+│   ├── 25-domain-go.md                             # glob: consumer interfaces, context/errgroup lifecycle, %w errors, -race
+│   ├── 26-domain-rust.md                           # glob: borrowing over .clone(), enum ADTs/traits, Result discipline, clippy
+│   ├── 27-domain-jvm-and-dotnet.md                 # glob: constructor DI, immutable records, sealed hierarchies, N+1/ORM boundaries
+│   └── 28-domain-frontend-ui.md                    # glob: <=150-200 LOC components, derived state over useEffect sync, cleanup & a11y
 ├── skills/                                         # Cross-surface slash skills (IDE, Antigravity 2.0 App & agy CLI)
+│   ├── kit-architecture/
+│   │   ├── SKILL.md                                # /kit-architecture [audit | refactor | patterns | lang]
+│   │   └── references/                             # SOLID/design patterns, <=200 LOC God-file refactoring, 12-stack polyglot guide
 │   ├── kit-bootstrap/
 │   │   ├── SKILL.md                                # /kit-bootstrap [--lite | --full | --migrate]
 │   │   └── resources/                              # GEMINI.{lite,full}.md, 10/11 rule templates, knowledge/* templates
@@ -346,27 +372,28 @@ gemini-mpm/
 ├── extras/
 │   └── manual-rules-fallback/                      # Optional zero-skill fallback (trigger: manual, IDE/App @mentions)
 │       ├── 90-playbook-bootstrap.md
-│       └── 91-playbook-handoff.md
+│       ├── 91-playbook-handoff.md
+│       └── 92-playbook-architecture.md
 └── ru/                                             # Complete standalone Russian plugin edition (--lang ru)
     ├── plugin.json
     ├── assets/logo.svg
-    ├── rules/{00..04,20..24}-*.md                  # Native Russian rules
-    ├── skills/{kit-bootstrap,kit-handoff}/         # Native Russian skills & Russian adapter templates
+    ├── rules/{00..04,20..28}-*.md                  # Native Russian core & polyglot rules
+    ├── skills/{kit-architecture,kit-bootstrap,kit-handoff}/ # Native Russian skills, guides & adapter templates
     ├── agents/code-critic.md                       # Native Russian adversarial Checker
-    └── extras/manual-rules-fallback/{90,91}-*.md   # Native Russian manual playbooks
+    └── extras/manual-rules-fallback/{90..92}-*.md  # Native Russian manual playbooks
 ```
 
 ---
 
 ## 9. Customization & Extending the Kit
 
-1. **Adding New Stack Domain Packs (`25-domain-<stack>.md`)**:
+1. **Adding New Stack Domain Packs (`29-domain-<stack>.md`)**:
    Place new stack rules directly inside `rules/` (and `ru/rules/` if maintaining bilingual parity) using a flat filename—Antigravity scans `rules/`, `skills/`, and `agents/` **one directory level deep only**.
    ```yaml
    ---
    trigger: glob
-   globs: "**/*.go, **/go.mod, **/go.sum"
-   description: "Go engineering guardrails: context cancellation, goroutine leak prevention, error wrapping, and race detector discipline."
+   globs: "**/*.rb, **/Gemfile, **/Rakefile"
+   description: "Ruby & Rails guardrails: service/query objects keeping ActiveRecord models lean, immutable Data.define DTOs, and strict_loading N+1 prevention."
    ---
    ```
    *Frontmatter Guardrails*: Always use plural `globs:` as a single quoted comma-separated string with `**/` prefixes and **expanded extensions (never `{a,b}` braces)**.
