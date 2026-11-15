@@ -37,12 +37,17 @@ Walk every gate on the changed scope before issuing a verdict:
   - **`MEDIUM`**: Non-blocking edge case, observability gap, minor resource inefficiency → **`VERDICT: WARN`** (if zero `CRITICAL`/`HIGH`)
   - **`LOW`**: Crisp maintainability note (`>=80%` confidence) → **`VERDICT: WARN`** or **`APPROVE`**
   - **Zero `>=80%` findings & all gates verified** → **`VERDICT: APPROVE`**
+- **Rework Routing Assessment**: On every review, classify rework routing:
+  - **`NONE`**: On `APPROVE` (or non-blocking cosmetic `WARN`).
+  - **`WARM_FIX`**: Localized mechanical slip fixable by the current Maker via `send_message` in 1 turn (typo, narrow assertion syntax, missing import).
+  - **`PROMOTE_MAKER -> <flash Medium | pro High>`**: Broken call-chain invariant, concurrency/security defect, or architectural/contract misunderstanding indicating the Maker tier is under-powered and requires a fresh higher-tier `invoke_subagent` per `01-orchestration.md` §2.2.
 
 ## 4. Required `send_message` Report Format
 Send this exact structure inline via `send_message` to your caller:
 
 ```markdown
 ## Code Critic Audit — VERDICT: <APPROVE | WARN | BLOCK>
+**Rework Routing**: <NONE | WARM_FIX | PROMOTE_MAKER -> flash Medium / pro High — 1-line reason>
 
 ### 1. Gate Summary
 - **Call-Chain Walk**: <PASS | FAIL — brief trace>

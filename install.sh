@@ -25,7 +25,7 @@ REPO_ROOT="$(resolve_script_dir)"
 
 usage() {
   cat <<'EOF'
-agy-mpm-kit — Installer & Edition Switcher (v1.3.0)
+agy-mpm-kit — Installer & Edition Switcher (v1.4.0)
 
 Usage:
   ./install.sh [--lang en|ru] [--force]

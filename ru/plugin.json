@@ -1,14 +1,14 @@
 {
   "name": "agy-mpm-core-ru",
   "displayName": "AGY MPM Core Kit (RU)",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "author": {
     "name": "asabadyr",
     "url": "https://github.com/asabadyr"
   },
   "homepage": "https://github.com/asabadyr/gemini-mpm",
   "repository": "https://github.com/asabadyr/gemini-mpm",
-  "description": "Нативная русскоязычная редакция набора правил, слэш-скиллов и контекстно-изолированного ревьюера code-critic (MPM) для Antigravity с генерацией проектного адаптера (--lite, --full, --migrate) и передачей сессий. Включает правила clean-architecture/OOP/DRY, /kit-architecture и полиглот-пакеты (20..28).",
+  "description": "Нативная русскоязычная редакция набора правил, слэш-скиллов и контекстно-изолированного ревьюера code-critic (MPM) для Antigravity с генерацией проектного адаптера (--lite, --full, --migrate) и передачей сессий. Включает асимметричную маршрутизацию моделей Maker<Checker, динамическое повышение Promote-on-Review, правила clean-architecture/OOP/DRY, /kit-architecture и полиглот-пакеты (20..28).",
   "logo": "assets/logo.svg",
   "suggestedPrompts": [
     "/kit-bootstrap --migrate",

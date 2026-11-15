@@ -53,6 +53,7 @@ Apply to solve concrete smells, never speculative YAGNI; cross-reference `/kit-a
 ## 2. HSDF Delegation Prompt Template (`🟡`)
 Structure subagent prompts with compact headers + exact paths/errors (never compress file paths, line numbers, tool names, or stack traces):
 ```yaml
+tier: T1 | T2a | T2b | T3
 Effort: Low | Medium | High
 task: "<one-sentence objective>"
 scope_allowlist: ["exact/path/file1.ts", "exact/path/file1.test.ts"]
@@ -83,7 +84,7 @@ Never guess-and-patch. Walk all 5 phases sequentially:
   **STRIP** the Maker's narrative rationale, excuses, and commit prose so the Critic evaluates evidence unanchored.
 - **Confidence Filter & Verdict Matrix**:
   - Report **only** findings with **`>=80%` confidence** (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`).
-  - **`CRITICAL` or `HIGH` finding** (across Correctness, Call-Chain Integrity, Architecture/DRY/Modularity, Concurrency, Test Quality, Git Dirty-Tree Hygiene, or Security) => **mandatory `VERDICT: BLOCK`** → return findings to Maker via `send_message`.
+  - **`CRITICAL` or `HIGH` finding** (across Correctness, Call-Chain Integrity, Architecture/DRY/Modularity, Concurrency, Test Quality, Git Dirty-Tree Hygiene, or Security) => **mandatory `VERDICT: BLOCK`** → route localized mechanical fixes via warm `send_message` (`WARM_FIX`) and escalate structural/invariant defects or bounced retries via **Promote-on-Review** (`PROMOTE_MAKER` -> fresh `+1/+2` tier `invoke_subagent` with stripped failed rationale per `01-orchestration.md` §2.2).
   - **`MEDIUM` / `LOW` only** => `VERDICT: WARN` (or `APPROVE` when clean).
 - **Mandatory OWASP + Multi-Tenant Security Escalation Triggers**:
   Any diff touching **auth/JWT/sessions**, **crypto/key handling**, **SQL/NoSQL query construction**, **shell/subprocess exec**, **file paths/uploads**, **deserialization**, or **tenant isolation boundaries** automatically triggers an explicit injection, authz-bypass, secret-exposure, and cross-tenant data-leak audit inside Checker review (`CRITICAL`/`HIGH` => `BLOCK`).
