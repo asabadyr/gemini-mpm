@@ -1,6 +1,6 @@
 ---
 trigger: always_on
-description: "Execution escalation ladder, non-blocking Maker-Checker subagents, asymmetric Maker<Checker model routing, Promote-on-Review dynamic escalation, wave-based parallel file ownership, .git workspace check, and warm vs fresh continuation."
+description: "Execution escalation ladder across 3 modes (T0 inline, teamwork/swarm exact model+effort pinning, coarse invoke_subagent fallback), asymmetric Maker<Checker routing, live Promote-on-Review dynamic escalation, wave-based file ownership, and cache-first gates."
 ---
 
 # Orchestration & Subagent Protocol (`01`)
@@ -8,9 +8,9 @@ description: "Execution escalation ladder, non-blocking Maker-Checker subagents,
 ## 1. Execution Escalation Ladder
 | Scope Tier | Signals | Execution Mode |
 |---|---|---|
-| **Direct (Inline)** | Status check, architectural Q&A, `<=3` file reads, trivial `<20` LOC 1-step edit | Handle directly in **Main Agent** (zero subagent cold-start overhead) |
-| **Standard Multi-Step** | Multi-file investigation, bug fix, feature (`20–500` LOC), test authoring/execution | Delegate asynchronously to **Maker + Checker** (`invoke_subagent`); briefly state active subagent plan and **end turn immediately** so Main Agent stays responsive for user dialogue |
-| **Complex / Campaign** | `>500` LOC, cross-service/schema/auth redesign, ambiguous trade-offs, or long autonomous runs | Recommend `/plan` or `/grill-me` to align first; recommend `/boost`, `/teamwork`, or `/goal` for deep multi-perspective or autonomous execution (and `/compact` or `/kit-handoff pause` when context grows) |
+| **Direct (Inline)** | Status check, architectural Q&A, `<=3` file reads, trivial `<20` LOC 1-step edit | **Mode 1 — Inline (Main Agent)** (zero subagent cold-start overhead) |
+| **Standard Multi-Step** | Multi-file investigation, bug fix, feature (`20–500` LOC), test authoring/execution | **Mode 2 — Exact Model + Effort Multi-Agent (`teamwork` / native `swarm`)** when role matrix defined; otherwise **Mode 3 — Asymmetric Maker + Checker (`invoke_subagent`)** |
+| **Complex / Campaign** | `>500` LOC, cross-service/schema/auth redesign, ambiguous trade-offs, or long autonomous runs | Recommend `/plan` or `/grill-me` to align first; execute via **Mode 2 (`teamwork` / native `swarm`)** or recommend `/boost` / `/goal` (and `/compact` or `/kit-handoff pause` when context grows) |
 
 ## 2. Asymmetric Maker–Checker & Pre-Dispatch Model + Effort Routing (`🔴`)
 Every non-trivial research, implementation, or testing workflow requires **at least 2 subagents**: **Maker** (investigates/implements/runs tests) + **Checker** (adversarial `code-critic` or independent `pro`/`inherit` reviewer auditing diffs, call chains, edge cases, test quality, and standing rules).
@@ -38,8 +38,33 @@ Select `Model` param + prompt `Effort:` header explicitly on every `invoke_subag
   4. **Mid-Flight Complexity Discovery**: Maker uncovers hidden cross-service coupling, race conditions, or auth/tenant impact (T3 scope).
 - **Clean Promotion Handoff (Anti-Anchoring)**: Pass promoted Maker **ONLY**: (a) original HSDF spec & contracts, (b) current `git status -s` / `git diff` on disk, and (c) verbatim test error or `code-critic` `BLOCK` table. **STRIP** failed lower-tier Maker reasoning/narratives.
 
-### 2.3. Workspace Role Pinning & Standing Cron Ban
-- **Exact Role Model/Effort Pinning via `teamwork`**: When a workspace (`AGENTS.md`) or user specifies exact model + effort profiles per role (e.g., `Implementer: Flash Medium, Researcher: Flash Low, Critical Reviewer: Pro High, Others: Flash_Lite Low`), route all multi-step subagent work through **`invoke_subagent(TypeName="teamwork")`** and **end the Main Agent turn immediately** so the chat stays non-blocking.
+### 2.3. Exact Model + Effort Execution Flows (`teamwork` & `swarm` vs `invoke_subagent`)
+
+#### Why Standard `invoke_subagent` Cannot Pin Exact Models or Effort
+In standard chat, `invoke_subagent` is restricted to 4 coarse tier aliases (`Model: "flash_lite" | "flash" | "pro" | "inherit"`) and exposes **no API-level `effort` parameter**. Prompt headers like `Effort: High` are only soft textual instructions, `Model: "inherit"` silently tracks the user's interactive UI dropdown, and `send_message` preserves the original bound model without mutation. When a project requires exact model families, deterministic thinking budgets, or live in-place promotion, use the 3 execution modes below.
+
+#### The 3 Execution Modes for Model & Effort Control
+1. **Mode 1 — `T0` Direct Inline (Main Agent)**:
+   - For `<=3` file reads, status/Q&A, or `<20` LOC 1-step edits. Handled directly in the Main Agent with zero subagent/`teamwork` overhead.
+
+2. **Mode 2 — Exact Model + Effort Multi-Agent Flow (`teamwork` & Native `swarm`)**:
+   - **Mandatory** whenever `GEMINI.md`, `AGENTS.md`, or the user defines an explicit `Role -> Exact Model + Effort` matrix, and strongly recommended for multi-step `T1..T3` engineering campaigns.
+   - **Built-in `teamwork` Flow (`invoke_subagent(TypeName="teamwork")` / `/teamwork`)**:
+     Launches the built-in multi-agent engine (`Sentinel -> Task Interviewer -> Orchestrator -> teamwork_explorer / teamwork_worker / teamwork_reviewer / teamwork_challenger / teamwork_victory_auditor`) with state tracked under `.agents/teamwork/`.
+     * **Prompt-Top Matrix Rule (`🔴`)**: The `teamwork` subagent tree cannot inspect parent conversation history. Whenever invoking `TypeName="teamwork"`, prepend the workspace's **Role -> Exact Model + Effort Matrix + `Promote-on-Review` Ladder** verbatim at the very top of `Prompt` (and store it canonically in `GEMINI.md` / `AGENTS.md`).
+     * **Knowledge-First Subagent Boot (`🔴`)**: Subagents boot with a blank slate. The parent agent or orchestrator **MUST** explicitly pass `knowledge_refs:` in every `Prompt` (top-level alongside the Role Matrix), `DISPATCH.md`, and `swarm` `add` `brief` (exact paths to root `GEMINI.md`/`AGENTS.md`, `.agents/knowledge/00-INDEX.md`, `.agents/knowledge/memories.md`, and 1–3 relevant topic docs). Every newly spawned agent/worker **MUST** read these in its **first tool batch BEFORE** launching broad file searches. When `.agents/knowledge/` + `00-INDEX.md` already map architecture, schemas, traps, and canonical commands, **skip blind survey waves** (Anti-Cold-Survey Gate) and target files directly.
+     * **`[skip-interview]` Fast-Path**: Prefix `Prompt` with `[skip-interview]` when requirements, acceptance criteria, and file scopes are concrete (`>=90%` clear) to bypass `teamwork_interviewer` and jump straight to implementation; omit `[skip-interview]` on ambiguous tasks so the interviewer clarifies first.
+     * **`Promote-on-Review` inside `teamwork`**: Workers inside `teamwork` are single-iteration (`handoff.md` -> never reused). Start routine subtasks (`T1`/`T2a`) 1–2 levels below max, standard multi-file (`T2b`) 1 level below or workhorse `High`, and keep `Critical Reviewer` (`teamwork_reviewer`) & `Victory Auditor` on `<frontier-model> (High)`. When `Stage 3.5` stalls or the reviewer returns `BLOCK`/`REJECT`, `teamwork_orchestrator` spawns `iter2` promoted `+1/+2` model/effort levels higher with clean unanchored `DISPATCH.md`.
+     * **Git Hygiene**: Always ensure `.agents/teamwork/` is ignored in `.gitignore` alongside `.agents/handoffs/`.
+   - **Native `swarm` Flow (when `native_swarm` tools `swarm`, `post_message`, `read_board`, `swarm_wait` are active)**:
+     * Inspect exact catalog and live quota via `swarm{action:"models"}`.
+     * Pin exact model + effort IDs per worker via `swarm{action:"add", name:"<role>", model:"<exact-model-id>", workspace:"inherit"|"share"|"branch", brief:"..."}` (workspace/user Role Matrix overrides `swarm`'s default same-model rule).
+     * **Live In-Place Promotion**: Switch a `waiting` worker's model+effort dynamically via `swarm{action:"model", name:"<worker>", model:"<promoted-model-id>"}` while keeping conversation history (or `add` fresh worker when clean anti-anchoring reset is needed for `PROMOTE_MAKER`).
+
+3. **Mode 3 — Coarse `invoke_subagent` Fallback (`Model: flash_lite | flash | pro | inherit`)**:
+   - Used when no exact model/effort matrix is required or when `teamwork`/`swarm` is unavailable in the host session. Follows the standard `T1..T3` pre-dispatch rubric and spawns a fresh `invoke_subagent` on Promote-on-Review.
+
+#### Standing Schedule Cron Ban (`🔴`)
 - **Ban Standing `schedule` Crons in Interactive Chats (`🔴`)**: Never run recurring monitoring crons via in-chat `schedule` (keeps the session stuck in `Running`); extract standing schedules to external **Scheduled Automations (`~/.gemini/config/sidecars/`)**, and isolate autonomous code-editing monitors in dedicated git worktrees so they do not collide with active development.
 
 ## 3. Wave Parallelism & `<workspace>/.git` Precondition (`🔴`)
@@ -54,7 +79,8 @@ Select `Model` param + prompt `Effort:` header explicitly on every `invoke_subag
 ## 4. Batching, Stage 3.5 Gate & Warm vs Promoted Continuation
 | Mechanism | Rule |
 |---|---|
-| **Context-First Lookup** | Read `.agents/knowledge/00-INDEX.md` and `.agents/knowledge/memories.md` (when present) before launching broad codebase searches |
+| **Knowledge-First Boot & Anti-Cold-Survey (`🔴`)** | Parent/orchestrator passes `knowledge_refs:` in HSDF/briefs. Subagents **MUST** read `GEMINI.md`/`AGENTS.md`, `00-INDEX.md`, and `memories.md` in Step 0 before broad file/grep scans. When knowledge base already maps architecture and traps, skip blind survey waves. |
+| **Cache-First Gate (`🟡`)** | When `>=75%` of requested benchmark, analytics, or report data already exists in cached JSON/CSV/Parquet/scratch files, **NEVER** spawn a heavy top-tier subagent to recompute from scratch—slice/render cached data inline or via a `T1` (`Low/Medium`) helper |
 | **Cohesive Batching** | Bundle `implement + lint + typecheck + run tests + return raw output` into `5–7` cohesive delegations/session rather than `20+` micro-dispatches |
 | **Stage 3.5 Gate** | Maker **MUST** pass build, lint, typecheck, and relevant tests before Main Agent dispatches Checker |
 | **Warm `send_message` (`WARM_FIX`)** | Use `send_message(Recipient=conversationId)` **only** for localized mechanical slips or same-scope rework within the same model tier (zero context reload) |

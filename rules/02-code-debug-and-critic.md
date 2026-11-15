@@ -54,9 +54,11 @@ Apply to solve concrete smells, never speculative YAGNI; cross-reference `/kit-a
 Structure subagent prompts with compact headers + exact paths/errors (never compress file paths, line numbers, tool names, or stack traces):
 ```yaml
 tier: T1 | T2a | T2b | T3
+role_profile: "<exact-model> (<Low|Medium|High>)" # optional exact role profile (for teamwork/swarm)
 Effort: Low | Medium | High
 task: "<one-sentence objective>"
 scope_allowlist: ["exact/path/file1.ts", "exact/path/file1.test.ts"]
+knowledge_refs: ["GEMINI.md", ".agents/knowledge/00-INDEX.md", ".agents/knowledge/memories.md"]
 contracts: ["<pre/postconditions, invariants, untouched constraints>"]
 observable: "<exact command/HTTP/DB/file output that proves runtime behavior>"
 return: ["git diff --stat", "verbatim lint/typecheck/test stdout", "observable proof"]
@@ -84,7 +86,7 @@ Never guess-and-patch. Walk all 5 phases sequentially:
   **STRIP** the Maker's narrative rationale, excuses, and commit prose so the Critic evaluates evidence unanchored.
 - **Confidence Filter & Verdict Matrix**:
   - Report **only** findings with **`>=80%` confidence** (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`).
-  - **`CRITICAL` or `HIGH` finding** (across Correctness, Call-Chain Integrity, Architecture/DRY/Modularity, Concurrency, Test Quality, Git Dirty-Tree Hygiene, or Security) => **mandatory `VERDICT: BLOCK`** → route localized mechanical fixes via warm `send_message` (`WARM_FIX`) and escalate structural/invariant defects or bounced retries via **Promote-on-Review** (`PROMOTE_MAKER` -> fresh `+1/+2` tier `invoke_subagent` with stripped failed rationale per `01-orchestration.md` §2.2).
+  - **`CRITICAL` or `HIGH` finding** (across Correctness, Call-Chain Integrity, Architecture/DRY/Modularity, Concurrency, Test Quality, Git Dirty-Tree Hygiene, or Security) => **mandatory `VERDICT: BLOCK`** → route localized mechanical fixes via warm `send_message` (`WARM_FIX`) and escalate structural/invariant defects or bounced retries via **Promote-on-Review** (`PROMOTE_MAKER` -> in `teamwork`, spawn an `iterN+1` fresh worker at `+1/+2` model+effort; in `swarm`, invoke `swarm{action:"model"}` or `add` a fresh unanchored worker; in standard `invoke_subagent`, spawn a fresh `+1/+2` tier subagent with stripped failed rationale per `01-orchestration.md` §2.2–§2.3).
   - **`MEDIUM` / `LOW` only** => `VERDICT: WARN` (or `APPROVE` when clean).
 - **Mandatory OWASP + Multi-Tenant Security Escalation Triggers**:
   Any diff touching **auth/JWT/sessions**, **crypto/key handling**, **SQL/NoSQL query construction**, **shell/subprocess exec**, **file paths/uploads**, **deserialization**, or **tenant isolation boundaries** automatically triggers an explicit injection, authz-bypass, secret-exposure, and cross-tenant data-leak audit inside Checker review (`CRITICAL`/`HIGH` => `BLOCK`).

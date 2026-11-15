@@ -6,11 +6,11 @@
 
 **[🇬🇧 English](README.md) | [🇷🇺 Русский](README.ru.md)**
 
-`v1.4.0` · **MIT License** · **0 Lines of Wrapper Code** · **`~3.8K` Startup Tokens (`<20%` Budget)** · **EN + RU Editions**
+`v1.5.0` · **MIT License** · **0 Lines of Wrapper Code** · **`~3.8K` Startup Tokens (`<20%` Budget)** · **EN + RU Editions**
 
 ---
 
-`gemini-mpm` (`agy-mpm-kit`) packages battle-tested multi-agent engineering discipline into **100% native Google Antigravity primitives**: Caveman-compressed `rules/` (with asymmetric `Maker < Checker` model routing, `Promote-on-Review` tier escalation, and zero-idle-cost polyglot `glob` packs `20..28`), cross-surface `/kit-bootstrap`, `/kit-architecture` & `/kit-handoff` `skills/`, and a context-isolated adversarial `code-critic` subagent (`agents/code-critic.md`). Install it once globally as a local plugin, scaffold thin per-repository adapters in ~90 seconds, and keep full architectural cleanliness, cost efficiency, and verification rigor across every repository on your machine without bloating your context window.
+`gemini-mpm` (`agy-mpm-kit`) packages battle-tested multi-agent engineering discipline into **100% native Google Antigravity primitives**: Caveman-compressed `rules/` (with 3-mode orchestration across `T0` inline, `teamwork`/`swarm` exact model+effort pinning, and coarse `invoke_subagent` fallback, live `Promote-on-Review` dynamic escalation, knowledge-first subagent boot, and zero-idle-cost polyglot `glob` packs `20..28`), cross-surface `/kit-bootstrap`, `/kit-architecture` & `/kit-handoff` `skills/`, and a context-isolated adversarial `code-critic` subagent (`agents/code-critic.md`). Install it once globally as a local plugin, scaffold thin per-repository adapters in ~90 seconds, and keep full architectural cleanliness, cost efficiency, and verification rigor across every repository on your machine without bloating your context window.
 
 ### 30-Second Quickstart
 
@@ -129,10 +129,15 @@ Prevents AI-generated spaghetti, copy-paste proliferation, and monolithic files 
 - **Problem-First OOP, SOLID & Design Patterns**: Enforces Composition over Inheritance (`depth <=2`), Constructor Dependency Injection, and concrete smell-to-pattern mappings (`3+` repeated `if/else`/`switch` chains -> **Strategy / Handler Registry**, persistence leakage -> **Repository**, external 3rd-party APIs -> **Adapter / Anti-Corruption Layer**, complex assembly -> **Factory / Builder**, cyclic calls -> **Domain Events**, slow upstream cascades -> **Circuit Breaker**).
 - **Zero-Idle-Cost Polyglot Best Practices**: Ships `9` `trigger: glob` domain packs (`20..28`: Tests/Contracts, Python, TypeScript/Node.js, K8s/Infra, SQL/MongoDB, Go, Rust, Java/Kotlin/C# `.NET`, and React/Next/Vue/Svelte Frontend UI) plus the progressive-disclosure `/kit-architecture` skill covering **12 language ecosystems** (`+ PHP, Ruby, Elixir/OTP, Swift/Dart, C/C++`) and safe `<=200`-LOC chunked God-file refactoring.
 
-### 11. Asymmetric `Maker < Checker` Routing (`T0..T3`) & `Promote-on-Review` Dynamic Model Escalation
-Overrides Antigravity's default `Model="inherit"` subagent behavior (which otherwise routes trivial tasks to top-tier models + `Effort: High`) with asymmetric cost/quality routing in `01-orchestration.md` and `agents/code-critic.md`:
-- **Makers `1–2` Tiers Below Max, Reviewer at Max (`T3`)**: Scores every task pre-dispatch across `T0` (Inline Main Agent), `T1` (`flash_lite` + `Effort: Low`), `T2a` (`flash` + `Effort: Low`), `T2b` (`flash` + `Effort: Medium`), and `T3` (`pro`/`inherit` + `Effort: High`), starting `1` tier lower on non-security boundaries while preserving `pro` + `Effort: High` for **`code-critic`**.
-- **Review-Driven Model Promotion (`Promote-on-Review`)**: Because an active subagent's `Model` is bound at `invoke_subagent` creation (`send_message` keeps the old model), `code-critic` classifies every non-approve review with `Rework Routing: WARM_FIX` (same Maker via `send_message` for localized slips) vs **`PROMOTE_MAKER -> <flash Medium | pro High>`** (fresh higher-tier `invoke_subagent` with stripped failed reasoning whenever 2 consecutive Stage 3.5 checks fail, warm rework bounces on retry #1, hidden `T3` concurrency/auth coupling appears, or `code-critic` flags architectural/invariant incomprehension).
+### 11. 3-Mode Orchestration (`T0` Inline, `teamwork`/`swarm` Exact Model+Effort Pinning & Live `Promote-on-Review`)
+Solves the fundamental limitation of standard `invoke_subagent` (which is restricted to 4 coarse tier aliases and exposes no API-level thinking effort control) by establishing three distinct execution modes across `01-orchestration.md`, `02-code-debug-and-critic.md`, and `agents/code-critic.md`:
+- **Mode 1 — Direct Inline (`T0`)**: Zero subagent overhead for `<=3` file reads, quick Q&A, and trivial `<20` LOC single-step edits in the Main Agent.
+- **Mode 2 — Exact Model + Effort Multi-Agent Flow (`teamwork` & Native `swarm`)**: Required whenever a project (`GEMINI.md`/`AGENTS.md`) defines exact role profiles (e.g. Implementer, Researcher, Critical Reviewer):
+  * **Built-in `teamwork` Flow (`/teamwork`)**: Enforces the **Prompt-Top Matrix Rule (`🔴`)** by prepending the workspace's Role -> Model + Effort Matrix verbatim at the prompt top (`teamwork` subagents cannot see parent conversation history). Supports **`[skip-interview]`** for rapid execution when specs are concrete (`>=90%`), single-iteration workers with unanchored promotion (`iterN+1` at `+1/+2` tiers on Stage 3.5 stall or reviewer `BLOCK`), and strict `.gitignore` tracking for `.agents/teamwork/`.
+  * **Native `swarm` Flow**: Leverages native swarm catalog discovery (`swarm{action:"models"}`), pins exact model+effort per worker (`swarm{action:"add"}`), and performs **live in-place promotion** (`swarm{action:"model"}`) on waiting workers without losing conversation context.
+- **Mode 3 — Coarse `invoke_subagent` Fallback (`flash_lite | flash | pro | inherit`)**: Follows the `T1..T3` pre-dispatch rubric with Maker `1–2` tiers below max and Checker at top tier (`pro` + `High`). Spawns a fresh higher-tier subagent on `Promote-on-Review`.
+- **Knowledge-First Subagent Boot (`🔴`)**: Eliminates wasteful cold surveys by requiring parent orchestrators to pass `knowledge_refs:` (`GEMINI.md`, `00-INDEX.md`, `memories.md`, and topic guides) in every prompt/dispatch/brief. Subagents read these in Step 0 before scanning files, skipping blind discovery waves when architectural context already exists.
+- **Cache-First Gate (`🟡`)**: When `>=75%` of requested analytics or report data exists in local cached files, agents slice/render cached data directly rather than spawning heavy top-tier subagents to recompute from scratch.
 
 ---
 
@@ -182,8 +187,8 @@ Every rule file sits well under `<35%` of Antigravity's `24,000`-byte per-file h
 | Layer | File | Trigger | Disk Size (EN) | Startup Tokens | On-Demand Tokens |
 |---|---|---|---|---|---|
 | **Tier 1 Core** | `rules/00-core-guardrails.md` | `always_on` | `4,402 B` (`4.4 KB`) | `~1,100` | *(Already loaded)* |
-| **Tier 1 Core** | `rules/01-orchestration.md` | `always_on` | `8,079 B` (`8.1 KB`) | `~2,020` | *(Already loaded)* |
-| **Tier 1 Core** | `rules/02-code-debug-and-critic.md` | `model_decision` | `7,859 B` (`7.9 KB`) | `~45` *(desc)* | `~1,965` |
+| **Tier 1 Core** | `rules/01-orchestration.md` | `always_on` | `12,755 B` (`12.8 KB`) | `~3,180` | *(Already loaded)* |
+| **Tier 1 Core** | `rules/02-code-debug-and-critic.md` | `model_decision` | `8,245 B` (`8.2 KB`) | `~45` *(desc)* | `~2,060` |
 | **Tier 1 Core** | `rules/03-analytical-forensics.md` | `model_decision` | `2,542 B` (`2.5 KB`) | `~35` *(desc)* | `~635` |
 | **Tier 1 Core** | `rules/04-memory-knowledge-adr.md` | `model_decision` | `3,344 B` (`3.3 KB`) | `~35` *(desc)* | `~835` |
 | **Tier 1 Domain** | `rules/20-domain-tests-and-contracts.md` | `glob` *(test files)* | `3,082 B` (`3.1 KB`) | **`0`** | `~770` |
@@ -196,9 +201,9 @@ Every rule file sits well under `<35%` of Antigravity's `24,000`-byte per-file h
 | **Tier 1 Domain** | `rules/27-domain-jvm-and-dotnet.md` | `glob` (`*.java`, `*.kt`, `*.cs`, `pom.xml`, `*.csproj`) | `3,170 B` (`3.2 KB`) | **`0`** | `~795` |
 | **Tier 1 Domain** | `rules/28-domain-frontend-ui.md` | `glob` (`*.tsx`, `*.jsx`, `*.vue`, `*.svelte`, `*.css`) | `3,395 B` (`3.4 KB`) | **`0`** | `~850` |
 | **Tier 1 Skills** | `skills/kit-architecture/SKILL.md` (+ 3 guides) | Slash `/kit-architecture` | `4,287 B` (`4.3 KB`) | `~40` *(desc)* | `~1,070` *(+ refs)* |
-| **Tier 1 Skills** | `skills/kit-bootstrap/SKILL.md` (+ 8 templates) | Slash `/kit-bootstrap` | `12,152 B` (`12.2 KB`) | `~45` *(desc)* | `~3,040` |
+| **Tier 1 Skills** | `skills/kit-bootstrap/SKILL.md` (+ 8 templates) | Slash `/kit-bootstrap` | `12,607 B` (`12.6 KB`) | `~45` *(desc)* | `~3,150` |
 | **Tier 1 Skills** | `skills/kit-handoff/SKILL.md` (+ 1 template) | Slash `/kit-handoff` | `4,238 B` (`4.2 KB`) | `~35` *(desc)* | `~1,060` |
-| **Tier 1 Agent** | `agents/code-critic.md` | Subagent `code-critic` | `6,635 B` (`6.6 KB`) | `~40` *(desc)* | `~1,660` *(isolated)* |
+| **Tier 1 Agent** | `agents/code-critic.md` | Subagent `code-critic` | `7,260 B` (`7.3 KB`) | `~40` *(desc)* | `~1,815` *(isolated)* |
 | **Tier 1 Extras** | `extras/manual-rules-fallback/90..92` | `manual` (`@90...`, `@91...`, `@92...`) | `12,878 B` *(3 files)* | **`0`** | *IDE/App fallback* |
 | **Tier 2 Adapter** | `<repo>/GEMINI.md` *(or `AGENTS.md`)* | Plain MD (`always_on`) | `~1.8–2.5 KB` | `~450–625` | *(Already loaded)* |
 | **Tier 2 Adapter** | `.agents/rules/10-project-operations.md` | `model_decision` *(`--full`)* | `~2.0–5.0 KB` | `~35` *(desc)* | `~500–1,250` |
@@ -340,7 +345,7 @@ Consolidates legacy or cross-agent setups into a clean Tier-2 Project Adapter in
 
 ```text
 gemini-mpm/
-├── plugin.json                                     # EN plugin manifest (agy-mpm-core v1.4.0)
+├── plugin.json                                     # EN plugin manifest (agy-mpm-core v1.5.0)
 ├── install.sh                                      # Safe symlink installer & EN/RU switcher (--lang en|ru, --status, --uninstall)
 ├── LICENSE                                         # MIT License + claude-mpm conceptual attribution
 ├── README.md                                       # English flagship documentation

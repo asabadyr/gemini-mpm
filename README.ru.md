@@ -6,7 +6,7 @@
 
 **[🇬🇧 English](README.md) | [🇷🇺 Русский](README.ru.md)**
 
-`v1.4.0` · **Лицензия MIT** · **0 строк внешних CLI-обёрток** · **`~3.8K` стартовых токенов (`<20%` бюджета)** · **Редакции EN + RU**
+`v1.5.0` · **Лицензия MIT** · **0 строк внешних CLI-обёрток** · **`~3.8K` стартовых токенов (`<20%` бюджета)** · **Редакции EN + RU**
 
 ---
 
@@ -129,10 +129,14 @@ cd ~/Projects/gemini-mpm
 - **Практические OOP, SOLID и паттерны проектирования**: композиция вместо глубокого наследования (`глубина <=2`), Constructor Dependency Injection и таблица перевода запахов кода в паттерны (`3+` повторяющихся веток `if/else`/`switch` -> **Strategy / Реестр обработчиков**, утечка SQL/ORM в домен -> **Repository**, внешние API/SDK -> **Adapter / Anti-Corruption Layer**, сложная сборка объектов -> **Factory / Builder**, циклические зависимости -> **Domain Events**, каскадные отказы -> **Circuit Breaker**).
 - **Языковые пакеты лучших практик без расхода токенов в простое**: `9` `glob`-правил (`20..28`: Тесты/Контракты, Python, TypeScript/Node.js, K8s/Infra, SQL/MongoDB, Go, Rust, Java/Kotlin/C# `.NET` и Frontend UI React/Next/Vue/Svelte) плюс скилл `/kit-architecture` со справочниками по **12 языковым экосистемам** (`+ PHP, Ruby, Elixir/OTP, Swift/Dart, C/C++`) и протоколом безопасного пошагового рефакторинга God-файлов чанками `<=200` LOC.
 
-### 11. Асимметричная маршрутизация `Maker < Checker` (`T0..T3`) и динамическое повышение модели (`Promote-on-Review`)
-Переопределяет встроенный дефолт Antigravity `Model="inherit"` (из-за которого даже тривиальные задачи уходят на максимальную модель и `Effort: High`) асимметричным протоколом в `01-orchestration.md` и `agents/code-critic.md`:
-- **Исполнители на `1–2` уровня ниже максимума, ревьюер на максимуме (`T3`)**: до запуска каждая подзадача оценивается по шкале `T0` (Inline в Main Agent), `T1` (`flash_lite` + `Effort: Low`), `T2a` (`flash` + `Effort: Low`), `T2b` (`flash` + `Effort: Medium`) и `T3` (`pro`/`inherit` + `Effort: High`) с выбором младшего уровня на пограничных задачах и сохранением максимального ресурса `pro` + `Effort: High` за ревьюером **`code-critic`**.
-- **Повышение модели по ходу ревью шагов (`Promote-on-Review`)**: поскольку модель субагента фиксируется при создании `conversationId` (`send_message` оставляет прежнюю модель), `code-critic` маркирует каждое непустое ревью полем `Rework Routing: WARM_FIX` (правка тем же Maker через `send_message` для локальных описок) либо **`PROMOTE_MAKER -> <flash Medium | pro High>`** (запуск нового `invoke_subagent` на `+1/+2` уровня выше без запутанных рассуждений предыдущего агента при 2 подряд сбоях на Stage 3.5, неудачном первом тёплом ретрае, вскрытии `T3`-сложности или непонимании инвариантов/архитектуры).
+### 11. Асимметричная маршрутизация `Maker < Checker` (`T0..T3`), 3 режима исполнения и динамическое повышение модели (`Promote-on-Review`)
+Переопределяет встроенный дефолт Antigravity `Model="inherit"` (из-за которого даже тривиальные задачи уходят на максимальную модель и `Effort: High`) трёхуровневым протоколом оркестрации в `01-orchestration.md` и `agents/code-critic.md`:
+- **3 режима исполнения**:
+  1. **Режим 1 (`T0` Inline в Main Agent)**: чтение `<=3` файлов, Q&A по архитектуре, точечная правка `<20` LOC в 1 шаг без запуска фоновых агентов.
+  2. **Режим 2 (Точный пиннинг `Роль -> Модель + Effort` через `teamwork` и `swarm`)** *(Основной)*: когда проект (`GEMINI.md`/`AGENTS.md`) или пользователь задают точные профили моделей (например, `Worker: <workhorse-model> (Medium)`, `Reviewer: <frontier-model> (High)`). Во встроенном контуре `teamwork` матрица ролей и ссылки `knowledge_refs` передаются в шапке `Prompt`, при ясности `>=90%` используется быстрый старт `[skip-interview]`, а состояние изолируется в `.agents/teamwork/` (в `.gitignore`). В нативном `swarm` пиннинг выполняется через `swarm{action:"add", model:"<exact-model-id>"}`, а живое повышение модели на месте — через `swarm{action:"model"}`.
+  3. **Режим 3 (Резервный грубый `invoke_subagent`)**: асимметричная связка Maker (`flash_lite`/`flash`) + Checker (`pro`/`inherit` High) по шкале `T1..T3`, когда точный пиннинг не требуется или `teamwork`/`swarm` недоступны.
+- **Шлюз Knowledge-First Boot (`knowledge_refs`) и Cache-First (`🟡`)**: каждый субагент обязан на Шаге 0 прочитать `GEMINI.md`, `00-INDEX.md`, `memories.md` и целевые доки ДО любых слепых `find`/`grep` (запрет cold survey); если `>=75%` данных уже в кэше — обработка выполняется inline или лёгким хелпером `T1`.
+- **Повышение модели по ходу ревью шагов (`Promote-on-Review`)**: `code-critic` классифицирует доработку как `WARM_FIX` (локальная правка через тёплый `send_message`) либо `PROMOTE_MAKER` (повышение модели на `+1/+2` ступени: `iterN+1` в `teamwork`, `swarm{action:"model"}` в рое или свежий `invoke_subagent` с отсечением ложных рассуждений автора).
 
 ---
 
@@ -142,7 +146,7 @@ cd ~/Projects/gemini-mpm
 flowchart TD
     subgraph Tier1["Уровень 1: Глобальный плагин agy-mpm-core (~3.4K стартовых токенов)"]
         A00["00-core-guardrails.md (always_on: приоритеты, верификация, Git/WIP, 3-Strike)"]
-        A01["01-orchestration.md (always_on: T0..T3 Maker<Checker, Promote-on-Review, Wave 0-2)"]
+        A01["01-orchestration.md (always_on: 3 режима, teamwork/swarm, Maker<Checker, Promote-on-Review)"]
         M02["02-code-debug-and-critic.md (model_decision: Чистая арх., DRY, OOP/паттерны, 5 фаз отладки)"]
         M03["03-analytical-forensics.md (model_decision: 6-пунктный Visible Self-Check)"]
         M04["04-memory-knowledge-adr.md (model_decision: FIFO memories.md, 00-INDEX, ADR)"]
@@ -156,7 +160,7 @@ flowchart TD
         R10["10-project-operations.md (model_decision: CI/CD, деплой, секреты, телеметрия)"]
         R11["11-project-confidentiality.md (Опциональный always_on: защита тенантов/облака/PII)"]
         KB[".agents/knowledge/ (memories.md <=4KB, 00-INDEX.md, active-tasks.md, postmortems.md)"]
-        HO[".agents/handoffs/LATEST.md (В .gitignore: 7-секционный слепок <=10K токенов)"]
+        HO[".agents/handoffs/ и .agents/teamwork/ (В .gitignore: LATEST.md слепок + итерации)"]
     end
 
     subgraph Exec["Асимметричное исполнение и контур Promote-on-Review"]
@@ -294,7 +298,7 @@ ln -s ~/Projects/gemini-mpm/ru ~/.gemini/config/plugins/agy-mpm-core
 ### 7.1 Подключение нового проекта (`/kit-bootstrap --lite` vs `--full`)
 
 - **`/kit-bootstrap --lite`** *(~90 сек — библиотеки, CLI-утилиты, `<5` модулей)*:
-  Сканирует манифесты стека (`package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml` и др.) и `git log`, задаёт **один** подтверждающий вопрос через `ask_question`, создаёт лаконичный `GEMINI.md` без YAML-фронтматтера (`~1.8 KB`), предзаполненный `.agents/knowledge/memories.md` и добавляет `.agents/handoffs/` в `.gitignore`.
+  Сканирует манифесты стека (`package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml` и др.) и `git log`, задаёт **один** подтверждающий вопрос через `ask_question`, создаёт лаконичный `GEMINI.md` без YAML-фронтматтера (`~1.8 KB`), предзаполненный `.agents/knowledge/memories.md` и добавляет `.agents/handoffs/` и `.agents/teamwork/` в `.gitignore`.
 - **`/kit-bootstrap --full`** *(~90 сек — продакшен-сервисы, монорепо, зонтичные мультирепо, K8s/облако)*:
   Дополнительно создаёт `.agents/rules/10-project-operations.md` (`model_decision` — убирает CI/CD, деплой в K8s, карты неймспейсов и скрипты секретов из обычных кодовых ходов), опциональный `.agents/rules/11-project-confidentiality.md` (`always_on`) и каркас базы знаний `.agents/knowledge/{00-INDEX.md, active-tasks.md, postmortems.md}`.
 - **Автоматическое повышение до `--migrate`**: если при запуске `--lite` или `--full` в репозитории обнаруживаются уже существующие файлы инструкций агентов, скилл **автоматически переключается в `--migrate`**, защищая проект от перезаписи.
@@ -307,14 +311,14 @@ ln -s ~/Projects/gemini-mpm/ru ~/.gemini/config/plugins/agy-mpm-core
 3. **Матрица 4 корзин (4-Bucket Triage Matrix)**:
    - *Корзина 1 (Дубликаты Универсального Ядра)* -> **Отбрасываются** (уже покрыты правилами `00..04` и `20..28`, мгновенно освобождая бюджет промпта).
    - *Корзина 2 (Поведенческие конфликты)* -> **Выносятся в `ask_question`** (например, небезопасные авто-коммиты или пропуск тестов).
-   - *Корзина 3 (Идентичность и Red Lines)* -> **Сжимаются** в чистый plain-Markdown `GEMINI.md` (или общий `AGENTS.md` для мульти-инструментальных команд с Claude Code + Cursor + Antigravity).
+   - *Корзина 3 (Идентичность и Red Lines)* -> **Сжимаются** в чистый plain-Markdown `GEMINI.md` (или общий `AGENTS.md` для мульти-инструментальных команд с Claude Code + Cursor + Antigravity) с сохранением/настройкой матрицы профилей `Роль -> Точная модель + Effort` (для `teamwork`/`swarm`) и блока `knowledge_refs`.
    - *Корзина 4 (Ops, подпроекты, знания и воркфлоу)* -> **Раскладываются** по `10-project-operations.md` (`model_decision`), `11-project-confidentiality.md` (`always_on`), опциональным `12-<subproject>.md` (`trigger: glob`, `globs: "**/<subdir>/**"`), базе `.agents/knowledge/*`, а устаревшие `.agents/workflows/*.md` конвертируются в `.agents/skills/<name>/SKILL.md`.
 4. **Единое подтверждение через `ask_question`**: согласовывает план триажа, режим коллаборации (Режим A / B / C / мульти-инструментальный `AGENTS.md`) и необходимость `11-project-confidentiality.md`.
 5. **Обязательный аудит без потерь через `code-critic`**: запускает субагента `code-critic` (`Model="pro"`, `Effort: High`), который сверяет сгенерированный адаптер с бэкапом в `scratch/rule-migration-backup/` и блокирует завершение, если был потерян **хотя бы один проектный инвариант, каноническая команда, регулярное выражение, маппинг неймспейсов или ссылка**.
 
 ### 7.3 Пауза, возобновление сессий и накопление опыта (`/kit-handoff` и `/learn`)
 
-- **`/kit-handoff pause`**: проверяет список фоновых задач и субагентов без их прерывания, редактирует секреты (`sk-`, `ghp_`, `AKIA`, `npm_`, `xox`, `AIza`, PEM, Bearer-токены), гарантирует наличие `.agents/handoffs/` в `.gitignore` и записывает `.agents/handoffs/LATEST.md` (`<=10K` токенов). При продолжении длинной беседы рекомендует `/compact`.
+- **`/kit-handoff pause`**: проверяет список фоновых задач и субагентов без их прерывания, редактирует секреты (`sk-`, `ghp_`, `AKIA`, `npm_`, `xox`, `AIza`, PEM, Bearer-токены), гарантирует наличие `.agents/handoffs/` и `.agents/teamwork/` в `.gitignore` и записывает `.agents/handoffs/LATEST.md` (`<=10K` токенов). При продолжении длинной беседы рекомендует `/compact`.
 - **`/kit-handoff resume`**: читает `LATEST.md` + `memories.md` и **сверяет их с живым `git status -s` и `git log --oneline -10`** (в корневом `.git` или по дочерним подрепозиториям `*/*/.git`). При любом расхождении побеждает реальное состояние Git.
 - **`/kit-handoff postmortem`**: анализирует ошибки сессии, `BLOCK`-вердикты `code-critic` и срабатывания 3-Strike по логам диалога, записывает однострочные выводы в `FIFO`-секции `memories.md` (+ подробные разборы в `postmortems.md`) и рекомендует нативную команду **`/learn`**, когда урок заслуживает превращения в глобальное правило или скилл.
 
@@ -340,7 +344,7 @@ ln -s ~/Projects/gemini-mpm/ru ~/.gemini/config/plugins/agy-mpm-core
 
 ```text
 gemini-mpm/
-├── plugin.json                                     # Манифест EN-плагина (agy-mpm-core v1.4.0)
+├── plugin.json                                     # Манифест EN-плагина (agy-mpm-core v1.5.0)
 ├── install.sh                                      # Установщик симлинка и переключатель EN/RU (--lang en|ru, --status, --uninstall)
 ├── LICENSE                                         # Лицензия MIT + атрибуция концепций claude-mpm
 ├── README.md                                       # Флагманская документация на английском языке

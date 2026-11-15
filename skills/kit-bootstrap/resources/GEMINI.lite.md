@@ -7,7 +7,7 @@
 ---
 
 ## 1. Project-Critical Red Lines (`🔴`)
-- **Git Topology**: {{GIT_TOPOLOGY_NOTE}} — stage explicit task paths only (`git status -s` before/after commits).
+- **Git & Subagent Topology**: {{GIT_AND_ORCHESTRATION_NOTE}} — stage explicit task paths only (`git status -s` before/after commits), ignore `.agents/handoffs/` and `.agents/teamwork/`, and follow configured role model+effort profiles.
 - **Target Test Environment**: Always execute tests via `{{CANONICAL_TEST_CMD}}` (never treat `0 collected` or skipped target suites as green).
 - **{{PROJECT_RED_LINE_3_TITLE}}**: {{PROJECT_RED_LINE_3_BODY}}
 
@@ -32,3 +32,5 @@
 | `{{DIR_1}}` | {{DIR_1_ROLE}} |
 | `{{DIR_2}}` | {{DIR_2_ROLE}} |
 | [`.agents/knowledge/memories.md`](file://{{WORKSPACE_PATH}}/.agents/knowledge/memories.md) | Typed FIFO-bounded project memory (`<=4 KB`) |
+
+> **Subagent & `teamwork` Boot (`🔴`)**: Pass `GEMINI.md`, `memories.md`, and relevant doc paths in every `Prompt` / `DISPATCH.md` / `brief`; workers MUST read them first before broad code scans.
