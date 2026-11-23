@@ -41,7 +41,7 @@ Walk every gate on the changed scope before issuing a verdict:
   - **`NONE`**: On `APPROVE` (or non-blocking cosmetic `WARN`).
   - **`WARM_FIX`**: Localized mechanical slip fixable by the current Maker via `send_message` in 1 turn (typo, narrow assertion syntax, missing import).
   - **`PROMOTE_MAKER -> <promoted tier/model>`**: Broken call-chain invariant, concurrency/security defect, or architectural/contract misunderstanding indicating the Maker tier is under-powered:
-    - In `teamwork`: Orchestrator spawns an `iterN+1` fresh worker at `+1/+2` model + effort levels with unanchored `DISPATCH.md`.
+    - In `teamwork`: Orchestrator spawns an `iterN+1` fresh worker promoted from Developer/Tester (`<fast-workhorse-model> (High)`) to `<frontier-model> (High)` with unanchored `DISPATCH.md` (while all Reviewers run unconditionally on `<frontier-model> (High)`).
     - In native `swarm`: Switch worker via `swarm{action:"model"}` or `add` a fresh unanchored worker at `+1/+2` tier.
     - In standard `invoke_subagent`: Spawn a fresh higher-tier subagent (+1/+2 tier: e.g. `flash Medium` or `pro High`) with stripped failed rationale per `01-orchestration.md` §2.2–§2.3.
 

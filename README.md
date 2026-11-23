@@ -6,7 +6,7 @@
 
 **[🇬🇧 English](README.md) | [🇷🇺 Русский](README.ru.md)**
 
-`v1.5.0` · **MIT License** · **0 Lines of Wrapper Code** · **`~3.8K` Startup Tokens (`<20%` Budget)** · **EN + RU Editions**
+`v1.6.0` · **MIT License** · **0 Lines of Wrapper Code** · **`~3.8K` Startup Tokens (`<20%` Budget)** · **EN + RU Editions**
 
 ---
 
@@ -132,8 +132,14 @@ Prevents AI-generated spaghetti, copy-paste proliferation, and monolithic files 
 ### 11. 3-Mode Orchestration (`T0` Inline, `teamwork`/`swarm` Exact Model+Effort Pinning & Live `Promote-on-Review`)
 Solves the fundamental limitation of standard `invoke_subagent` (which is restricted to 4 coarse tier aliases and exposes no API-level thinking effort control) by establishing three distinct execution modes across `01-orchestration.md`, `02-code-debug-and-critic.md`, and `agents/code-critic.md`:
 - **Mode 1 — Direct Inline (`T0`)**: Zero subagent overhead for `<=3` file reads, quick Q&A, and trivial `<20` LOC single-step edits in the Main Agent.
-- **Mode 2 — Exact Model + Effort Multi-Agent Flow (`teamwork` & Native `swarm`)**: Required whenever a project (`GEMINI.md`/`AGENTS.md`) defines exact role profiles (e.g. Implementer, Researcher, Critical Reviewer):
+- **Mode 2 — Exact Model + Effort Multi-Agent Flow (`teamwork` & Native `swarm`)**: Required whenever a project (`GEMINI.md`/`AGENTS.md`) defines exact role profiles, featuring the **Velocity-Optimized 5-Role Matrix** to eliminate multi-agent turn latency:
+  * **1. Orchestrator (`Sentinel`, `teamwork_orchestrator`)**: `<fast-workhorse-model> (High)` — prevents coordination and dispatch latency bottlenecks.
+  * **2. Researcher & Analyst (`teamwork_explorer`)**: `<frontier-model> (Medium)` — cuts deep exploration latency while retaining frontier analytical depth.
+  * **3. Developer & Tester (`teamwork_worker`)**: `<fast-workhorse-model> (High)` — rapid coding and test execution; escalates to `<frontier-model> (High)` on `Promote-on-Review` (2 Stage 3.5 stalls or reviewer `BLOCK`).
+  * **4. Reviewers of All Kinds (`code-critic`, `teamwork_reviewer`, `teamwork_challenger`, `teamwork_victory_auditor`)**: `<frontier-model> (High)` — maximum frontier rigor unconditionally for every verification gate.
+  * **5. Task Setter / Spec Author (`teamwork_interviewer`)**: `<frontier-model> (Medium)` — structured problem framing without `High` overhead (bypassed via `[skip-interview]` when requirements are concrete).
   * **Built-in `teamwork` Flow (`/teamwork`)**: Enforces the **Prompt-Top Matrix Rule (`🔴`)** by prepending the workspace's Role -> Model + Effort Matrix verbatim at the prompt top (`teamwork` subagents cannot see parent conversation history). Supports **`[skip-interview]`** for rapid execution when specs are concrete (`>=90%`), single-iteration workers with unanchored promotion (`iterN+1` at `+1/+2` tiers on Stage 3.5 stall or reviewer `BLOCK`), and strict `.gitignore` tracking for `.agents/teamwork/`.
+  * **`teamwork` Anti-Latency Guardrails (`🟡`)**: Reserves full multi-stage `teamwork` pipelines for multi-step campaigns (`>=3` files or cross-module workflows), defaults to `[skip-interview]` when clear, and pairs Knowledge-First Boot with Cache-First gates to eliminate redundant discovery loops.
   * **Native `swarm` Flow**: Leverages native swarm catalog discovery (`swarm{action:"models"}`), pins exact model+effort per worker (`swarm{action:"add"}`), and performs **live in-place promotion** (`swarm{action:"model"}`) on waiting workers without losing conversation context.
 - **Mode 3 — Coarse `invoke_subagent` Fallback (`flash_lite | flash | pro | inherit`)**: Follows the `T1..T3` pre-dispatch rubric with Maker `1–2` tiers below max and Checker at top tier (`pro` + `High`). Spawns a fresh higher-tier subagent on `Promote-on-Review`.
 - **Knowledge-First Subagent Boot (`🔴`)**: Eliminates wasteful cold surveys by requiring parent orchestrators to pass `knowledge_refs:` (`GEMINI.md`, `00-INDEX.md`, `memories.md`, and topic guides) in every prompt/dispatch/brief. Subagents read these in Step 0 before scanning files, skipping blind discovery waves when architectural context already exists.
@@ -345,7 +351,7 @@ Consolidates legacy or cross-agent setups into a clean Tier-2 Project Adapter in
 
 ```text
 gemini-mpm/
-├── plugin.json                                     # EN plugin manifest (agy-mpm-core v1.5.0)
+├── plugin.json                                     # EN plugin manifest (agy-mpm-core v1.6.0)
 ├── install.sh                                      # Safe symlink installer & EN/RU switcher (--lang en|ru, --status, --uninstall)
 ├── LICENSE                                         # MIT License + claude-mpm conceptual attribution
 ├── README.md                                       # English flagship documentation

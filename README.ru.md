@@ -6,7 +6,7 @@
 
 **[🇬🇧 English](README.md) | [🇷🇺 Русский](README.ru.md)**
 
-`v1.5.0` · **Лицензия MIT** · **0 строк внешних CLI-обёрток** · **`~3.8K` стартовых токенов (`<20%` бюджета)** · **Редакции EN + RU**
+`v1.6.0` · **Лицензия MIT** · **0 строк внешних CLI-обёрток** · **`~3.8K` стартовых токенов (`<20%` бюджета)** · **Редакции EN + RU**
 
 ---
 
@@ -129,14 +129,14 @@ cd ~/Projects/gemini-mpm
 - **Практические OOP, SOLID и паттерны проектирования**: композиция вместо глубокого наследования (`глубина <=2`), Constructor Dependency Injection и таблица перевода запахов кода в паттерны (`3+` повторяющихся веток `if/else`/`switch` -> **Strategy / Реестр обработчиков**, утечка SQL/ORM в домен -> **Repository**, внешние API/SDK -> **Adapter / Anti-Corruption Layer**, сложная сборка объектов -> **Factory / Builder**, циклические зависимости -> **Domain Events**, каскадные отказы -> **Circuit Breaker**).
 - **Языковые пакеты лучших практик без расхода токенов в простое**: `9` `glob`-правил (`20..28`: Тесты/Контракты, Python, TypeScript/Node.js, K8s/Infra, SQL/MongoDB, Go, Rust, Java/Kotlin/C# `.NET` и Frontend UI React/Next/Vue/Svelte) плюс скилл `/kit-architecture` со справочниками по **12 языковым экосистемам** (`+ PHP, Ruby, Elixir/OTP, Swift/Dart, C/C++`) и протоколом безопасного пошагового рефакторинга God-файлов чанками `<=200` LOC.
 
-### 11. Асимметричная маршрутизация `Maker < Checker` (`T0..T3`), 3 режима исполнения и динамическое повышение модели (`Promote-on-Review`)
+### 11. Асимметричная маршрутизация `Maker < Checker` (`T0..T3`), скоростная 5-ролевая матрица и динамическое повышение модели (`Promote-on-Review`)
 Переопределяет встроенный дефолт Antigravity `Model="inherit"` (из-за которого даже тривиальные задачи уходят на максимальную модель и `Effort: High`) трёхуровневым протоколом оркестрации в `01-orchestration.md` и `agents/code-critic.md`:
 - **3 режима исполнения**:
   1. **Режим 1 (`T0` Inline в Main Agent)**: чтение `<=3` файлов, Q&A по архитектуре, точечная правка `<20` LOC в 1 шаг без запуска фоновых агентов.
-  2. **Режим 2 (Точный пиннинг `Роль -> Модель + Effort` через `teamwork` и `swarm`)** *(Основной)*: когда проект (`GEMINI.md`/`AGENTS.md`) или пользователь задают точные профили моделей (например, `Worker: <workhorse-model> (Medium)`, `Reviewer: <frontier-model> (High)`). Во встроенном контуре `teamwork` матрица ролей и ссылки `knowledge_refs` передаются в шапке `Prompt`, при ясности `>=90%` используется быстрый старт `[skip-interview]`, а состояние изолируется в `.agents/teamwork/` (в `.gitignore`). В нативном `swarm` пиннинг выполняется через `swarm{action:"add", model:"<exact-model-id>"}`, а живое повышение модели на месте — через `swarm{action:"model"}`.
+  2. **Режим 2 (Скоростная 5-ролевая матрица `Роль -> Модель + Effort` через `teamwork` и `swarm`)** *(Основной)*: устраняет задержки долгих прогонов, сохраняя бескомпромиссную приёмку. Оркестратор (`Sentinel`/координатор) и Разработчик/Тестировщик (`teamwork_worker`) работают на **`<fast-workhorse-model> (High)`** для мгновенной координации и быстрых тестов; Исследователь/Аналитик (`teamwork_explorer`) и Постановщик задания (`teamwork_interviewer`) — на **`<frontier-model> (Medium)`**; а все ревьюеры (`code-critic`, `teamwork_reviewer`, `teamwork_challenger`, `teamwork_victory_auditor`) — строго на **`<frontier-model> (High)`**. При ясности ТЗ `>=90%` используется быстрый старт `[skip-interview]`, а состояние изолируется в `.agents/teamwork/` (в `.gitignore`). В нативном `swarm` пиннинг выполняется через `swarm{action:"add", model:"<exact-model-id>"}`, а живое повышение модели на месте — через `swarm{action:"model"}`.
   3. **Режим 3 (Резервный грубый `invoke_subagent`)**: асимметричная связка Maker (`flash_lite`/`flash`) + Checker (`pro`/`inherit` High) по шкале `T1..T3`, когда точный пиннинг не требуется или `teamwork`/`swarm` недоступны.
-- **Шлюз Knowledge-First Boot (`knowledge_refs`) и Cache-First (`🟡`)**: каждый субагент обязан на Шаге 0 прочитать `GEMINI.md`, `00-INDEX.md`, `memories.md` и целевые доки ДО любых слепых `find`/`grep` (запрет cold survey); если `>=75%` данных уже в кэше — обработка выполняется inline или лёгким хелпером `T1`.
-- **Повышение модели по ходу ревью шагов (`Promote-on-Review`)**: `code-critic` классифицирует доработку как `WARM_FIX` (локальная правка через тёплый `send_message`) либо `PROMOTE_MAKER` (повышение модели на `+1/+2` ступени: `iterN+1` в `teamwork`, `swarm{action:"model"}` в рое или свежий `invoke_subagent` с отсечением ложных рассуждений автора).
+- **Шлюзы Knowledge-First Boot (`knowledge_refs`), Cache-First (`🟡`) и анти-латентность**: каждый субагент обязан на Шаге 0 прочитать `GEMINI.md`, `00-INDEX.md`, `memories.md` и целевые доки ДО любых слепых `find`/`grep` (запрет cold survey); если `>=75%` данных уже в кэше — обработка выполняется inline или лёгким хелпером `T1`; задачи `<=3` файлов решаются inline без запуска тяжёлых субагентов.
+- **Повышение модели по ходу ревью шагов (`Promote-on-Review`)**: `code-critic` классифицирует доработку как `WARM_FIX` (локальная правка через тёплый `send_message`) либо `PROMOTE_MAKER` (повышение Разработчика от `<fast-workhorse-model> (High)` до `<frontier-model> (High)`: `iterN+1` в `teamwork`, `swarm{action:"model"}` в рое или свежий `invoke_subagent(Model="pro", Effort="High")` с отсечением ложных рассуждений автора).
 
 ---
 
@@ -344,7 +344,7 @@ ln -s ~/Projects/gemini-mpm/ru ~/.gemini/config/plugins/agy-mpm-core
 
 ```text
 gemini-mpm/
-├── plugin.json                                     # Манифест EN-плагина (agy-mpm-core v1.5.0)
+├── plugin.json                                     # Манифест EN-плагина (agy-mpm-core v1.6.0)
 ├── install.sh                                      # Установщик симлинка и переключатель EN/RU (--lang en|ru, --status, --uninstall)
 ├── LICENSE                                         # Лицензия MIT + атрибуция концепций claude-mpm
 ├── README.md                                       # Флагманская документация на английском языке

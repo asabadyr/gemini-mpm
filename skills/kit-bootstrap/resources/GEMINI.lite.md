@@ -7,7 +7,7 @@
 ---
 
 ## 1. Project-Critical Red Lines (`🔴`)
-- **Git & Subagent Topology**: {{GIT_AND_ORCHESTRATION_NOTE}} — stage explicit task paths only (`git status -s` before/after commits), ignore `.agents/handoffs/` and `.agents/teamwork/`, and follow configured role model+effort profiles.
+- **Git & Subagent Topology**: {{GIT_AND_ORCHESTRATION_NOTE}} — stage explicit task paths only (`git status -s` before/after commits), ignore `.agents/handoffs/` and `.agents/teamwork/`, and follow Velocity-Optimized 5-Role Matrix (`Orchestrator`, `Researcher/Analyst`, `Developer/Tester`, `Reviewers of all kinds`, `Task Setter/Interviewer`).
 - **Target Test Environment**: Always execute tests via `{{CANONICAL_TEST_CMD}}` (never treat `0 collected` or skipped target suites as green).
 - **{{PROJECT_RED_LINE_3_TITLE}}**: {{PROJECT_RED_LINE_3_BODY}}
 
