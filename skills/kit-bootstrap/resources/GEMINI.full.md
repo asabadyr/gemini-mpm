@@ -34,7 +34,7 @@
 
 ## 4. Hierarchical Knowledge Repository (`.agents/knowledge/`)
 
-> **Subagent & `teamwork` Boot (`🔴`)**: Pass `GEMINI.md`, `00-INDEX.md`, `memories.md`, and relevant doc paths in every `Prompt` / `DISPATCH.md` / `brief`; workers MUST read them first before broad code scans.
+> **Subagent & `teamwork` Boot (`🔴`)**: Pass `GEMINI.md`, `00-INDEX.md`, `memories.md`, and relevant doc paths in every `Prompt` / `DISPATCH.md` / `brief`; workers MUST read them first before broad code scans. Practice `Read-Once` and pass exact `read_anchors` across delegations; following real code references (`imports`, callers/callees, interfaces) and codebase similarity/DRY audits is unrestricted.
 
 Consult [`.agents/knowledge/00-INDEX.md`](file://{{WORKSPACE_PATH}}/.agents/knowledge/00-INDEX.md) and [`.agents/knowledge/memories.md`](file://{{WORKSPACE_PATH}}/.agents/knowledge/memories.md) before broad codebase exploration:
 - **Master Index & Authority Matrix**: [`.agents/knowledge/00-INDEX.md`](file://{{WORKSPACE_PATH}}/.agents/knowledge/00-INDEX.md)

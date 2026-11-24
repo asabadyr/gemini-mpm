@@ -6,11 +6,11 @@
 
 **[🇬🇧 English](README.md) | [🇷🇺 Русский](README.ru.md)**
 
-`v1.6.0` · **MIT License** · **0 Lines of Wrapper Code** · **`~3.8K` Startup Tokens (`<20%` Budget)** · **EN + RU Editions**
+`v1.7.0` · **MIT License** · **0 Lines of Wrapper Code** · **`~4.5K` Startup Tokens (`<25%` Budget)** · **EN + RU Editions**
 
 ---
 
-`gemini-mpm` (`agy-mpm-kit`) packages battle-tested multi-agent engineering discipline into **100% native Google Antigravity primitives**: Caveman-compressed `rules/` (with 3-mode orchestration across `T0` inline, `teamwork`/`swarm` exact model+effort pinning, and coarse `invoke_subagent` fallback, live `Promote-on-Review` dynamic escalation, knowledge-first subagent boot, and zero-idle-cost polyglot `glob` packs `20..28`), cross-surface `/kit-bootstrap`, `/kit-architecture` & `/kit-handoff` `skills/`, and a context-isolated adversarial `code-critic` subagent (`agents/code-critic.md`). Install it once globally as a local plugin, scaffold thin per-repository adapters in ~90 seconds, and keep full architectural cleanliness, cost efficiency, and verification rigor across every repository on your machine without bloating your context window.
+`gemini-mpm` (`agy-mpm-kit`) packages battle-tested multi-agent engineering discipline into **100% native Google Antigravity primitives**: Caveman-compressed `rules/` (with 3-mode orchestration across `T0` inline, `teamwork`/`swarm` exact model+effort pinning, and coarse `invoke_subagent` fallback, live `Promote-on-Review` dynamic escalation, Reference-Aware `Read-Once` & `Symbol-First` reading protocol, knowledge-first subagent boot, and zero-idle-cost polyglot `glob` packs `20..28`), cross-surface `/kit-bootstrap`, `/kit-architecture` & `/kit-handoff` `skills/`, and a context-isolated adversarial `code-critic` subagent (`agents/code-critic.md`). Install it once globally as a local plugin, scaffold thin per-repository adapters in ~90 seconds, and keep full architectural cleanliness, cost efficiency, and verification rigor across every repository on your machine without bloating your context window.
 
 ### 30-Second Quickstart
 
@@ -38,7 +38,7 @@ Then open any repository in **Google Antigravity** (IDE, App, or `agy` CLI) and 
 
 1. [Motivation: Why Monolithic Instruction Files Break at Scale](#1-motivation-why-monolithic-instruction-files-break-at-scale)
 2. [Origins & Inspiration (`bobmatnyc/claude-mpm`) — Why `0` Wrapper Code](#2-origins--inspiration-bobmatnycclaude-mpm--why-0-wrapper-code)
-3. [Eleven Core Innovations Inside `agy-mpm-kit`](#3-eleven-core-innovations-inside-agy-mpm-kit)
+3. [Twelve Core Innovations Inside `agy-mpm-kit`](#3-twelve-core-innovations-inside-agy-mpm-kit)
 4. [Architecture Diagram & Token Budget](#4-architecture-diagram--token-budget)
 5. [Native Bilingual Support (`EN` Root vs `RU` `./ru/` Edition)](#5-native-bilingual-support-en-root-vs-ru-ru-edition)
 6. [Four Installation & Multi-Project Topologies (`realpath` Guide)](#6-four-installation--multi-project-topologies-realpath-guide)
@@ -87,7 +87,7 @@ In Claude Code, `claude-mpm` had to grow into a ~250-file Click/FastAPI/Socket.I
 
 ---
 
-## 3. Eleven Core Innovations Inside `agy-mpm-kit`
+## 3. Twelve Core Innovations Inside `agy-mpm-kit`
 
 ### 1. Caveman Table-Driven Prompt Compression & HSDF Messaging
 Grounded in empirical MPM benchmarks where converting verbose prose rules (`47 KB` / `~12.7K` tokens) into dense decision tables (`10.8 KB` / `~2.7K` tokens) cut system-prompt tokens by **`-77%`**, reduced total session tokens by **`-47%`**, and **improved QA rubric adherence by `+17%` (`3.75/5 -> 4.40/5`)**. Subagent delegations use **HSDF (Hybrid Structured Delegation Format)** (`tier`, `Effort`, `task`, `scope_allowlist`, `contracts`, `observable`, `return`, `context`), keeping prompts compact while never compressing exact file paths, line numbers, tool names, or stack traces.
@@ -145,6 +145,17 @@ Solves the fundamental limitation of standard `invoke_subagent` (which is restri
 - **Knowledge-First Subagent Boot (`🔴`)**: Eliminates wasteful cold surveys by requiring parent orchestrators to pass `knowledge_refs:` (`GEMINI.md`, `00-INDEX.md`, `memories.md`, and topic guides) in every prompt/dispatch/brief. Subagents read these in Step 0 before scanning files, skipping blind discovery waves when architectural context already exists.
 - **Cache-First Gate (`🟡`)**: When `>=75%` of requested analytics or report data exists in local cached files, agents slice/render cached data directly rather than spawning heavy top-tier subagents to recompute from scratch.
 
+### 12. Reference-Aware `Read-Once` & `Symbol-First` Reading Protocol
+Stops context-window pollution, token waste, and turn latency caused by redundant re-reads, unreferenced curiosity browsing, or blind micro-stepping across large files:
+- **Mode-Calibrated Read Scope (Zero Foot-Guns)**:
+  * **Targeted Coding & Bugfixes**: Directs agents to inspect `scope_allowlist` + target tests + **any real code references** (`imports`, base classes, interfaces, callers/callees, shared types/configs) across files to whatever hop depth is required for call-chain correctness. Bans *only* unreferenced curiosity reads (unrelated sibling implementations, other-environment configs, blanket directory dumps) lacking a code reference or search hit.
+  * **General Analysis, DRY & Similarity Audits**: Cross-module `grep -rn` and multi-file pattern reads are **explicitly unrestricted**—agents discover candidates via `00-INDEX.md` + `grep -rn` first, then inspect exact matched regions.
+- **4 Universal Anti-Waste Rules (for All Agents)**:
+  1. **`Read-Once` (No Duplicate Reads)**: Never re-read an unchanged `(file, line_range)` twice in the same conversation; keep read signatures and contracts in working notes until disk edits invalidate them.
+  2. **No Blind 100-Line Stepping**: For cohesive files `<=600–800` lines, fetch the needed scope in **1** `read_file` call (up to tool max `800` lines) rather than stepping `1-100`, `101-200`, `201-350`.
+  3. **`Grep-Before-Read` on Large Files (`>400` lines)**: Run `grep -n` first to pinpoint exact symbol/reference line numbers, then fetch **1** targeted block per needed symbol/call-site (including when jumping across `import` references into another large file).
+  4. **`read_anchors:` Handoff (`Explorer -> Developer`)**: `Explorer` and `Task Setter` deliverables (`handoff.md`, `DISPATCH.md`) pass exact `path:start-end | symbol | key_refs` anchors in HSDF delegations so Developers start on target lines immediately without cold re-exploration (while remaining fully free to follow newly discovered code references).
+
 ---
 
 ## 4. Architecture Diagram & Token Budget
@@ -193,8 +204,8 @@ Every rule file sits well under `<35%` of Antigravity's `24,000`-byte per-file h
 | Layer | File | Trigger | Disk Size (EN) | Startup Tokens | On-Demand Tokens |
 |---|---|---|---|---|---|
 | **Tier 1 Core** | `rules/00-core-guardrails.md` | `always_on` | `4,402 B` (`4.4 KB`) | `~1,100` | *(Already loaded)* |
-| **Tier 1 Core** | `rules/01-orchestration.md` | `always_on` | `12,755 B` (`12.8 KB`) | `~3,180` | *(Already loaded)* |
-| **Tier 1 Core** | `rules/02-code-debug-and-critic.md` | `model_decision` | `8,245 B` (`8.2 KB`) | `~45` *(desc)* | `~2,060` |
+| **Tier 1 Core** | `rules/01-orchestration.md` | `always_on` | `17,991 B` (`18.0 KB`) | `~4,490` | *(Already loaded)* |
+| **Tier 1 Core** | `rules/02-code-debug-and-critic.md` | `model_decision` | `8,525 B` (`8.5 KB`) | `~45` *(desc)* | `~2,130` |
 | **Tier 1 Core** | `rules/03-analytical-forensics.md` | `model_decision` | `2,542 B` (`2.5 KB`) | `~35` *(desc)* | `~635` |
 | **Tier 1 Core** | `rules/04-memory-knowledge-adr.md` | `model_decision` | `3,344 B` (`3.3 KB`) | `~35` *(desc)* | `~835` |
 | **Tier 1 Domain** | `rules/20-domain-tests-and-contracts.md` | `glob` *(test files)* | `3,082 B` (`3.1 KB`) | **`0`** | `~770` |
@@ -207,15 +218,15 @@ Every rule file sits well under `<35%` of Antigravity's `24,000`-byte per-file h
 | **Tier 1 Domain** | `rules/27-domain-jvm-and-dotnet.md` | `glob` (`*.java`, `*.kt`, `*.cs`, `pom.xml`, `*.csproj`) | `3,170 B` (`3.2 KB`) | **`0`** | `~795` |
 | **Tier 1 Domain** | `rules/28-domain-frontend-ui.md` | `glob` (`*.tsx`, `*.jsx`, `*.vue`, `*.svelte`, `*.css`) | `3,395 B` (`3.4 KB`) | **`0`** | `~850` |
 | **Tier 1 Skills** | `skills/kit-architecture/SKILL.md` (+ 3 guides) | Slash `/kit-architecture` | `4,287 B` (`4.3 KB`) | `~40` *(desc)* | `~1,070` *(+ refs)* |
-| **Tier 1 Skills** | `skills/kit-bootstrap/SKILL.md` (+ 8 templates) | Slash `/kit-bootstrap` | `12,607 B` (`12.6 KB`) | `~45` *(desc)* | `~3,150` |
+| **Tier 1 Skills** | `skills/kit-bootstrap/SKILL.md` (+ 8 templates) | Slash `/kit-bootstrap` | `13,240 B` (`13.2 KB`) | `~45` *(desc)* | `~3,310` |
 | **Tier 1 Skills** | `skills/kit-handoff/SKILL.md` (+ 1 template) | Slash `/kit-handoff` | `4,238 B` (`4.2 KB`) | `~35` *(desc)* | `~1,060` |
-| **Tier 1 Agent** | `agents/code-critic.md` | Subagent `code-critic` | `7,260 B` (`7.3 KB`) | `~40` *(desc)* | `~1,815` *(isolated)* |
+| **Tier 1 Agent** | `agents/code-critic.md` | Subagent `code-critic` | `7,794 B` (`7.8 KB`) | `~40` *(desc)* | `~1,950` *(isolated)* |
 | **Tier 1 Extras** | `extras/manual-rules-fallback/90..92` | `manual` (`@90...`, `@91...`, `@92...`) | `12,878 B` *(3 files)* | **`0`** | *IDE/App fallback* |
 | **Tier 2 Adapter** | `<repo>/GEMINI.md` *(or `AGENTS.md`)* | Plain MD (`always_on`) | `~1.8–2.5 KB` | `~450–625` | *(Already loaded)* |
 | **Tier 2 Adapter** | `.agents/rules/10-project-operations.md` | `model_decision` *(`--full`)* | `~2.0–5.0 KB` | `~35` *(desc)* | `~500–1,250` |
 | **Tier 2 Adapter** | `.agents/rules/11-project-confidentiality.md` | `always_on` *(optional)* | `~1.1–1.5 KB` | `~275–375` *(opt)* | *(Already loaded)* |
 | **Tier 2 Lore** | `.agents/knowledge/*` & `handoffs/LATEST.md` | Read on demand | `<=4 KB` (`memories.md`) | **`0`** | Read selectively |
-| **TOTAL** | **Baseline Session Start (`Core + Adapter`)** | — | — | **`~3,845` tokens** (`~4.1K` w/ `11-*`) | **`19.2%` of `20K` budget** |
+| **TOTAL** | **Baseline Session Start (`Core + Adapter`)** | — | — | **`~5,155` tokens** (`~5.5K` w/ `11-*`) | **`~25.8%` of `20K` budget** |
 
 ---
 
@@ -351,7 +362,7 @@ Consolidates legacy or cross-agent setups into a clean Tier-2 Project Adapter in
 
 ```text
 gemini-mpm/
-├── plugin.json                                     # EN plugin manifest (agy-mpm-core v1.6.0)
+├── plugin.json                                     # EN plugin manifest (agy-mpm-core v1.7.0)
 ├── install.sh                                      # Safe symlink installer & EN/RU switcher (--lang en|ru, --status, --uninstall)
 ├── LICENSE                                         # MIT License + claude-mpm conceptual attribution
 ├── README.md                                       # English flagship documentation
@@ -360,8 +371,8 @@ gemini-mpm/
 │   └── logo.svg                                    # 256x256 square plugin icon (~12.5% safe margin)
 ├── rules/                                          # FLAT 1-level directory (Antigravity scans 1 level deep!)
 │   ├── 00-core-guardrails.md                       # always_on: severity tiers, item-by-item, verification, Git/WIP, 3-strike
-│   ├── 01-orchestration.md                         # always_on: T0..T3 Maker<Checker routing, Promote-on-Review, Wave 0-2, .git check
-│   ├── 02-code-debug-and-critic.md                 # model_decision: Clean Arch, LOC/DRY caps, OOP/patterns, HSDF, 5-phase debug
+│   ├── 01-orchestration.md                         # always_on: T0..T3 Maker<Checker, Promote-on-Review, Read-Once & Symbol-First, Wave 0-2
+│   ├── 02-code-debug-and-critic.md                 # model_decision: Clean Arch, LOC/DRY caps, OOP/patterns, HSDF (read_anchors), 5-phase debug
 │   ├── 03-analytical-forensics.md                  # model_decision: mandatory 6-point Visible Self-Check for metrics/logs/DB
 │   ├── 04-memory-knowledge-adr.md                  # model_decision: FIFO memories.md (<=4KB), 00-INDEX matrix, 3-gate ADRs
 │   ├── 20-domain-tests-and-contracts.md            # glob: anti-tautology, mental mutation, parameterized DRY, 3-level contracts

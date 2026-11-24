@@ -1,14 +1,14 @@
 {
   "name": "agy-mpm-core-ru",
   "displayName": "AGY MPM Core Kit (RU)",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "author": {
     "name": "asabadyr",
     "url": "https://github.com/asabadyr"
   },
   "homepage": "https://github.com/asabadyr/gemini-mpm",
   "repository": "https://github.com/asabadyr/gemini-mpm",
-  "description": "Нативная русскоязычная редакция набора правил, слэш-скиллов и контекстно-изолированного ревьюера code-critic (MPM) для Antigravity с 3 режимами исполнения (T0 inline, скоростная 5-ролевая матрица teamwork/swarm с живым Promote-on-Review, резервный invoke_subagent), анти-латентными шлюзами, протоколом Knowledge-First Boot, генерацией проектного адаптера (--lite, --full, --migrate), /kit-architecture и передачей сессий.",
+  "description": "Нативная русскоязычная редакция набора правил, слэш-скиллов и контекстно-изолированного ревьюера code-critic (MPM) для Antigravity с 3 режимами исполнения (T0 inline, скоростная 5-ролевая матрица teamwork/swarm с живым Promote-on-Review, резервный invoke_subagent), протоколом чтения Read-Once и по референсам (Grep-Before-Read, read_anchors), Knowledge-First Boot, генерацией проектного адаптера (--lite, --full, --migrate), /kit-architecture и передачей сессий.",
   "logo": "assets/logo.svg",
   "suggestedPrompts": [
     "/kit-bootstrap --migrate",

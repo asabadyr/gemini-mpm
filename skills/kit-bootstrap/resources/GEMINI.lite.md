@@ -33,4 +33,4 @@
 | `{{DIR_2}}` | {{DIR_2_ROLE}} |
 | [`.agents/knowledge/memories.md`](file://{{WORKSPACE_PATH}}/.agents/knowledge/memories.md) | Typed FIFO-bounded project memory (`<=4 KB`) |
 
-> **Subagent & `teamwork` Boot (`🔴`)**: Pass `GEMINI.md`, `memories.md`, and relevant doc paths in every `Prompt` / `DISPATCH.md` / `brief`; workers MUST read them first before broad code scans.
+> **Subagent & `teamwork` Boot (`🔴`)**: Pass `GEMINI.md`, `memories.md`, and relevant doc paths in every `Prompt` / `DISPATCH.md` / `brief`; workers MUST read them first before broad code scans. Practice `Read-Once` and pass exact `read_anchors` across delegations; following real code references (`imports`, callers/callees, interfaces) and codebase similarity/DRY audits is unrestricted.

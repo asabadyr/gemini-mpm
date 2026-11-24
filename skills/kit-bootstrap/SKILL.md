@@ -19,6 +19,7 @@ Scaffold, smart-merge, or losslessly migrate into a thin **Tier-2 Project Adapte
 1. **Zero Duplicate Rule Injection (`realpath` Invariant)**: Antigravity deduplicates rules strictly by resolved physical path (`realpath`), and Global + Workspace rules are **cumulative**. **NEVER** `cp` Universal Core rules (`00..04`, `20..28`) into `<workspace>/.agents/rules/` while `agy-mpm-core` is enabled! (If setting up a shared team repo for coworkers without the plugin, either symlink via `ln -s` locally or advise toggling `[agy-mpm-core](customization://agy-mpm-core)` off.)
 2. **Lossless Backup Gate**: Before modifying or creating any adapter file, copy every existing or discovered instruction file preserving relative paths into `<appDataDir>/brain/<conversation-id>/scratch/rule-migration-backup/`.
 3. **Never Revert Dirty Working Trees**: Inspect `git status -s` read-only; never discard or stage pre-existing user changes.
+4. **Reference-Aware Reading Protocol (`🟡`)**: Adhere to `Read-Once` (no duplicate unchanged reads) and hand off exact `read_anchors` in subagent briefs (`Explorer -> Developer`). Real code references (`imports`, base classes, interfaces, callers/callees) and codebase-wide similarity/DRY analysis are **explicitly unrestricted**.
 
 ---
 
@@ -93,7 +94,7 @@ Read templates from `./resources/` and write concrete repo values (zero `{{...}}
 ### A. Core Adapter Files
 1. **`<workspace>/GEMINI.md`** (from [`./resources/GEMINI.lite.md`](./resources/GEMINI.lite.md) or [`./resources/GEMINI.full.md`](./resources/GEMINI.full.md), or `<workspace>/AGENTS.md` for multi-tool setups):
    - **Plain Markdown ONLY — NO YAML frontmatter** (must not contain `---` metadata header).
-   - Target `~1.8–3.8 KB`: Workspace Identity + `agy-mpm-core` adapter note, Top 3–5 `🔴` Project Red Lines (including Git & Subagent/`teamwork` Topology with Velocity-Optimized 5-Role Matrix & Promote-on-Review ladder if configured), Directory/Sub-Project Map table, Single-Path Canonical Commands, and `.agents/knowledge/` links.
+   - Target `~1.8–3.8 KB`: Workspace Identity + `agy-mpm-core` adapter note, Top 3–5 `🔴` Project Red Lines (including Git & Subagent/`teamwork` Topology with Velocity-Optimized 5-Role Matrix & Promote-on-Review ladder if configured, plus `Read-Once` + `read_anchors` boot note), Directory/Sub-Project Map table, Single-Path Canonical Commands, and `.agents/knowledge/` links.
 2. **`<workspace>/.agents/knowledge/memories.md`** (from [`./resources/memories.template.md`](./resources/memories.template.md)):
    - Seed with 3–5 verified facts discovered in Step 1 (topology, test runner, deploy target) under the standard 5-section FIFO header (`CRITICAL`, `Environment`, `Decisions`, `Patterns`, `Gotchas`, `<=4 KB`).
 3. **Git Integration**:

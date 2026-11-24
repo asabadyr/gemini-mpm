@@ -65,9 +65,10 @@ Present discovery summary, triage matrix, and prompt user **once** via `ask_ques
 
 ## Step 4: Scaffold Project Adapter (Zero Universal Core Copies!)
 > **Anti-Duplication Invariant**: Never `cp` Universal Core rules (`00..04`, `20..28`) into `<workspace>/.agents/rules/` while global `agy-mpm-core` is enabled (`realpath` deduplication only deduplicates identical physical files!).
+> **Reference-Aware Reading Protocol (`🟡`)**: Enforce `Read-Once` and pass exact `read_anchors` in subagent handoffs; following real code references (`imports`, base classes, callers/callees) and codebase similarity/DRY audits is unrestricted.
 
 1. **`--lite`, `--full`, & `--migrate`**:
-   - Write `<workspace>/GEMINI.md` (**plain Markdown, NO YAML frontmatter**, `~1.8–3.8 KB`): Workspace Identity, Top 3–5 `🔴` Project Red Lines, Directory/Sub-Project Map, Canonical Commands, and `.agents/knowledge/` links.
+   - Write `<workspace>/GEMINI.md` (**plain Markdown, NO YAML frontmatter**, `~1.8–3.8 KB`): Workspace Identity, Top 3–5 `🔴` Project Red Lines, Directory/Sub-Project Map, Canonical Commands, `Read-Once` + `read_anchors` subagent boot note, and `.agents/knowledge/` links.
    - Create `.agents/knowledge/memories.md` with the 5-section FIFO-capped header (`CRITICAL` 20 no-evict, `Environment` 15, `Decisions` 20, `Patterns` 20, `Gotchas` 15, `<=4 KB`).
    - Git tracking: if personal overlay, update `.git/info/exclude` ONLY when `<workspace>/.git` exists as a real Git directory (never create a fake `.git/info/exclude` in a non-git multi-repo umbrella root, where root adapter files are already outside child git repos!); if shared/solo and `<workspace>/.git` exists, append `.agents/handoffs/` and `.agents/teamwork/` to `.gitignore` (idempotently ensuring both directories are present while preserving existing lines).
 2. **`--full` & `--migrate` additions**:

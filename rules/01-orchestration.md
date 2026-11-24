@@ -1,6 +1,6 @@
 ---
 trigger: always_on
-description: "Execution escalation ladder across 3 modes (T0 inline, teamwork/swarm exact model+effort pinning, coarse invoke_subagent fallback), asymmetric Maker<Checker routing, live Promote-on-Review dynamic escalation, wave-based file ownership, and cache-first gates."
+description: "Execution escalation ladder across 3 modes (T0 inline, teamwork/swarm exact model+effort pinning, coarse invoke_subagent fallback), asymmetric Maker<Checker routing, live Promote-on-Review dynamic escalation, wave-based file ownership, cache-first gates, and Reference-Aware Read-Once & Symbol-First reading protocol."
 ---
 
 # Orchestration & Subagent Protocol (`01`)
@@ -62,9 +62,10 @@ In standard chat, `invoke_subagent` is restricted to 4 coarse tier aliases (`Mod
      * **`[skip-interview]` Fast-Path**: Prefix `Prompt` with `[skip-interview]` when requirements, acceptance criteria, and file scopes are concrete (`>=90%` clear) to bypass `teamwork_interviewer` and jump straight to implementation; omit `[skip-interview]` on ambiguous tasks so the interviewer clarifies first.
      * **`Promote-on-Review` inside `teamwork`**: Workers inside `teamwork` are single-iteration (`handoff.md` -> never reused). Developer/Tester workers run on `<fast-workhorse-model> (High)`. When `Stage 3.5` stalls (2 consecutive test failures) or the reviewer returns `BLOCK` / `PROMOTE_MAKER`, `teamwork_orchestrator` spawns `iter2` promoted to `<frontier-model> (High)` with clean unanchored `DISPATCH.md`. Reviewers and Victory Auditor remain unconditionally on `<frontier-model> (High)`.
      * **Git Hygiene**: Always ensure `.agents/teamwork/` is ignored in `.gitignore` alongside `.agents/handoffs/`.
-   - **`teamwork` Anti-Latency Guardrails (`🟡`)**:
+   - **`teamwork` Anti-Latency & Anti-Loop Guardrails (`🟡`)**:
      * **Scope Fit**: Reserve full multi-stage `teamwork` pipelines for multi-step, multi-file campaigns (`>=3` files or cross-module workflows). Keep quick Q&A and `<=20` LOC single-file fixes in `T0` inline (zero subagent overhead).
      * **Fast-Path Default**: Always prefix `Prompt` with `[skip-interview]` when requirements and files are already identified to eliminate unnecessary interviewer round-trips.
+     * **Silent-Until-Done Sentinel Mode (`🔴`)**: Explicitly instruct `teamwork` Sentinel in `Prompt` to send **ZERO periodic/intermediate status pings** to the parent conversation and message the caller **ONLY ONCE on final Victory Audit sign-off or an irrecoverable blocker requiring user input** (eliminates multi-turn status-relay chains that trigger `think_len=0` autoregressive log-continuation loops in the Main Agent).
      * **Boot & Cache Synergy**: Combine Knowledge-First Boot with Cache-First gates to eliminate redundant survey waves and avoid recomputing existing data.
    - **Native `swarm` Flow (when `native_swarm` tools `swarm`, `post_message`, `read_board`, `swarm_wait` are active)**:
      * Inspect exact catalog and live quota via `swarm{action:"models"}`.
@@ -96,4 +97,18 @@ In standard chat, `invoke_subagent` is restricted to 4 coarse tier aliases (`Mod
 | **Warm `send_message` (`WARM_FIX`)** | Use `send_message(Recipient=conversationId)` **only** for localized mechanical slips or same-scope rework within the same model tier (zero context reload) |
 | **Promoted `invoke_subagent` (`PROMOTE_MAKER`)** | Spawn a fresh subagent with clean unanchored handoff whenever promoting model tier (+1/+2), when role changes (`Research -> Maker`, `Maker -> Critic`), or scope expands |
 | **Stream-Timeout False-Liveness Check** | When checking long-running subagent progress, inspect the tail of its `transcript.jsonl` (not `lastStepTime` alone) to catch repeated `The stream was interrupted` loops caused by oversized `write_file` calls |
+| **Async Status Relay Anti-Loop Guard (`🔴`)** | If an intermediate `<SYSTEM_MESSAGE>` still arrives from `teamwork`/`swarm`: reply in **1 plain natural-prose sentence with ZERO log prefixes** — **NEVER** use timestamps (`04:50:`, `06:30:`), repeated bold headers (`**Status Update:**`), bullets, `Up Next:` roadmaps, or trailing `Waiting...` boilerplate (any sequential/timestamped prefix turns context into a log stream and triggers `think_len=0` infinite continuation loops). Enforce **1 incoming message -> 1 plain sentence, 0 speculative next phases, and 0 tool calls on deliverables** until final sign-off |
 | **Main Agent Acceptance** | Main Agent owns final acceptance; if Checker returns `BLOCK`, route `WARM_FIX` via `send_message` or escalate to `PROMOTE_MAKER` via fresh `invoke_subagent` before reporting to user |
+| **Reference-Aware `Read-Once` & `Symbol-First` (`🟡`)** | Read `scope_allowlist` + tests + real code references (imports, base classes, interfaces, callers/callees, shared types) across files; general/DRY audits unrestricted; ban duplicate reads, blind 100-line stepping, and unanchored cold surveys per §5 |
+
+## 5. Reference-Aware `Read-Once` & `Symbol-First` Protocol (`🟡`)
+
+### 5.1. Mode-Calibrated Read Scope (Zero Foot-Guns)
+- **Targeted Coding / Bugfix**: Read `scope_allowlist` + target tests + **any real code references** (`imports`, base classes, interfaces, callers/callees, shared types/configs) across files to whatever hop depth is needed for call-chain correctness. Ban ONLY unreferenced curiosity reads (unrelated sibling implementations, other-env YAMLs, blanket `ls -la` directory dumps) without a reference or search hit.
+- **General Analysis / DRY / Similarity Audit**: Cross-module `grep -rn` and multi-file pattern reads are **explicitly unrestricted**—discover via `00-INDEX.md` + `grep -rn` first, then read exact matched regions.
+
+### 5.2. 4 Universal Anti-Waste Rules (for ALL agents)
+1. **`Read-Once` (No Duplicate Reads)**: Never re-read an unchanged `(file, line_range)` twice in the same conversation; keep read signatures/contracts in working notes until disk edits invalidate them.
+2. **No Blind 100-Line Stepping**: For cohesive files `<=600–800` lines that must be understood cleanly, fetch the needed scope in **1** `read_file` call (tool returns up to `800` lines) rather than stepping `1-100`, `101-200`, `201-350`.
+3. **`Grep-Before-Read` on Large Files (`>400` lines)**: Run `grep -n` first to pinpoint exact symbol/reference line numbers, then fetch **1** targeted block per needed symbol/call-site (including when jumping across `import` references into another large file).
+4. **`read_anchors:` Handoff (`Explorer -> Developer`)**: `Explorer` / `Task Setter` deliverables (`handoff.md`, `DISPATCH.md`) MUST pass exact `path:start-end | symbol | key_refs` anchors so Developers start on target lines immediately instead of re-exploring cold (while still free to follow newly discovered code references).
