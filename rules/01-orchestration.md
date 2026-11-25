@@ -1,6 +1,6 @@
 ---
 trigger: always_on
-description: "Execution escalation ladder across 3 modes (T0 inline, teamwork/swarm exact model+effort pinning, coarse invoke_subagent fallback), asymmetric Maker<Checker routing, live Promote-on-Review dynamic escalation, wave-based file ownership, cache-first gates, and Reference-Aware Read-Once & Symbol-First reading protocol."
+description: "Execution escalation ladder across 3 modes (T0 inline, teamwork/swarm exact model+effort pinning, coarse fallback), live Promote-on-Review dynamic escalation, milestone child visibility, 180s adaptive watchdog, pre-wave safety snapshot & scope-escape tilt kill switch, wave-based file ownership, and Reference-Aware Read-Once & Symbol-First protocol."
 ---
 
 # Orchestration & Subagent Protocol (`01`)
@@ -62,10 +62,12 @@ In standard chat, `invoke_subagent` is restricted to 4 coarse tier aliases (`Mod
      * **`[skip-interview]` Fast-Path**: Prefix `Prompt` with `[skip-interview]` when requirements, acceptance criteria, and file scopes are concrete (`>=90%` clear) to bypass `teamwork_interviewer` and jump straight to implementation; omit `[skip-interview]` on ambiguous tasks so the interviewer clarifies first.
      * **`Promote-on-Review` inside `teamwork`**: Workers inside `teamwork` are single-iteration (`handoff.md` -> never reused). Developer/Tester workers run on `<fast-workhorse-model> (High)`. When `Stage 3.5` stalls (2 consecutive test failures) or the reviewer returns `BLOCK` / `PROMOTE_MAKER`, `teamwork_orchestrator` spawns `iter2` promoted to `<frontier-model> (High)` with clean unanchored `DISPATCH.md`. Reviewers and Victory Auditor remain unconditionally on `<frontier-model> (High)`.
      * **Git Hygiene**: Always ensure `.agents/teamwork/` is ignored in `.gitignore` alongside `.agents/handoffs/`.
-   - **`teamwork` Anti-Latency & Anti-Loop Guardrails (`🟡`)**:
+   - **`teamwork` Anti-Latency & Visibility Guardrails (`🟡`)**:
      * **Scope Fit**: Reserve full multi-stage `teamwork` pipelines for multi-step, multi-file campaigns (`>=3` files or cross-module workflows). Keep quick Q&A and `<=20` LOC single-file fixes in `T0` inline (zero subagent overhead).
+     * **Visibility Routing Fit**: Prefer native `swarm` (exposes every worker + live board natively in UI) when active; avoid burying 1–2 file tasks inside 3-hop `Sentinel -> Orchestrator` trees.
      * **Fast-Path Default**: Always prefix `Prompt` with `[skip-interview]` when requirements and files are already identified to eliminate unnecessary interviewer round-trips.
-     * **Silent-Until-Done Sentinel Mode (`🔴`)**: Explicitly instruct `teamwork` Sentinel in `Prompt` to send **ZERO periodic/intermediate status pings** to the parent conversation and message the caller **ONLY ONCE on final Victory Audit sign-off or an irrecoverable blocker requiring user input** (eliminates multi-turn status-relay chains that trigger `think_len=0` autoregressive log-continuation loops in the Main Agent).
+     * **Milestone Visibility & Child Links (`🟡`)**: Do NOT go completely mute (`"silently wait"`). Emit 1 concise natural-prose update on wave launch and on each **real phase transition** (`Survey -> Impl -> Critic -> Rework -> Victory`) including clickable `[Role](conversation://<id>)` links + assigned scope for every spawned child/grandchild agent! Keep `Async Status Relay Anti-Loop Guard` (NO fixed clock timestamps like `04:50:`, NO `"Waiting..."` boilerplate, 0 updates when nothing changed).
+     * **180s Adaptive Watchdog (Ban Blind `10–20m` Sleeps)**: Orchestrators (`Sentinel`, `teamwork_orchestrator`) MUST NEVER sleep blindly on `600s–1200s` timers—use a one-shot `schedule(DurationSeconds=180, TimerCondition='any', ...)` watchdog that auto-cancels whenever a child finishes or messages early (never run recurring crons in Main Agent).
      * **Boot & Cache Synergy**: Combine Knowledge-First Boot with Cache-First gates to eliminate redundant survey waves and avoid recomputing existing data.
    - **Native `swarm` Flow (when `native_swarm` tools `swarm`, `post_message`, `read_board`, `swarm_wait` are active)**:
      * Inspect exact catalog and live quota via `swarm{action:"models"}`.
@@ -112,3 +114,22 @@ In standard chat, `invoke_subagent` is restricted to 4 coarse tier aliases (`Mod
 2. **No Blind 100-Line Stepping**: For cohesive files `<=600–800` lines that must be understood cleanly, fetch the needed scope in **1** `read_file` call (tool returns up to `800` lines) rather than stepping `1-100`, `101-200`, `201-350`.
 3. **`Grep-Before-Read` on Large Files (`>400` lines)**: Run `grep -n` first to pinpoint exact symbol/reference line numbers, then fetch **1** targeted block per needed symbol/call-site (including when jumping across `import` references into another large file).
 4. **`read_anchors:` Handoff (`Explorer -> Developer`)**: `Explorer` / `Task Setter` deliverables (`handoff.md`, `DISPATCH.md`) MUST pass exact `path:start-end | symbol | key_refs` anchors so Developers start on target lines immediately instead of re-exploring cold (while still free to follow newly discovered code references).
+
+## 6. Active Watchdog, Tilt Detection & Rollback Control (`🔴`)
+
+### 6.1. Pre-Wave Safety Snapshot (`Pre-Mutation Guard`)
+- **Isolation Preference**: Prefer `Workspace="share"` for parallel or risky edits (`kill` cleanly deletes the isolated working copy).
+- **Inherit Pre-Wave Dirty Baseline**: In shared `Workspace="inherit"`, capture a pre-wave baseline before spawning editing workers:
+  1. Record `git status -s` dirty state.
+  2. Create a non-destructive stash object: `git stash create` (saves current dirty tree without altering the working directory and returns a commit SHA). In non-git umbrella directories, copy target files from `scope_allowlist` into `<scratch>/pre-wave-backup/`.
+
+### 6.2. 3-Point Liveness & Tilt Audit
+Audited at every `180s` watchdog wakeup or status query—**NEVER** trust `progress.md` or `lastStepTime` alone:
+1. **Coma / Error-Loop Check**:
+   - Inspect the last 5 steps of the child's `transcript.jsonl` and active processes (`manage_task` or `ps`).
+   - If `>=3–4m` idle with no active build/test PID, or `>=2` consecutive identical errors (`The stream was interrupted`, artifact-directory error, repeated missing-symbol exception) -> **instant `kill` + clean respawn** (`PROMOTE_MAKER` after repeated failure).
+2. **Early Tilt Detector**:
+   - If `>=10–15` tool steps pass without measurable progress, `Read-Once` thrashing occurs (repeated re-reading of identical regions), diffs oscillate between two contradictory edits, or the agent attempts to weaken tests/fixtures instead of fixing bugs -> **instant `kill` + reslice/promote**.
+3. **Scope-Escape Kill Switch**:
+   - Compare `git status -s` / `git diff --stat` against `scope_allowlist` and the pre-wave baseline.
+   - Any unapproved edit outside `scope_allowlist` or unmandated destructive command (`rm`, `git reset/checkout`, `kubectl apply/delete`) -> **instant `kill` + roll back ONLY rogue worker-touched paths using the pre-wave snapshot** (protecting all pre-existing user WIP!).

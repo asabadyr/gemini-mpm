@@ -61,6 +61,7 @@ scope_allowlist: ["exact/path/file1.ts", "exact/path/file1.test.ts"]
 knowledge_refs: ["GEMINI.md", ".agents/knowledge/00-INDEX.md", ".agents/knowledge/memories.md"]
 read_anchors: ["exact/path/file1.ts:120-185 (Class.method -> ref)"] # optional exact line/symbol anchors
 contracts: ["<pre/postconditions, invariants, untouched constraints>"]
+forbidden_ops: ["edits outside scope_allowlist", "git checkout/reset/clean", "destructive shell/DB/cluster ops"] # optional explicit red lines
 observable: "<exact command/HTTP/DB/file output that proves runtime behavior>"
 return: ["git diff --stat", "verbatim lint/typecheck/test stdout", "observable proof"]
 context: |

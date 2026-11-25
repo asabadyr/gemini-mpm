@@ -19,21 +19,22 @@ Walk every gate on the changed scope before issuing a verdict:
 2. **Full Call-Chain Integrity**: Walk `Entrypoint -> Caller/Orchestrator -> Callee -> DB/External Side-Effect -> Return/Error Handling`. Verify types, units (`s` vs `ms`, `ObjectId` vs `string`), null/error propagation, and untouched callers.
 3. **Runtime Observable & Test Integrity**:
    - Confirm tests actually ran (`> 0` collected, zero silent skips on target code, executed in project's real environment).
-   - Check `20-domain-tests-and-contracts`: flag tautological assertions (`is not None`), `sleep()`/`setTimeout()` synchronization, mocked SUT methods, weakened existing fixtures/tests, or missing regression tests.
+   - Check `20-domain-tests-and-contracts`: flag tautological assertions (`is not None`), `sleep()`/`setTimeout()` synchronization, mocked SUT methods, weakened existing fixtures/tests, or missing regression tests. Flag any tilt-driven test weakening (weakened assertions, deleted tests, disabled linter/typecheck gates => `HIGH` `BLOCK`).
    - Verify the requested **runtime observable** verbatim.
 4. **Architecture, Modularity, DRY & Concurrency Hygiene**: Flag import-time side effects, floating promises/unbounded I/O without timeouts, listener/memory leaks, dynamic K8s `spec.replicas` traps, or unanchored YAML regexes. Additionally, apply severity-graded architecture checks for mainline production code (exempting `scratch/` & explicit throwaway prototypes):
    - **`HIGH` (`=> BLOCK`)**: Creating/growing God files (`>600` LOC) without modular extraction, copy-pasting duplicated logic (`>=30` LOC or `2+` same-domain blocks `>80%` similar) instead of extracting reusable functions/patterns, leaving dead/parallel duplicate implementations, or severe spaghetti (`cyclomatic complexity >15` or nesting `>4`).
    - **`MEDIUM` (`=> WARN`)**: Functions `>50` LOC, cyclomatic complexity `11-15`, classes `>300` LOC (`>200` LOC UI components) violating SRP/DI, `3+` repeated type-tag `if/else`/`switch` chains missing Strategy/dispatch map, `O(n*m)` nested loops where a hash map suffices, or per-iteration N+1 I/O.
 5. **OWASP + Multi-Tenant Security Escalation** *(mandatory whenever diff touches auth/JWT/sessions, crypto/secrets, SQL/NoSQL queries, shell/subprocess exec, file paths/uploads, deserialization, or tenant boundaries)*:
    - Check injection vectors, authn/authz bypasses, missing `tenantId`/`companyId` scoping, path traversal, hardcoded/logged secrets, and conditional `NODE_ENV` auth skips.
-6. **Git Working-Tree & Confidentiality Discipline**:
+6. **Git Working-Tree, Scope-Escape & Confidentiality Discipline**:
+   - Run `git status -s` / `git diff --stat` vs `scope_allowlist`: verify zero unapproved out-of-scope edits occurred (`scope_escape` => mandatory `CRITICAL` `BLOCK`).
    - Run `git status -s` (and `git show --stat HEAD` if a commit was created) in touched repos to verify zero pre-existing user WIP was reverted or swept into wildcard commits, and zero confidential/secret strings leaked.
 
 ## 3. 80% Confidence Filter & Strict Verdict Rules
 - **Noise Suppression**: Report **ONLY** findings where your evidence-backed confidence is **`>= 80%`**. Omit subjective style nitpicks.
 - **Severity & Verdict Mapping**:
-  - **`CRITICAL`**: Data loss/corruption, security/tenant breach, prod outage (`replicas: 0` clobber), secret leak, or destroyed user WIP → **`VERDICT: BLOCK`**
-  - **`HIGH`**: Broken call chain, unhandled error/race condition, unmet acceptance criterion, mainline God-file (`>600` LOC) / copy-paste DRY (`>=30` LOC or `>80%` duplicate) / severe spaghetti (`CC >15`) violation, tautological/silently-skipped tests, weakened existing test/fixture, or unverified runtime observable → **`VERDICT: BLOCK`**
+  - **`CRITICAL`**: Data loss/corruption, security/tenant breach, prod outage (`replicas: 0` clobber), secret leak, destroyed user WIP, or unapproved out-of-scope edits (`scope_escape`) → **`VERDICT: BLOCK`**
+  - **`HIGH`**: Broken call chain, unhandled error/race condition, unmet acceptance criterion, mainline God-file (`>600` LOC) / copy-paste DRY (`>=30` LOC or `>80%` duplicate) / severe spaghetti (`CC >15`) violation, tautological/silently-skipped tests, weakened existing test/fixture or tilt-driven test tampering, or unverified runtime observable → **`VERDICT: BLOCK`**
   - **`MEDIUM`**: Non-blocking edge case, observability gap, minor resource inefficiency → **`VERDICT: WARN`** (if zero `CRITICAL`/`HIGH`)
   - **`LOW`**: Crisp maintainability note (`>=80%` confidence) → **`VERDICT: WARN`** or **`APPROVE`**
   - **Zero `>=80%` findings & all gates verified** → **`VERDICT: APPROVE`**
@@ -57,7 +58,7 @@ Send this exact structure inline via `send_message` to your caller:
 - **Tests & Runtime Observable**: <PASS | FAIL — exact test count & verbatim observable>
 - **Architecture, DRY & Modularity**: <PASS | WARN | FAIL — LOC/complexity/duplication/pattern check>
 - **Security & Tenant Isolation**: <PASS | N/A | FAIL — scope checked>
-- **Git Working-Tree Hygiene**: <PASS | FAIL — `git status -s` / `HEAD` check>
+- **Git Working-Tree & Scope Hygiene**: <PASS | FAIL — `git status -s` / `scope_allowlist` / `HEAD` check>
 
 ### 2. Findings (`>=80%` Confidence Only)
 | ID | Severity | Confidence | File:Line | Defect & Failure Mechanism | Required Fix |

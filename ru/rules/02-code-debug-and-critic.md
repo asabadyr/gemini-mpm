@@ -61,6 +61,7 @@ scope_allowlist: ["exact/path/file1.ts", "exact/path/file1.test.ts"]
 knowledge_refs: ["exact/path/to/GEMINI.md", ".agents/knowledge/00-INDEX.md", ".agents/knowledge/memories.md"]
 read_anchors: ["exact/path/file1.ts:120-180 | ClassOrSymbol | callers/callees"] # опционально: якоря чтения от Explorer/Task Setter
 contracts: ["<предусловия/постусловия, инварианты, неприкосновенные ограничения>"]
+forbidden_ops: ["<запрещённые операции, команды или пути вне скоупа>"] # опционально: явный список запретов (Scope-Escape Guard)
 observable: "<точная команда / HTTP / БД / файловый вывод, доказывающий поведение в рантайме>"
 return: ["git diff --stat", "дословный stdout lint/typecheck/test", "доказательство observable"]
 context: |
