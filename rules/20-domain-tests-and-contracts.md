@@ -1,7 +1,7 @@
 ---
 trigger: glob
 globs: "**/tests/**, **/test/**, **/__tests__/**, **/*test*.*, **/*spec*.*"
-description: "Test quality inspector, anti-tautology assertions, mental mutation check, no-sleep condition polling, no test-only prod methods, and 3-level contract testing."
+description: "Test quality inspector, anti-tautology assertions, mental mutation check, no-sleep condition polling, safe multi-core runner/batch parallelism, and 3-level contract testing."
 ---
 
 # Domain Pack: Test Quality & Contract Pyramid (`20`)
@@ -27,3 +27,13 @@ For contract-bearing, financial, parsing, or state-machine functions, layer test
 1. **Level 1 — Postcondition & Boundary Unit Tests**: Cover nominal paths, empty/zero/max boundaries, idempotency, and exact error outcomes.
 2. **Level 2 — Property-Based Invariant Tests** (`hypothesis` / `fast-check` / `rapid`): Encode preconditions directly in **generators** (avoid heavy `assume()` filtering that starves test cases) and assert structural invariants (round-trip, conservation, ordering, monotonicity).
 3. **Level 3 — Negative Precondition Tests**: Feed invalid types, out-of-range values, expired/malformed tokens, and concurrent races to prove explicit rejection without partial state corruption.
+
+## 4. Safe Multi-Core Parallelism for Long Tests & Local Compute Scripts (`🟡`)
+- **When to Parallelize**: For CPU-bound test suites or multi-item local scripts (grid sweeps, simulations, batch processing `>15–30s` across independent scenarios/items), avoid pegging a single CPU core when batches are independent.
+- **Runner Parallelism First**: Use `pytest -n auto` (when `pytest-xdist` exists in the repo venv, excluding explicitly single-process/monkey-patched suites), `vitest`/`jest` worker pools, `cargo test`/`nextest`, or `go test -p <cores>` + `t.Parallel()`.
+- **Chunked Multi-Core Script Batches**: Shard independent items across `workers = min(max(1, (os.cpu_count() or 2) - 1), len(batches), memory_safe_cap)` (`ProcessPoolExecutor` in Python; worker pool in Node/Go/Rust) instead of sequential 1-core loops.
+- **4 Safety Invariants (`🔴`)**:
+  1. *Disjoint State & Deterministic Merge*: Workers read immutable slices/paths and write only disjoint temp paths or returned objects (never race on shared files, global dicts, or a single SQLite writer); sort/merge results in deterministic input order.
+  2. *`__main__` Guard & `spawn` Context*: Always guard process pool entrypoints with `if __name__ == "__main__":`; use `multiprocessing.get_context("spawn")` when threads, async loops, DB pools, or monkey-patched C-extensions are imported (never unsafe `fork`).
+  3. *Anti-Oversubscription*: Pin inner linear-algebra/BLAS threads (`OMP_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`, `MKL_NUM_THREADS=1`) when spawning multiple worker processes.
+  4. *Memory Budget*: Bound worker count by `available_RAM / per_worker_peak_RAM`; pass file paths/lightweight slice indices rather than duplicating huge datasets per item.

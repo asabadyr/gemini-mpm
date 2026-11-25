@@ -14,6 +14,7 @@ description: "Activate when writing or refactoring code, designing modules, refa
 | **Provided Artifacts Are Constraints** | Existing tests, fixtures (`conftest.py`, seed data), and public schemas are binding contracts: fix production code when existing tests fail—**NEVER** weaken assertions, delete failing tests, or shadow fixtures unless specs explicitly changed |
 | **Whole Call-Chain Walk** | Trace `Entrypoint -> Caller/Orchestrator -> Callee -> DB/External Side-Effect -> Return/Error Handling` end-to-end before coding or approving a fix |
 | **Contracts Before Bodies** | Specify preconditions, postconditions, invariants, and error surfaces before writing bodies (skip ceremony only on `<=20` LOC non-auth/crypto hotfixes) |
+| **Safe Multi-Core Batching (`🟡`)** | For slow CPU-bound local test/batch scripts (`>15–30s` independent items), shard across available CPU cores (`spawn`, `OMP_NUM_THREADS=1`, disjoint outputs, deterministic merge) per `20`/`21` instead of pegging 1 core |
 
 ### 1.2. Production Mainline vs Prototype/Scratch Calibration
 | Context / Scope | Allowed Architecture & Enforcement |

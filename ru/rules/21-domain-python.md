@@ -1,7 +1,7 @@
 ---
 trigger: glob
 globs: "**/*.py, **/pyproject.toml"
-description: "Инженерные правила Python: тулчейн uv/ruff/mypy, чистота времени импорта, таймауты async-вызовов, проверка инвариантов в рантайме без голого assert и защита от мутабельных дефолтов."
+description: "Инженерные правила Python: тулчейн uv/ruff/mypy, чистота времени импорта, таймауты async-вызовов, безопасный многоядерный расчёт (spawn/ProcessPoolExecutor), проверка инвариантов без assert и защита от мутабельных дефолтов."
 ---
 
 # Предметный пакет: Python (`21`)
@@ -19,3 +19,4 @@ description: "Инженерные правила Python: тулчейн uv/ruff
 | **`Protocol` и композиция вместо глубокого наследования** | Глубокие `ABC`-иерархии и модульные синглтоны | Использовать `typing.Protocol` + конструкторный DI вместо глубоких `ABC`-иерархий и модульных синглтонов |
 | **Иммутабельные DTO и Value Objects** | Скрытая мутация входных аргументов | Использовать `@dataclass(frozen=True, slots=True)` или Pydantic v2 `ConfigDict(frozen=True, extra="forbid")` на границах; запрет скрытой мутации входных аргументов |
 | **Связность пакетов и жизненный цикл ресурсов** | Циклические импорты | Модули `<=400-600` LOC по доменам без циклических импортов через чистое слоение / `TYPE_CHECKING`; `@contextmanager` / `AsyncExitStack` |
+| **Многоядерный расчёт и долгие скрипты (`🟡`)** | Блокировка одного ядра на долгих CPU-задачах (`>15–30` с) или небезопасный `fork` с гонками | `ProcessPoolExecutor(mp_context=mp.get_context("spawn"))` под `if __name__ == "__main__":`, `OMP_NUM_THREADS=1`/`OPENBLAS_NUM_THREADS=1`, `pytest -n auto` (при наличии `pytest-xdist`, кроме изолированных monkey-patched сьютов) |

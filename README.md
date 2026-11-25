@@ -6,11 +6,11 @@
 
 **[🇬🇧 English](README.md) | [🇷🇺 Русский](README.ru.md)**
 
-`v1.8.0` · **MIT License** · **0 Lines of Wrapper Code** · **`~4.8K` Startup Tokens (`<26%` Budget)** · **EN + RU Editions**
+`v1.9.0` · **MIT License** · **0 Lines of Wrapper Code** · **`~4.8K` Startup Tokens (`<26%` Budget)** · **EN + RU Editions**
 
 ---
 
-`gemini-mpm` (`agy-mpm-kit`) packages battle-tested multi-agent engineering discipline into **100% native Google Antigravity primitives**: Caveman-compressed `rules/` (with 3-mode orchestration across `T0` inline, `teamwork`/`swarm` exact model+effort pinning, and coarse `invoke_subagent` fallback, live `Promote-on-Review` dynamic escalation, 180s adaptive watchdog, milestone child visibility, pre-wave safety snapshot & scope-escape tilt kill switch, Reference-Aware `Read-Once` & `Symbol-First` reading protocol, knowledge-first subagent boot, and zero-idle-cost polyglot `glob` packs `20..28`), cross-surface `/kit-bootstrap`, `/kit-architecture` & `/kit-handoff` `skills/`, and a context-isolated adversarial `code-critic` subagent (`agents/code-critic.md`). Install it once globally as a local plugin, scaffold thin per-repository adapters in ~90 seconds, and keep full architectural cleanliness, cost efficiency, and verification rigor across every repository on your machine without bloating your context window.
+`gemini-mpm` (`agy-mpm-kit`) packages battle-tested multi-agent engineering discipline into **100% native Google Antigravity primitives**: Caveman-compressed `rules/` (with 3-mode orchestration across `T0` inline, `teamwork`/`swarm` exact model+effort pinning, and coarse `invoke_subagent` fallback, live `Promote-on-Review` dynamic escalation, 180s adaptive watchdog, milestone child visibility, pre-wave safety snapshot & scope-escape tilt kill switch, Reference-Aware `Read-Once` & `Symbol-First` reading protocol, knowledge-first subagent boot, safe multi-core batch & test parallelism, and zero-idle-cost polyglot `glob` packs `20..28`), cross-surface `/kit-bootstrap`, `/kit-architecture` & `/kit-handoff` `skills/`, and a context-isolated adversarial `code-critic` subagent (`agents/code-critic.md`). Install it once globally as a local plugin, scaffold thin per-repository adapters in ~90 seconds, and keep full architectural cleanliness, cost efficiency, and verification rigor across every repository on your machine without bloating your context window.
 
 ### 30-Second Quickstart
 
@@ -38,7 +38,7 @@ Then open any repository in **Google Antigravity** (IDE, App, or `agy` CLI) and 
 
 1. [Motivation: Why Monolithic Instruction Files Break at Scale](#1-motivation-why-monolithic-instruction-files-break-at-scale)
 2. [Origins & Inspiration (`bobmatnyc/claude-mpm`) — Why `0` Wrapper Code](#2-origins--inspiration-bobmatnycclaude-mpm--why-0-wrapper-code)
-3. [Thirteen Core Innovations Inside `agy-mpm-kit`](#3-thirteen-core-innovations-inside-agy-mpm-kit)
+3. [Fourteen Core Innovations Inside `agy-mpm-kit`](#3-fourteen-core-innovations-inside-agy-mpm-kit)
 4. [Architecture Diagram & Token Budget](#4-architecture-diagram--token-budget)
 5. [Native Bilingual Support (`EN` Root vs `RU` `./ru/` Edition)](#5-native-bilingual-support-en-root-vs-ru-ru-edition)
 6. [Four Installation & Multi-Project Topologies (`realpath` Guide)](#6-four-installation--multi-project-topologies-realpath-guide)
@@ -87,7 +87,7 @@ In Claude Code, `claude-mpm` had to grow into a ~250-file Click/FastAPI/Socket.I
 
 ---
 
-## 3. Thirteen Core Innovations Inside `agy-mpm-kit`
+## 3. Fourteen Core Innovations Inside `agy-mpm-kit`
 
 ### 1. Caveman Table-Driven Prompt Compression & HSDF Messaging
 Grounded in empirical MPM benchmarks where converting verbose prose rules (`47 KB` / `~12.7K` tokens) into dense decision tables (`10.8 KB` / `~2.7K` tokens) cut system-prompt tokens by **`-77%`**, reduced total session tokens by **`-47%`**, and **improved QA rubric adherence by `+17%` (`3.75/5 -> 4.40/5`)**. Subagent delegations use **HSDF (Hybrid Structured Delegation Format)** (`tier`, `Effort`, `task`, `scope_allowlist`, `contracts`, `observable`, `return`, `context`), keeping prompts compact while never compressing exact file paths, line numbers, tool names, or stack traces.
@@ -162,6 +162,16 @@ Protects developer workspaces from rogue subagents, infinite loops, and silent d
 - **180s Adaptive Watchdog**: Eliminates blind 10–20 minute sleeps by wrapping wait loops in a one-shot `schedule(DurationSeconds=180, TimerCondition='any', ...)` watchdog that triggers immediate triage if an agent stalls, while waking instantly when child agents finish or reply early.
 - **3-Point Liveness & Tilt Audit**: At every 180s wake or status query, audits: (1) Coma / Error-Loop (inspecting child `transcript.jsonl` tail and process table; `>=3–4m` idle without CPU or `>=2` consecutive identical errors -> instant `kill` + respawn), (2) Early Tilt (`>=10–15` steps without progress, `Read-Once` thrashing, oscillating edits, or test-weakening attempts -> instant `kill` + reslice/promote), and (3) Scope-Escape Kill Switch (any unapproved edit outside `scope_allowlist` or unmandated destructive command triggers instant `kill` and rolls back *only* rogue worker paths from the pre-wave snapshot, keeping user WIP safe).
 
+### 14. Safe Multi-Core Batch & Test Parallelism (v1.9.0)
+Eliminates single-core bottlenecks on CPU-bound local test suites and long batch scripts (`>15–30s` independent items/sweeps) across `20-domain-tests-and-contracts.md` and `21-domain-python.md`:
+- **Runner Parallelism First**: Leverages `pytest -n auto` (when `pytest-xdist` is available in the virtualenv, safely bypassing monkey-patched or state-sharing suites), `vitest`/`jest` worker pools, `cargo test`/`nextest`, or `go test -p <cores>` + `t.Parallel()`.
+- **Chunked Multi-Core Script Batches**: Shards independent scenarios across `workers = min(max(1, (os.cpu_count() or 2) - 1), len(batches), memory_safe_cap)` via `ProcessPoolExecutor` (Python) or native worker pools (Node/Go/Rust) instead of sequential 1-core loops.
+- **4 Safety Invariants (`🔴`)**:
+  1. *Disjoint State & Deterministic Merge*: Workers read immutable slices/paths and write only disjoint temp paths or returned objects (never race on shared files, global dicts, or SQLite); results merge in deterministic input order.
+  2. *`__main__` Guard & `spawn` Context*: Always guards pool entrypoints with `if __name__ == "__main__":` and uses `multiprocessing.get_context("spawn")` whenever threads, async loops, DB pools, or monkey-patched C-extensions are loaded (never unsafe `fork`).
+  3. *Anti-Oversubscription*: Pins inner linear-algebra/BLAS threads (`OMP_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`, `MKL_NUM_THREADS=1`) to prevent CPU thrashing.
+  4. *Memory Budget*: Bounds worker count by `available_RAM / per_worker_peak_RAM` and passes file paths or lightweight slice indices rather than duplicating full in-memory datasets.
+
 ---
 
 ## 4. Architecture Diagram & Token Budget
@@ -211,11 +221,11 @@ Every rule file sits well under `<35%` of Antigravity's `24,000`-byte per-file h
 |---|---|---|---|---|---|
 | **Tier 1 Core** | `rules/00-core-guardrails.md` | `always_on` | `4,402 B` (`4.4 KB`) | `~1,100` | *(Already loaded)* |
 | **Tier 1 Core** | `rules/01-orchestration.md` | `always_on` | `20,728 B` (`20.7 KB`) | `~5,180` | *(Already loaded)* |
-| **Tier 1 Core** | `rules/02-code-debug-and-critic.md` | `model_decision` | `8,668 B` (`8.7 KB`) | `~45` *(desc)* | `~2,165` |
+| **Tier 1 Core** | `rules/02-code-debug-and-critic.md` | `model_decision` | `8,932 B` (`8.9 KB`) | `~45` *(desc)* | `~2,235` |
 | **Tier 1 Core** | `rules/03-analytical-forensics.md` | `model_decision` | `2,542 B` (`2.5 KB`) | `~35` *(desc)* | `~635` |
 | **Tier 1 Core** | `rules/04-memory-knowledge-adr.md` | `model_decision` | `3,344 B` (`3.3 KB`) | `~35` *(desc)* | `~835` |
-| **Tier 1 Domain** | `rules/20-domain-tests-and-contracts.md` | `glob` *(test files)* | `3,082 B` (`3.1 KB`) | **`0`** | `~770` |
-| **Tier 1 Domain** | `rules/21-domain-python.md` | `glob` (`*.py`, `pyproject.toml`) | `2,978 B` (`3.0 KB`) | **`0`** | `~745` |
+| **Tier 1 Domain** | `rules/20-domain-tests-and-contracts.md` | `glob` *(test files)* | `4,830 B` (`4.8 KB`) | **`0`** | `~1,210` |
+| **Tier 1 Domain** | `rules/21-domain-python.md` | `glob` (`*.py`, `pyproject.toml`) | `3,608 B` (`3.6 KB`) | **`0`** | `~900` |
 | **Tier 1 Domain** | `rules/22-domain-typescript-node.md` | `glob` (`*.ts`, `*.tsx`, `*.js`) | `2,890 B` (`2.9 KB`) | **`0`** | `~725` |
 | **Tier 1 Domain** | `rules/23-domain-k8s-and-infra.md` | `glob` (`*.yaml`, `Dockerfile`, `*.tf`, `*.sh`) | `2,235 B` (`2.2 KB`) | **`0`** | `~560` |
 | **Tier 1 Domain** | `rules/24-domain-sql-mongo-migrations.md` | `glob` (`migrations/**`, `*.sql`, `*schema*`) | `2,186 B` (`2.2 KB`) | **`0`** | `~545` |
@@ -362,12 +372,12 @@ Consolidates legacy or cross-agent setups into a clean Tier-2 Project Adapter in
 | Free up context window mid-session (pair with `/kit-handoff pause`) | `/compact` |
 | Promote a project discovery into a reusable global skill or rule | `/learn` |
 
-### 7.6 Upgrading Existing Installs & Projects (`v1.x` -> `v1.8.0`)
+### 7.6 Upgrading Existing Installs & Projects (`v1.x` -> `v1.9.0`)
 
 | Layer | Auto-Updated on `git pull`? | Action Required for Existing Users / Repos |
 |---|---|---|
 | **Global Plugin (`00..04`, `20..28`, `code-critic`, `/kit-*`)** | **Yes** *(if symlinked via `./install.sh`)* | Run `git pull --ff-only` inside your cloned `gemini-mpm` folder (or re-run `./install.sh --force` if copied without a symlink; verify via `./install.sh --status`). If you used Mode D fallback, refresh copied `90..92` playbooks. |
-| **Existing Bootstrapped Repos (`GEMINI.md`, `.gitignore`)** | **No** *(local repo files stay on bootstrap version)* | Open the repo and run **`/kit-bootstrap --migrate`** — backs up current files to `scratch/`, adds `.agents/teamwork/` to `.gitignore` (required when upgrading from `v1.2–v1.4`), and refreshes `GEMINI.md` with `Knowledge-First Boot`, `Read-Once`, `180s Watchdog`, and optional `teamwork`/`swarm` `Role -> Model + Effort` table without losing repo invariants. |
+| **Existing Bootstrapped Repos (`GEMINI.md`, `.gitignore`)** | **No** *(local repo files stay on bootstrap version)* | Open the repo and run **`/kit-bootstrap --migrate`** — backs up current files to `scratch/`, adds `.agents/teamwork/` to `.gitignore` (required when upgrading from `v1.2–v1.4`), and refreshes `GEMINI.md` with `Knowledge-First Boot`, `Read-Once`, `180s Watchdog`, safe multi-core parallelism, and optional `teamwork`/`swarm` `Role -> Model + Effort` table without losing repo invariants. |
 | **Long Open Chats / Feature Worktrees** | Core rules reload on next turn | Run `/compact` (or open a fresh chat) to clear stale in-context habits; merge/rebase `main` into long-lived research worktrees when ready to sync `GEMINI.md`. |
 
 ---
@@ -376,7 +386,7 @@ Consolidates legacy or cross-agent setups into a clean Tier-2 Project Adapter in
 
 ```text
 gemini-mpm/
-├── plugin.json                                     # EN plugin manifest (agy-mpm-core v1.8.0)
+├── plugin.json                                     # EN plugin manifest (agy-mpm-core v1.9.0)
 ├── install.sh                                      # Safe symlink installer & EN/RU switcher (--lang en|ru, --status, --uninstall)
 ├── LICENSE                                         # MIT License + claude-mpm conceptual attribution
 ├── README.md                                       # English flagship documentation
@@ -389,8 +399,8 @@ gemini-mpm/
 │   ├── 02-code-debug-and-critic.md                 # model_decision: Clean Arch, LOC/DRY caps, OOP/patterns, HSDF (forbidden_ops), 5-phase debug
 │   ├── 03-analytical-forensics.md                  # model_decision: mandatory 6-point Visible Self-Check for metrics/logs/DB
 │   ├── 04-memory-knowledge-adr.md                  # model_decision: FIFO memories.md (<=4KB), 00-INDEX matrix, 3-gate ADRs
-│   ├── 20-domain-tests-and-contracts.md            # glob: anti-tautology, mental mutation, parameterized DRY, 3-level contracts
-│   ├── 21-domain-python.md                         # glob: uv/ruff/mypy, Protocol/DI, frozen dataclasses, import purity, async timeouts
+│   ├── 20-domain-tests-and-contracts.md            # glob: anti-tautology, mental mutation, 3-level contracts, safe multi-core runner/batch parallelism
+│   ├── 21-domain-python.md                         # glob: uv/ruff/mypy, Protocol/DI, frozen dataclasses, import purity, async timeouts, multi-core compute
 │   ├── 22-domain-typescript-node.md                # glob: unknown narrowing, discriminated unions, interface DI, no barrel cycles
 │   ├── 23-domain-k8s-and-infra.md                  # glob: dynamic spec.replicas guard, registry-anchored regex, shell safety
 │   ├── 24-domain-sql-mongo-migrations.md           # glob: ID/timestamp units, driver shapes, tenant/survival filters, ESR
