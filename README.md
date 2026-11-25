@@ -362,6 +362,14 @@ Consolidates legacy or cross-agent setups into a clean Tier-2 Project Adapter in
 | Free up context window mid-session (pair with `/kit-handoff pause`) | `/compact` |
 | Promote a project discovery into a reusable global skill or rule | `/learn` |
 
+### 7.6 Upgrading Existing Installs & Projects (`v1.x` -> `v1.8.0`)
+
+| Layer | Auto-Updated on `git pull`? | Action Required for Existing Users / Repos |
+|---|---|---|
+| **Global Plugin (`00..04`, `20..28`, `code-critic`, `/kit-*`)** | **Yes** *(if symlinked via `./install.sh`)* | Run `git pull --ff-only` inside your cloned `gemini-mpm` folder (or re-run `./install.sh --force` if copied without a symlink; verify via `./install.sh --status`). If you used Mode D fallback, refresh copied `90..92` playbooks. |
+| **Existing Bootstrapped Repos (`GEMINI.md`, `.gitignore`)** | **No** *(local repo files stay on bootstrap version)* | Open the repo and run **`/kit-bootstrap --migrate`** — backs up current files to `scratch/`, adds `.agents/teamwork/` to `.gitignore` (required when upgrading from `v1.2–v1.4`), and refreshes `GEMINI.md` with `Knowledge-First Boot`, `Read-Once`, `180s Watchdog`, and optional `teamwork`/`swarm` `Role -> Model + Effort` table without losing repo invariants. |
+| **Long Open Chats / Feature Worktrees** | Core rules reload on next turn | Run `/compact` (or open a fresh chat) to clear stale in-context habits; merge/rebase `main` into long-lived research worktrees when ready to sync `GEMINI.md`. |
+
 ---
 
 ## 8. Repository Structure Map (`/` EN & `/ru` RU)

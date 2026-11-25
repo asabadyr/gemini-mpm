@@ -37,3 +37,8 @@ ln -sfn ~/Projects/gemini-mpm/ru ~/.gemini/config/plugins/agy-mpm-core
 - **`skills/kit-handoff/`** — слэш-скилл `/kit-handoff` (`pause`, `resume`, `postmortem`) + шаблон `LATEST.template.md`.
 - **`agents/code-critic.md`** — контекстно-изолированный ревьюер без прав записи (`>=80%` фильтр уверенности, Knowledge-First аудит, `Read-Once` + `Grep-Before-Read`, Scope-Escape Guard и защита от тильт-ослабления тестов, оценка маршрута доработки `Rework Routing: WARM_FIX | PROMOTE_MAKER`, вердикты `APPROVE | WARN | BLOCK`).
 - **`extras/manual-rules-fallback/`** — ручные плейбуки `@90-playbook-bootstrap.md`, `@91-playbook-handoff.md` и `@92-playbook-architecture.md` (`trigger: manual`) для сред без `skills/`.
+
+### Обновление (`v1.x` -> `v1.8.0`)
+
+1. **Глобальный плагин**: при установке через `install.sh` достаточно `git pull --ff-only` в каталоге `gemini-mpm` (`../install.sh --status` покажет `v1.8.0`). Если папка копировалась вручную — обновите через `../install.sh --lang ru --force`.
+2. **Уже инициализированные проекты**: ядро `00..04` и `20..28` обновится само, но для добавления `.agents/teamwork/` в `.gitignore` (после `v1.2–v1.4`) и обновления локального `GEMINI.md` выполните в проекте **`/kit-bootstrap --migrate`** (сохранит все проектные правила с проверкой через `code-critic`).
