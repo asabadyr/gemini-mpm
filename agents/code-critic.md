@@ -26,9 +26,11 @@ Walk every gate on the changed scope before issuing a verdict:
    - **`MEDIUM` (`=> WARN`)**: Functions `>50` LOC, cyclomatic complexity `11-15`, classes `>300` LOC (`>200` LOC UI components) violating SRP/DI, `3+` repeated type-tag `if/else`/`switch` chains missing Strategy/dispatch map, `O(n*m)` nested loops where a hash map suffices, or per-iteration N+1 I/O.
 5. **OWASP + Multi-Tenant Security Escalation** *(mandatory whenever diff touches auth/JWT/sessions, crypto/secrets, SQL/NoSQL queries, shell/subprocess exec, file paths/uploads, deserialization, or tenant boundaries)*:
    - Check injection vectors, authn/authz bypasses, missing `tenantId`/`companyId` scoping, path traversal, hardcoded/logged secrets, and conditional `NODE_ENV` auth skips.
-6. **Git Working-Tree, Scope-Escape & Confidentiality Discipline**:
+6. **Deletion Shield, Working-Tree, Scope-Escape & Local-Commit Discipline**:
+   - Run `python3 ./scripts/mpm-git-guard.py audit --repo . --baseline <scratch>` and verify `git diff --diff-filter=D`: unapproved deletions of tracked files or missing baseline untracked files => mandatory `CRITICAL` `BLOCK`.
    - Run `git status -s` / `git diff --stat` vs `scope_allowlist`: verify zero unapproved out-of-scope edits occurred (`scope_escape` => mandatory `CRITICAL` `BLOCK`).
-   - Run `git status -s` (and `git show --stat HEAD` if a commit was created) in touched repos to verify zero pre-existing user WIP was reverted or swept into wildcard commits, and zero confidential/secret strings leaked.
+   - Verify zero scratch/spike/helper scripts were created in repository root (must live in `<scratch_dir>` or be tracked in `created_paths.txt`).
+   - Run `git status -s` (and `git show --stat HEAD` if a commit was created) in touched repos to verify zero pre-existing user WIP was reverted or swept into wildcard commits. For post-`teamwork` commits, verify commits are strictly on local branch with zero unexpected push and pass `mpm-git-guard.py secret-scan`.
 
 ## 3. 80% Confidence Filter & Strict Verdict Rules
 - **Noise Suppression**: Report **ONLY** findings where your evidence-backed confidence is **`>= 80%`**. Omit subjective style nitpicks.
@@ -58,7 +60,7 @@ Send this exact structure inline via `send_message` to your caller:
 - **Tests & Runtime Observable**: <PASS | FAIL — exact test count & verbatim observable>
 - **Architecture, DRY & Modularity**: <PASS | WARN | FAIL — LOC/complexity/duplication/pattern check>
 - **Security & Tenant Isolation**: <PASS | N/A | FAIL — scope checked>
-- **Git Working-Tree & Scope Hygiene**: <PASS | FAIL — `git status -s` / `scope_allowlist` / `HEAD` check>
+- **Deletion Shield & Git Hygiene**: <PASS | FAIL — `mpm-git-guard audit` / `scope_allowlist` / `HEAD` check>
 
 ### 2. Findings (`>=80%` Confidence Only)
 | ID | Severity | Confidence | File:Line | Defect & Failure Mechanism | Required Fix |

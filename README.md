@@ -6,11 +6,11 @@
 
 **[🇬🇧 English](README.md) | [🇷🇺 Русский](README.ru.md)**
 
-`v1.9.0` · **MIT License** · **0 Lines of Wrapper Code** · **`~4.8K` Startup Tokens (`<26%` Budget)** · **EN + RU Editions**
+`v2.0.0` · **MIT License** · **Native PreToolUse Deletion Shield & 0 Daemon Overhead** · **`~4.8K` Startup Tokens (`<26%` Budget)** · **EN + RU Editions**
 
 ---
 
-`gemini-mpm` (`agy-mpm-kit`) packages battle-tested multi-agent engineering discipline into **100% native Google Antigravity primitives**: Caveman-compressed `rules/` (with 3-mode orchestration across `T0` inline, `teamwork`/`swarm` exact model+effort pinning, and coarse `invoke_subagent` fallback, live `Promote-on-Review` dynamic escalation, 180s adaptive watchdog, milestone child visibility, pre-wave safety snapshot & scope-escape tilt kill switch, Reference-Aware `Read-Once` & `Symbol-First` reading protocol, knowledge-first subagent boot, safe multi-core batch & test parallelism, and zero-idle-cost polyglot `glob` packs `20..28`), cross-surface `/kit-bootstrap`, `/kit-architecture` & `/kit-handoff` `skills/`, and a context-isolated adversarial `code-critic` subagent (`agents/code-critic.md`). Install it once globally as a local plugin, scaffold thin per-repository adapters in ~90 seconds, and keep full architectural cleanliness, cost efficiency, and verification rigor across every repository on your machine without bloating your context window.
+`gemini-mpm` (`agy-mpm-kit`) packages battle-tested multi-agent engineering discipline into **100% native Google Antigravity primitives**: a native `PreToolUse` Deletion Shield hook (`hooks.json` -> `scripts/destructive-cmd-guard.py`) with zero-dependency git snapshot, audit, and restore tooling (`scripts/mpm-git-guard.py`), Caveman-compressed `rules/` (with 3-mode orchestration across `T0` inline, `teamwork`/`swarm` exact model+effort pinning, and coarse `invoke_subagent` fallback, live `Promote-on-Review` dynamic escalation, 180s adaptive watchdog, milestone child visibility, pre-wave safety snapshot & scope-escape tilt kill switch, Reference-Aware `Read-Once` & `Symbol-First` reading protocol, knowledge-first subagent boot, safe multi-core batch & test parallelism, and zero-idle-cost polyglot `glob` packs `20..28`), cross-surface `/kit-bootstrap`, `/kit-architecture` & `/kit-handoff` `skills/`, and a context-isolated adversarial `code-critic` subagent (`agents/code-critic.md`). Install it once globally as a local plugin, scaffold thin per-repository adapters in ~90 seconds, and keep full architectural cleanliness, cost efficiency, and verification rigor across every repository on your machine without bloating your context window.
 
 ### 30-Second Quickstart
 
@@ -38,7 +38,7 @@ Then open any repository in **Google Antigravity** (IDE, App, or `agy` CLI) and 
 
 1. [Motivation: Why Monolithic Instruction Files Break at Scale](#1-motivation-why-monolithic-instruction-files-break-at-scale)
 2. [Origins & Inspiration (`bobmatnyc/claude-mpm`) — Why `0` Wrapper Code](#2-origins--inspiration-bobmatnycclaude-mpm--why-0-wrapper-code)
-3. [Fourteen Core Innovations Inside `agy-mpm-kit`](#3-fourteen-core-innovations-inside-agy-mpm-kit)
+3. [Fifteen Core Innovations Inside `agy-mpm-kit`](#3-fifteen-core-innovations-inside-agy-mpm-kit)
 4. [Architecture Diagram & Token Budget](#4-architecture-diagram--token-budget)
 5. [Native Bilingual Support (`EN` Root vs `RU` `./ru/` Edition)](#5-native-bilingual-support-en-root-vs-ru-ru-edition)
 6. [Four Installation & Multi-Project Topologies (`realpath` Guide)](#6-four-installation--multi-project-topologies-realpath-guide)
@@ -64,30 +64,31 @@ Most AI-assisted engineering setups start with a single `GEMINI.md` or `CLAUDE.m
 
 ---
 
-## 2. Origins & Inspiration (`bobmatnyc/claude-mpm`) — Why `0` Wrapper Code
+## 2. Origins & Inspiration (`bobmatnyc/claude-mpm`) — Built-In Deletion Shield vs Heavy CLI Daemons
 
 `agy-mpm-kit` is deeply inspired by Bob Matsuoka's pioneering open-source [**`bobmatnyc/claude-mpm`**](https://github.com/bobmatnyc/claude-mpm) framework, along with [**`claude-mpm-agents`**](https://github.com/bobmatnyc/claude-mpm-agents) and [**`claude-mpm-skills`**](https://github.com/bobmatnyc/claude-mpm-skills).
 
-### Why `claude-mpm` Required a Python CLI Wrapper — And Why Antigravity Does Not
+### Why `claude-mpm` Required a Heavy Python CLI Wrapper — And How Antigravity Compares
 
 In Claude Code, `claude-mpm` had to grow into a ~250-file Click/FastAPI/Socket.IO Python wrapper around the CLI binary because:
 1. Claude Code plugins initialized *after* system prompt assembly and could not inject top-level orchestration rules pre-turn.
 2. An upstream model-routing bug ignored subagent frontmatter `model:` fields, requiring Python `PreToolUse` hooks to route model tiers.
 3. Subagents were stateless one-shot calls (`~95K`-token cold reload on every lint/test rework), and monitoring required an external Socket.IO + Svelte web server.
 
-**Google Antigravity solves 100% of that infrastructure natively.** As a result, `agy-mpm-kit` ships **`0` lines of Python CLI, daemon, Socket.IO, or hook-wrapper code**:
+**Google Antigravity solves orchestration, stateful reactive subagents, and slash UI natively.** Rather than running a monolithic external Python CLI or socket server, `agy-mpm-kit v2.0.0` leverages native plugin primitives plus a lightweight, pure Python standard library **`PreToolUse` Deletion Shield hook (`hooks.json` -> `scripts/destructive-cmd-guard.py`)** and git safety helper (`scripts/mpm-git-guard.py`):
 
-| Capability | `claude-mpm` (`v6.5+`) | `agy-mpm-kit` on Google Antigravity |
+| Capability | `claude-mpm` (`v6.5+`) | `agy-mpm-kit` on Google Antigravity (`v2.0.0`) |
 |---|---|---|
 | **Pre-Turn Rule Loading & Progressive Disclosure** | Python CLI wrapper assembling system prompts + `build-agent.py` | Native pre-turn `GEMINI.md` / `.agents/rules/*.md` / Plugin `rules/` with `always_on`, `model_decision`, `glob`, and `manual` triggers + `@[label](path)` includes |
 | **Dynamic Subagent Model & Sandbox Routing** | Python `PreToolUse` hook (`model_tier_hook.py`) | Native `invoke_subagent(Model="flash_lite"\|"flash"\|"pro"\|"inherit", Workspace="inherit"\|"branch"\|"share")` |
 | **Rework Continuation & Live Subagent UI** | Stateless re-dispatch + external Socket.IO/Svelte monitor | Stateful subagents woken reactively via **`send_message(Recipient=conversationId)`** (zero cold reload!) + native Subagents/Tasks UI |
 | **Strategic Planning, Autonomous & Learning Flows** | Custom CLI commands & hook scripts | Native `/plan`, `/grill-me`, `/boost`, `/teamwork`, `/goal`, `/compact`, `/learn` + cross-surface `/kit-bootstrap`, `/kit-architecture` & `/kit-handoff` skills |
-| **Real-World Dirty-Tree & Multi-Repo Safety** | Mandates `ONE FILE PER COMMIT`, auto-commits every phase, and assumes root `.git` | **Upgraded**: Protects dirty user WIP, enforces explicit-path `git add <file>`, and checks `<workspace>/.git` for multi-repo non-git umbrellas |
+| **PreToolUse Deletion Shield & Shell Safety** | External CLI wrapper & prompt checks | Native **`hooks.json` PreToolUse hook** executing stdlib `scripts/destructive-cmd-guard.py` (hard-blocks `git clean`, `git reset --hard`, worktree `git checkout/restore`, catastrophic `rm`, force-push to `main`; forces confirmation for deletes outside `<scratch>/` or `/tmp/`) |
+| **Real-World Dirty-Tree & Multi-Repo Safety** | Mandates `ONE FILE PER COMMIT`, auto-commits every phase, and assumes root `.git` | **Upgraded**: Pure stdlib `scripts/mpm-git-guard.py` (`snapshot`, `audit`, `restore`, `secret-scan`), protects dirty user WIP, enforces explicit-path `git add <file>`, and checks `<workspace>/.git` for multi-repo non-git umbrellas |
 
 ---
 
-## 3. Fourteen Core Innovations Inside `agy-mpm-kit`
+## 3. Fifteen Core Innovations Inside `agy-mpm-kit`
 
 ### 1. Caveman Table-Driven Prompt Compression & HSDF Messaging
 Grounded in empirical MPM benchmarks where converting verbose prose rules (`47 KB` / `~12.7K` tokens) into dense decision tables (`10.8 KB` / `~2.7K` tokens) cut system-prompt tokens by **`-77%`**, reduced total session tokens by **`-47%`**, and **improved QA rubric adherence by `+17%` (`3.75/5 -> 4.40/5`)**. Subagent delegations use **HSDF (Hybrid Structured Delegation Format)** (`tier`, `Effort`, `task`, `scope_allowlist`, `contracts`, `observable`, `return`, `context`), keeping prompts compact while never compressing exact file paths, line numbers, tool names, or stack traces.
@@ -171,6 +172,22 @@ Eliminates single-core bottlenecks on CPU-bound local test suites and long batch
   2. *`__main__` Guard & `spawn` Context*: Always guards pool entrypoints with `if __name__ == "__main__":` and uses `multiprocessing.get_context("spawn")` whenever threads, async loops, DB pools, or monkey-patched C-extensions are loaded (never unsafe `fork`).
   3. *Anti-Oversubscription*: Pins inner linear-algebra/BLAS threads (`OMP_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`, `MKL_NUM_THREADS=1`) to prevent CPU thrashing.
   4. *Memory Budget*: Bounds worker count by `available_RAM / per_worker_peak_RAM` and passes file paths or lightweight slice indices rather than duplicating full in-memory datasets.
+
+### 15. Native PreToolUse Deletion Shield, `mpm-git-guard` & Zero-Token `mpm-live-watch` (v2.0.0)
+Multi-layered hardware defense against destructive commands, rogue subagent loops, and uncommitted WIP loss across autonomous multi-agent turns:
+- **Built-in `PreToolUse` Deletion Shield (`hooks.json` -> `destructive-cmd-guard.py`)**: Intercepts `run_command` before execution:
+  * **Hard `"deny"`**: `git clean` (except pure dry-run `-n`), `git reset --hard/--merge`, worktree `git checkout` (`--`, `.`, `HEAD <path>`), worktree `git restore` (without pure `--staged`), catastrophic `rm` (`/`, `~`, `.`, `..`, `*`), and force-push to `main`/`master`.
+  * **Mandatory `"force_ask"`**: Any file deletion (`rm`, `rmdir`, `unlink`, `shred`, `find -delete`, inline Python deletion) unless target paths resolve strictly inside `<artifactDir>/scratch` or system `/tmp` dirs.
+  * Shell statement splitting on `;`, `&&`, `||`, `|`, `\n` outside quotes prevents command-chaining bypasses. Propagates to child subagents automatically.
+- **`mpm-git-guard.py` Stdlib Helper**:
+  * `snapshot`: Archives untracked files (`git ls-files --others`) + modified tracked files into `pre-wave-backup.tar.gz` and records `git stash create` SHA + manifest before risky delegations (supporting 0-commit repos and spaces in paths cleanly).
+  * `audit`: Detects tracked deletions (`git diff --diff-filter=D`), missing baseline untracked files, or banned commands in `transcript.jsonl`, exiting `2` on failure.
+  * `restore`: Safely restores missing files without clobbering new work (`--only-missing`).
+  * `secret-scan`: Pre-commit regex audit blocking API keys, private keys, and bearer tokens.
+- **Zero-Token `mpm-live-watch.py` OS Continuous Monitor**:
+  * Runs as a background watcher (`WaitMsBeforeAsync=500`, 0 LLM tokens while clean) polling transcript growth and git working tree every `1.5s`.
+  * Exits immediately with JSON alert and exit codes `10..15` (`DELETION_DETECTED`, `DANGEROUS_COMMAND`, `ERROR_LOOP`, `READ_ONLY_TILT`, `IDLE_COMA`, `SCOPE_ESCAPE`), triggering **`~1–2s` `Reactive Wakeup`** in orchestrator instead of waiting for a 180s timer.
+- **Mandatory `teamwork` Local-Branch Commit Lifecycle (Zero Push)**: Isolate tasks in `teamwork/<slug>` branch or dedicated worktree, enforce audit + secret scan, and commit strictly to local branch without unexpected push.
 
 ---
 
@@ -372,12 +389,13 @@ Consolidates legacy or cross-agent setups into a clean Tier-2 Project Adapter in
 | Free up context window mid-session (pair with `/kit-handoff pause`) | `/compact` |
 | Promote a project discovery into a reusable global skill or rule | `/learn` |
 
-### 7.6 Upgrading Existing Installs & Projects (`v1.x` -> `v1.9.0`)
+### 7.6 Upgrading Existing Installs & Projects (`v1.x` -> `v2.0.0`)
 
 | Layer | Auto-Updated on `git pull`? | Action Required for Existing Users / Repos |
 |---|---|---|
-| **Global Plugin (`00..04`, `20..28`, `code-critic`, `/kit-*`)** | **Yes** *(if symlinked via `./install.sh`)* | Run `git pull --ff-only` inside your cloned `gemini-mpm` folder (or re-run `./install.sh --force` if copied without a symlink; verify via `./install.sh --status`). If you used Mode D fallback, refresh copied `90..92` playbooks. |
-| **Existing Bootstrapped Repos (`GEMINI.md`, `.gitignore`)** | **No** *(local repo files stay on bootstrap version)* | Open the repo and run **`/kit-bootstrap --migrate`** — backs up current files to `scratch/`, adds `.agents/teamwork/` to `.gitignore` (required when upgrading from `v1.2–v1.4`), and refreshes `GEMINI.md` with `Knowledge-First Boot`, `Read-Once`, `180s Watchdog`, safe multi-core parallelism, and optional `teamwork`/`swarm` `Role -> Model + Effort` table without losing repo invariants. |
+| **Global Plugin (`00..04`, `20..28`, `hooks.json`, `scripts/`, `code-critic`, `/kit-*`)** | **Yes** *(if symlinked via `./install.sh`)* | Run `git pull --ff-only` inside your cloned `gemini-mpm` folder (or re-run `./install.sh --force` if copied without a symlink; verify via `./install.sh --status` to confirm `Hook Guard: ACTIVE`). If you used Mode D fallback, refresh copied `90..92` playbooks. |
+| **PreToolUse Deletion Shield Hook (`hooks.json`)** | **Immediate** | Intercepts `run_command` across all sessions and child subagents automatically. *Authoring Note*: Always author and test target guard scripts (`python3 ./scripts/destructive-cmd-guard.py`) *before* registering them in `hooks.json`, because Antigravity begins executing hooks immediately once configured. |
+| **Existing Bootstrapped Repos (`GEMINI.md`, `.gitignore`)** | **No** *(local repo files stay on bootstrap version)* | Open the repo and run **`/kit-bootstrap --migrate`** — backs up current files to `scratch/`, ensures `.agents/teamwork/` is in `.gitignore`, and refreshes `GEMINI.md` with `PreToolUse` Deletion Shield, `mpm-git-guard` snapshot/audit/restore, continuous `mpm-live-watch` OS monitor, `Read-Once`, and local-branch `teamwork` commit lifecycle without losing repo invariants. |
 | **Long Open Chats / Feature Worktrees** | Core rules reload on next turn | Run `/compact` (or open a fresh chat) to clear stale in-context habits; merge/rebase `main` into long-lived research worktrees when ready to sync `GEMINI.md`. |
 
 ---
@@ -386,17 +404,25 @@ Consolidates legacy or cross-agent setups into a clean Tier-2 Project Adapter in
 
 ```text
 gemini-mpm/
-├── plugin.json                                     # EN plugin manifest (agy-mpm-core v1.9.0)
+├── plugin.json                                     # EN plugin manifest (agy-mpm-core v2.0.0)
+├── hooks.json                                      # PreToolUse Deletion Shield lifecycle hook (run_command)
 ├── install.sh                                      # Safe symlink installer & EN/RU switcher (--lang en|ru, --status, --uninstall)
 ├── LICENSE                                         # MIT License + claude-mpm conceptual attribution
 ├── README.md                                       # English flagship documentation
 ├── README.ru.md                                    # Russian flagship documentation (100% parity)
 ├── assets/
 │   └── logo.svg                                    # 256x256 square plugin icon (~12.5% safe margin)
+├── scripts/                                        # Pure Python 3 stdlib guards & continuous OS watchdogs
+│   ├── guard_common.py                             # Shared regex patterns, git porcelain parsers & baseline checks
+│   ├── destructive-cmd-guard.py                    # PreToolUse hook script (hard-deny destructive git/rm, force-ask)
+│   ├── mpm-git-guard.py                            # CLI helper: snapshot, audit, restore, secret-scan
+│   └── mpm-live-watch.py                           # Zero-token continuous OS monitor (1–2s Reactive Wakeup)
+├── tests/                                          # Comprehensive test suite (unittest)
+│   └── test_guards.py                              # End-to-end unit tests for hooks, git-guard & live-watch
 ├── rules/                                          # FLAT 1-level directory (Antigravity scans 1 level deep!)
-│   ├── 00-core-guardrails.md                       # always_on: severity tiers, item-by-item, verification, Git/WIP, 3-strike
-│   ├── 01-orchestration.md                         # always_on: T0..T3 Maker<Checker, Promote-on-Review, 180s watchdog, pre-wave snapshot & kill switch
-│   ├── 02-code-debug-and-critic.md                 # model_decision: Clean Arch, LOC/DRY caps, OOP/patterns, HSDF (forbidden_ops), 5-phase debug
+│   ├── 00-core-guardrails.md                       # always_on: severity tiers, item-by-item, verification, Git/WIP, deletion shield, 3-strike
+│   ├── 01-orchestration.md                         # always_on: T0..T3 Maker<Checker, Promote-on-Review, mpm-live-watch & 180s watchdog, pre-wave snapshot & kill switch
+│   ├── 02-code-debug-and-critic.md                 # model_decision: Clean Arch, LOC/DRY caps, OOP/patterns, HSDF (forbidden_ops), 5-phase debug, Gate 6 deletion audit
 │   ├── 03-analytical-forensics.md                  # model_decision: mandatory 6-point Visible Self-Check for metrics/logs/DB
 │   ├── 04-memory-knowledge-adr.md                  # model_decision: FIFO memories.md (<=4KB), 00-INDEX matrix, 3-gate ADRs
 │   ├── 20-domain-tests-and-contracts.md            # glob: anti-tautology, mental mutation, 3-level contracts, safe multi-core runner/batch parallelism

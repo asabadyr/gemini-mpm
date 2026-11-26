@@ -75,19 +75,20 @@ cd ~/Projects/gemini-mpm
 2. Из-за апстрим-бага маршрутизации поле `model:` во фронтматтере субагентов игнорировалось, требуя Python-хука `PreToolUse` (`model_tier_hook.py`).
 3. Субагенты были одноразовыми вызовами без сохранения состояния (перезагрузка `~95K` токенов на каждую правку по линтеру/тестам), а для мониторинга требовался отдельный Socket.IO + Svelte веб-сервер.
 
-**Google Antigravity решает 100% этих инфраструктурных задач нативно.** Поэтому `agy-mpm-kit` содержит **`0` строк Python CLI, демонов, Socket.IO или обёрточных хуков**:
+**Google Antigravity решает оркестрацию, стейтфул-субагентов и слэш-UI нативно.** Вместо монолитной внешней Python CLI-обёртки и веб-сервера `agy-mpm-kit v2.0.0` опирается на нативные примитивы плагина плюс лёгкий zero-dependency **`PreToolUse`-хук Deletion Shield (`hooks.json` -> `scripts/destructive-cmd-guard.py`)**, git-хелпер (`scripts/mpm-git-guard.py`) и непрерывный OS-монитор (`scripts/mpm-live-watch.py`) на чистой стандартной библиотеке Python 3:
 
-| Механизм | `claude-mpm` (`v6.5+`) | `agy-mpm-kit` в Google Antigravity |
+| Механизм | `claude-mpm` (`v6.5+`) | `agy-mpm-kit` в Google Antigravity (`v2.0.0`) |
 |---|---|---|
 | **Загрузка правил до хода и прогрессивное раскрытие** | Python CLI-обёртка сборки промпта + скрипт `build-agent.py` | Нативная загрузка `GEMINI.md` / `.agents/rules/*.md` / `rules/` плагина с триггерами `always_on`, `model_decision`, `glob`, `manual` и `@[label](path)` |
 | **Маршрутизация моделей и песочниц субагентов** | Python-хук `PreToolUse` (`model_tier_hook.py`) | Нативный `invoke_subagent(Model="flash_lite"\|"flash"\|"pro"\|"inherit", Workspace="inherit"\|"branch"\|"share")` |
-| **Доработка замечаний и UI мониторинга агентов** | Повторный холодный запуск + внешний Socket.IO/Svelte сервер | Тёплые субагенты с реактивным пробуждением через **`send_message(Recipient=conversationId)`** (0 токенов на перезагрузку!) + нативный UI Subagents/Tasks |
+| **Доработка замечаний и UI мониторинга агентов** | Повторный холодный запуск + внешний Socket.IO/Svelte сервер | Тёплые субагенты с реактивным пробуждением через **`send_message(Recipient=conversationId)`** (0 токенов на перезагрузку!) + `mpm-live-watch.py` + нативный UI Subagents/Tasks |
 | **Планирование, автономные кампании и обучение** | Собственные CLI-команды и хуки | Нативные `/plan`, `/grill-me`, `/boost`, `/teamwork`, `/goal`, `/compact`, `/learn` + кросс-интерфейсные скиллы `/kit-bootstrap`, `/kit-architecture` и `/kit-handoff` |
-| **Безопасность грязного Git-дерева и мультирепо** | Догма `ONE FILE PER COMMIT`, авто-коммит после каждой фазы и допущение корневого `.git` | **Усилено**: защита незакоммиченного WIP, стейджинг строго по явным путям `git add <file>` и проверка `<workspace>/.git` для зонтичных мультирепо |
+| **PreToolUse Deletion Shield и защита файлов** | Внешняя CLI-обёртка и промпт-проверки | Нативный **`hooks.json` (`PreToolUse` -> `scripts/destructive-cmd-guard.py`)** с автопробросом в субагенты: жёсткий `deny` на `git clean`, `git reset --hard`, `git checkout --`, `git restore`, `rm -rf`; принудительный `force_ask` на `rm` вне `<scratch>/` и `/tmp/` |
+| **Безопасность грязного Git-дерева и мультирепо** | Догма `ONE FILE PER COMMIT`, авто-коммит после каждой фазы и допущение корневого `.git` | **Усилено**: `scripts/mpm-git-guard.py` (`snapshot`, `audit`, `restore`, `secret-scan`), обязательный локальный коммит без push в ветку `teamwork/<slug>`, стейджинг строго по явным путям и проверка `<workspace>/.git` |
 
 ---
 
-## 3. Четырнадцать ключевых инноваций `agy-mpm-kit`
+## 3. Пятнадцать ключевых инноваций `agy-mpm-kit`
 
 ### 1. Табличное Caveman-сжатие промптов и формат делегирования HSDF
 Основано на эмпирических бенчмарках MPM, где перевод многословных инструкций (`47 KB` / `~12.7K` токенов) в плотные таблицы решений (`10.8 KB` / `~2.7K` токенов) сократил системный промпт на **`-77%`**, общий расход токенов сессии — на **`-47%`**, и **повысил соблюдение критериев качества на `+17%` (`3.75/5 -> 4.40/5`)**. Задачи субагентам передаются в формате **HSDF (Hybrid Structured Delegation Format)** (`tier`, `Effort`, `task`, `scope_allowlist`, `contracts`, `observable`, `return`, `context`), который никогда не сжимает точные пути к файлам, номера строк, имена инструментов и стектрейсы.
@@ -164,6 +165,22 @@ cd ~/Projects/gemini-mpm
   2. *Защита `if __name__ == "__main__":` и `spawn`*: обязательная точка входа `if __name__ == "__main__":` и контекст `multiprocessing.get_context("spawn")` для Python при наличии потоков, async-циклов, пулов БД или C-расширений (полный запрет небезопасного `fork`).
   3. *Без вложенного переподписания CPU (No Over-Subscription)*: автоматическое выставление `OMP_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`, `MKL_NUM_THREADS=1` для воркер-процессов, предотвращающее конкуренцию внутренних потоков библиотек за ядра.
   4. *Лимит по RAM*: расчёт пула по свободной памяти (`свободная_RAM / пик_воркера`) и передача легковесных путей/индексов вместо копирования гигантских датасетов через IPC.
+
+### 15. Нативный Deletion Shield (PreToolUse), `mpm-git-guard` и нулевой по токенам `mpm-live-watch` (v2.0.0)
+Многоуровневая аппаратная защита от разрушительных команд, зацикливания субагентов и потери незакоммиченного WIP в многоагентных сессиях:
+- **Встроенный хук Deletion Shield (`hooks.json` -> `destructive-cmd-guard.py`)**: перехватывает `run_command` до его выполнения:
+  * **Жёсткий отказ (`"deny"`)**: `git clean` (кроме сухого прогона `-n`), `git reset --hard/--merge`, checkout рабочего дерева (`git checkout --`, `.`, `HEAD <path>`), откат рабочего дерева (`git restore` без `--staged`), катастрофический `rm` (`/`, `~`, `.`, `..`, `*`) и force-push в ветки `main`/`master`.
+  * **Обязательный интерактивный запрос (`"force_ask"`)**: любое удаление файлов (`rm`, `rmdir`, `unlink`, `shred`, `find -delete`, удаление через инлайн-Python), если пути не разрешаются строго внутри `<artifactDir>/scratch` или системного `/tmp`.
+  * Разделение составных шелл-команд по `;`, `&&`, `||`, `|`, `\n` вне кавычек предотвращает обход ограничений через цепочки. Автоматически наследуется дочерними субагентами.
+- **Хелпер стандартной библиотеки `mpm-git-guard.py`**:
+  * `snapshot`: архивирует неотслеживаемые (`git ls-files --others`) и изменённые отслеживаемые файлы в `pre-wave-backup.tar.gz`, сохраняя SHA `git stash create` и манифест перед рискованным делегированием (корректно работает в репо с 0 коммитов и пробелами в путях).
+  * `audit`: выявляет удаление отслеживаемых файлов (`git diff --diff-filter=D`), пропажу неотслеживаемых файлов базового снимка или запрещённые команды в `transcript.jsonl`, завершаясь с кодом `2` при сбое.
+  * `restore`: безопасно восстанавливает пропавшие файлы без перезаписи новой работы (`--only-missing`).
+  * `secret-scan`: пре-коммит аудит по регулярным выражениям, блокирующий API-ключи, приватные ключи и bearer-токены.
+- **Нулевой по токенам непрерывный монитор ОС `mpm-live-watch.py`**:
+  * Работает как фоновый процесс (`WaitMsBeforeAsync=500`, 0 LLM-токенов в штатном режиме), опрашивая рост транскрипта и рабочее дерево Git каждые `1.5 с`.
+  * Мгновенно завершается с JSON-оповещением и кодами выхода `10..15` (`DELETION_DETECTED`, `DANGEROUS_COMMAND`, `ERROR_LOOP`, `READ_ONLY_TILT`, `IDLE_COMA`, `SCOPE_ESCAPE`), вызывая **реактивное пробуждение (`Reactive Wakeup`) за `~1–2 с`** в оркестраторе вместо долгого ожидания таймера 180s.
+- **Обязательный цикл коммитов `teamwork` в локальную ветку (Zero Push)**: изоляция задач в ветке `teamwork/<slug>` или git worktree, аудит + проверка на секреты и коммит строго в локальную ветку без неожиданного push.
 
 ---
 
@@ -365,13 +382,14 @@ ln -s ~/Projects/gemini-mpm/ru ~/.gemini/config/plugins/agy-mpm-core
 | Сжатие контекста длинной сессии (отлично работает в паре с `/kit-handoff pause`) | `/compact` |
 | Закрепление важного исправления в виде переиспользуемого скилла или правила | `/learn` |
 
-### 7.6 Обновление существующих установок и проектов (`v1.x` -> `v1.9.0`)
+### 7.6 Обновление существующих установок и проектов (`v1.x` -> `v2.0.0`)
 
 | Уровень | Обновляется само после `git pull`? | Что нужно сделать пользователю / в проекте |
 |---|---|---|
-| **Глобальный плагин (`00..04`, `20..28`, `code-critic`, `/kit-*`)** | **Да** *(если подключён симлинком через `./install.sh`)* | Выполните `git pull --ff-only` в клоне `gemini-mpm` (или `./install.sh --force`, если копировали папку без симлинка; проверить: `./install.sh --status`). Для Режима D обновите скопированные плейбуки `90..92`. |
-| **Уже настроенные проекты (`GEMINI.md`, `.gitignore`)** | **Нет** *(локальные файлы репозитория остаются на версии установки)* | Откройте проект и запустите **`/kit-bootstrap --migrate`** — сохранит бэкап в `scratch/`, допишет `.agents/teamwork/` в `.gitignore` (важно при апдейте с `v1.2–v1.4`) и без потерь обновит `GEMINI.md` (`Knowledge-First Boot`, `Read-Once`, `180s Watchdog`, при желании матрица `Роль -> Модель + Effort`). |
-| **Старые длинные чаты и ветки worktree** | Правила перечитываются на следующем ходе | В длинном старом чате выполните `/compact` (или откройте новый чат); в долгоживущие ветки `git worktree` подлейте `main` по готовности. |
+| **Глобальный плагин (`00..04`, `20..28`, `hooks.json`, `scripts/`, `code-critic`, `/kit-*`)** | **Да** *(если подключён симлинком через `./install.sh`)* | Выполните `git pull --ff-only` в клоне `gemini-mpm` (или `./install.sh --force`, если копировали папку без симлинка; проверить: `./install.sh --status`, подтвердив `Hook Guard: ACTIVE`). Для Режима D обновите скопированные плейбуки `90..92`. |
+| **Хук Deletion Shield в PreToolUse (`hooks.json`)** | **Сразу же** | Автоматически перехватывает `run_command` во всех сессиях и дочерних субагентах. *Важное правило разработки*: всегда создавайте и тестируйте целевые скрипты-гарды (`python3 ./scripts/destructive-cmd-guard.py`) *до* их регистрации в `hooks.json`, так как Antigravity начинает выполнять хуки сразу после их появления в конфиге. |
+| **Уже настроенные проекты (`GEMINI.md`, `.gitignore`)** | **Нет** *(локальные файлы репозитория остаются на версии установки)* | Откройте проект и запустите **`/kit-bootstrap --migrate`** — сохранит бэкап в `scratch/`, допишет `.agents/teamwork/` в `.gitignore` и без потерь обновит `GEMINI.md` (`PreToolUse` Deletion Shield, `mpm-git-guard` snapshot/audit/restore, непрерывный монитор `mpm-live-watch`, `Read-Once` и локальный цикл коммитов `teamwork` без push). |
+| **Старые длинные чаты и ветки worktree** | Правила перечитываются на следующем ходе | В длинном старом чате выполните `/compact` (или откройте новый чат); в долгоживущие ветки `git worktree` подлейте `main` по готовности обновить `GEMINI.md`. |
 
 ---
 
@@ -379,17 +397,25 @@ ln -s ~/Projects/gemini-mpm/ru ~/.gemini/config/plugins/agy-mpm-core
 
 ```text
 gemini-mpm/
-├── plugin.json                                     # Манифест EN-плагина (agy-mpm-core v1.8.0)
+├── plugin.json                                     # Манифест EN-плагина (agy-mpm-core v2.0.0)
+├── hooks.json                                      # Хук PreToolUse Deletion Shield для run_command
 ├── install.sh                                      # Установщик симлинка и переключатель EN/RU (--lang en|ru, --status, --uninstall)
 ├── LICENSE                                         # Лицензия MIT + атрибуция концепций claude-mpm
 ├── README.md                                       # Флагманская документация на английском языке
 ├── README.ru.md                                    # Флагманская документация на русском языке (100% паритет)
 ├── assets/
 │   └── logo.svg                                    # Квадратная иконка плагина 256x256 (безопасное поле ~12.5%)
+├── scripts/                                        # Чистые скрипты стандартной библиотеки Python 3 и мониторы ОС
+│   ├── guard_common.py                             # Общие регулярные выражения, парсеры porcelain Git и базовые проверки
+│   ├── destructive-cmd-guard.py                    # Скрипт хука PreToolUse (жёсткий отказ destructive git/rm, force-ask)
+│   ├── mpm-git-guard.py                            # CLI-хелпер: snapshot, audit, restore, secret-scan
+│   └── mpm-live-watch.py                           # Нулевой по токенам непрерывный монитор ОС (пробуждение за 1–2 с)
+├── tests/                                          # Комплексный набор тестов (unittest)
+│   └── test_guards.py                              # Сквозные юнит-тесты для хуков, git-guard и live-watch
 ├── rules/                                          # ПЛОСКИЙ каталог 1 уровня (Antigravity сканирует ровно 1 уровень!)
-│   ├── 00-core-guardrails.md                       # always_on: приоритеты, Item-by-Item, верификация, Git/WIP, 3-Strike
-│   ├── 01-orchestration.md                         # always_on: T0..T3 Maker<Checker, Promote-on-Review, Read-Once & Symbol-First, Wave 0-2
-│   ├── 02-code-debug-and-critic.md                 # model_decision: чистая арх., лимиты LOC/DRY, OOP/паттерны, HSDF (read_anchors), 5 фаз отладки
+│   ├── 00-core-guardrails.md                       # always_on: уровни критичности, item-by-item, верификация, Git/WIP, deletion shield, 3-strike
+│   ├── 01-orchestration.md                         # always_on: T0..T3 Maker<Checker, Promote-on-Review, mpm-live-watch и вотчдог 180s, pre-wave снимок и kill switch
+│   ├── 02-code-debug-and-critic.md                 # model_decision: чистая арх., лимиты LOC/DRY, OOP/паттерны, HSDF (forbidden_ops), 5 фаз отладки, Шлюз 6 аудит удалений
 │   ├── 03-analytical-forensics.md                  # model_decision: обязательный 6-пунктный Visible Self-Check для метрик/логов/БД
 │   ├── 04-memory-knowledge-adr.md                  # model_decision: FIFO memories.md (<=4KB), матрица 00-INDEX, 3-критериальные ADR
 │   ├── 20-domain-tests-and-contracts.md            # glob: анти-тавтология, мысленная мутация, 3 уровня контрактов, многоядерные тесты/батчи
@@ -419,7 +445,8 @@ gemini-mpm/
 │       ├── 91-playbook-handoff.md
 │       └── 92-playbook-architecture.md
 └── ru/                                             # Полная автономная русская редакция плагина (--lang ru)
-    ├── plugin.json                                 # Манифест RU-плагина (agy-mpm-core-ru v1.9.0)
+    ├── plugin.json                                 # Манифест RU-плагина (agy-mpm-core-ru v2.0.0)
+    ├── hooks.json                                  # Хук PreToolUse Deletion Shield (русскоязычные сообщения)
     ├── assets/logo.svg
     ├── rules/{00..04,20..28}-*.md                  # Нативные ядро и языковые правила на русском языке
     ├── skills/{kit-architecture,kit-bootstrap,kit-handoff}/ # Нативные русские скиллы, гайды и шаблоны адаптера

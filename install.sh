@@ -25,7 +25,7 @@ REPO_ROOT="$(resolve_script_dir)"
 
 usage() {
   cat <<'EOF'
-agy-mpm-kit — Installer & Edition Switcher (v1.9.0)
+agy-mpm-kit — Installer & Edition Switcher (v2.0.0)
 
 Usage:
   ./install.sh [--lang en|ru] [--force]
@@ -91,6 +91,11 @@ cmd_status() {
       printf "Target      : %s\n" "${raw_target}"
       printf "Edition     : %s\n" "$(detect_edition "${resolved_target}")"
       [ -n "${ver}" ] && printf "Version     : v%s\n" "${ver}"
+      if [ -f "${resolved_target}/hooks.json" ]; then
+        printf "Hook Guard  : ACTIVE (hooks.json present)\n"
+      else
+        printf "Hook Guard  : INACTIVE (hooks.json not found)\n"
+      fi
       printf "Manage UI   : /plugin -> customization://%s\n" "${PLUGIN_DIR_NAME}"
     else
       printf "State       : BROKEN SYMLINK (target plugin.json not found)\n"

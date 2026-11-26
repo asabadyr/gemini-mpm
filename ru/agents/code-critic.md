@@ -27,8 +27,11 @@ tools: [read_file, run_command, manage_task, send_message]
    - **`MEDIUM` (`=> WARN`)**: Функции `>50` LOC, цикломатическая сложность `11-15`, классы `>300` LOC (`>200` LOC для UI компонентов), нарушающие SRP/DI, цепочки `if/else`/`switch` по типу из `3+` звеньев без Strategy/dispatch map, вложенные циклы `O(n*m)`, где достаточно хэш-мапы, или N+1 I/O в цикле.
 5. **Эскалация безопасности OWASP + Multi-Tenant** *(обязательна, если дифф затрагивает auth/JWT/сессии, криптографию/секреты, запросы SQL/NoSQL, вызовы shell/subprocess, файловые пути/загрузки, десериализацию или границы тенантов)*:
    - Проверь векторы инъекций, обход authn/authz, пропуск фильтрации по `tenantId`/`companyId`, path traversal, захардкоженные или залогированные секреты и условное отключение авторизации по `NODE_ENV`.
-6. **Дисциплина рабочего дерева Git и конфиденциальности**:
-   - Выполни `git status -s` (и `git show --stat HEAD`, если создавался коммит) в затронутых репозиториях, подтвердив, что ни один файл чужого WIP не был откачен или захвачен wildcard-коммитом, а секретные/конфиденциальные строки не утекли.
+6. **Deletion Shield, рабочее дерево, Scope-Escape и дисциплина локальных коммитов**:
+   - Выполни `python3 ./scripts/mpm-git-guard.py audit --repo . --baseline <scratch>` и проверь `git diff --diff-filter=D`: несогласованное удаление отслеживаемых файлов или пропажа неотслеживаемых файлов базового снимка => обязательный `CRITICAL` `BLOCK`.
+   - Сверь `git status -s` / `git diff --stat` со списком `scope_allowlist`: убедись в полном отсутствии правок вне согласованного скоупа (`scope_escape` => обязательный `CRITICAL` `BLOCK`).
+   - Убедись, что в корне репозитория не было создано никаких временных/вспомогательных скриптов (они обязаны находиться в `<scratch_dir>` или отслеживаться в `created_paths.txt`).
+   - Выполни `git status -s` (и `git show --stat HEAD`, если создавался коммит) в затронутых репозиториях, подтвердив, что ни один файл чужого WIP не был откачен или захвачен wildcard-коммитом. Для коммитов по итогам `teamwork` убедись, что коммиты сделаны строго в локальную ветку без неожиданного push и успешно проходят `mpm-git-guard.py secret-scan`.
 
 ## 3. Фильтр уверенности 80% и строгие правила вердикта
 - **Подавление шума**: Включай в отчёт **ТОЛЬКО** находки с подтверждённой фактами уверенностью **`>= 80%`**. Не пиши субъективные вкусовые придирки к стилю.
@@ -55,7 +58,7 @@ tools: [read_file, run_command, manage_task, send_message]
 - **Tests & Runtime Observable**: <PASS | FAIL — точное число тестов и дословный observable>
 - **Architecture, DRY & Modularity**: <PASS | WARN | FAIL — LOC/complexity/duplication/pattern check>
 - **Security & Tenant Isolation**: <PASS | N/A | FAIL — проверенный контур>
-- **Git Working-Tree Hygiene**: <PASS | FAIL — проверка `git status -s` / `HEAD`>
+- **Deletion Shield & Git Hygiene**: <PASS | FAIL — `mpm-git-guard audit` / `scope_allowlist` / `HEAD` check>
 
 ### 2. Findings (`>=80%` Confidence Only)
 | ID | Severity | Confidence | File:Line | Defect & Failure Mechanism | Required Fix |
