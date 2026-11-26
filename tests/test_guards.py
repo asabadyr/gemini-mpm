@@ -3,6 +3,7 @@
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -12,6 +13,9 @@ REPO_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 GUARD_SCRIPT = os.path.join(REPO_DIR, "scripts", "destructive-cmd-guard.py")
 GIT_GUARD_SCRIPT = os.path.join(REPO_DIR, "scripts", "mpm-git-guard.py")
 LIVE_WATCH_SCRIPT = os.path.join(REPO_DIR, "scripts", "mpm-live-watch.py")
+MPM_PY_SCRIPT = os.path.join(REPO_DIR, "scripts", "mpm-py")
+RU_MPM_PY_SCRIPT = os.path.join(REPO_DIR, "ru", "scripts", "mpm-py")
+INSTALL_SCRIPT = os.path.join(REPO_DIR, "install.sh")
 
 
 class TestDestructiveCmdGuard(unittest.TestCase):
@@ -426,6 +430,226 @@ class TestMpmLiveWatch(unittest.TestCase):
                 text=True,
             )
             self.assertEqual(proc.returncode, 0, f"Unexpected alert on completed transcript: {proc.stdout}")
+
+
+
+class TestMpmPyWrapper(unittest.TestCase):
+    """Test suite for scripts/mpm-py runtime wrapper."""
+
+    def test_env_override_python(self):
+        """(a) Test AGY_MPM_PYTHON override."""
+        env = dict(os.environ)
+        env["AGY_MPM_PYTHON"] = sys.executable
+        proc = subprocess.run(
+            [MPM_PY_SCRIPT, "--print-python"],
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        self.assertEqual(proc.returncode, 0, f"Failed: {proc.stderr}")
+        self.assertEqual(proc.stdout.strip(), sys.executable)
+
+    def test_pin_file_resolution_with_fake_path_stub(self):
+        """(b) Test agy-mpm-core.env pin resolution even when PATH contains fake < 3.8 stub."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            cfg_dir = os.path.join(tmp_dir, "config")
+            os.makedirs(cfg_dir, exist_ok=True)
+            pin_file = os.path.join(cfg_dir, "agy-mpm-core.env")
+            with open(pin_file, "w") as f:
+                f.write(f'AGY_MPM_PYTHON="{sys.executable}"\n')
+
+            fake_bin = os.path.join(tmp_dir, "fake_bin")
+            os.makedirs(fake_bin, exist_ok=True)
+            fake_py = os.path.join(fake_bin, "python3")
+            with open(fake_py, "w") as f:
+                f.write("#!/bin/sh\nexit 1\n")
+            os.chmod(fake_py, 0o755)
+
+            env = {
+                "AGY_CONFIG_DIR": cfg_dir,
+                "PATH": f"{fake_bin}:/bin:/usr/bin",
+                "AGY_MPM_PYTHON": "",
+                "VIRTUAL_ENV": "",
+                "CONDA_PREFIX": "",
+            }
+            proc = subprocess.run(
+                [MPM_PY_SCRIPT, "--print-python"],
+                capture_output=True,
+                text=True,
+                env=env,
+            )
+            self.assertEqual(proc.returncode, 0, f"Failed: {proc.stderr}")
+            self.assertEqual(proc.stdout.strip(), sys.executable)
+
+    def test_ru_symlink_mpm_py(self):
+        """(c) Test RU symlink ./ru/scripts/mpm-py --print-python."""
+        self.assertTrue(os.path.islink(os.path.join(REPO_DIR, "ru", "scripts")))
+        self.assertTrue(os.path.isfile(RU_MPM_PY_SCRIPT))
+        self.assertTrue(os.access(RU_MPM_PY_SCRIPT, os.X_OK))
+
+        proc = subprocess.run(
+            [RU_MPM_PY_SCRIPT, "--print-python"],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(proc.returncode, 0, f"Failed: {proc.stderr}")
+        resolved = proc.stdout.strip()
+        self.assertTrue(os.path.isfile(resolved))
+        self.assertTrue(os.access(resolved, os.X_OK))
+
+    def test_missing_python_fallback_force_ask_json(self):
+        """(d) Test missing Python fallback emitting valid force_ask JSON for destructive-cmd-guard.py."""
+        env = {
+            "AGY_MPM_DISABLE_SYSTEM": "1",
+            "AGY_MPM_IGNORE_PIN": "1",
+            "AGY_MPM_PYTHON": "",
+            "VIRTUAL_ENV": "",
+            "CONDA_PREFIX": "",
+            "PATH": "/bin:/usr/bin",
+        }
+        guard_rel = os.path.join("scripts", "destructive-cmd-guard.py")
+        proc = subprocess.run(
+            [MPM_PY_SCRIPT, guard_rel],
+            capture_output=True,
+            text=True,
+            env=env,
+            cwd=REPO_DIR,
+        )
+        self.assertEqual(proc.returncode, 0, f"Expected exit 0 for force_ask, got: {proc.returncode}, stderr: {proc.stderr}")
+        data = json.loads(proc.stdout)
+        self.assertEqual(data.get("decision"), "force_ask")
+        self.assertIn("Python >=3.8 not found", data.get("reason", ""))
+        self.assertIn("Python >=3.8 is required", proc.stderr)
+
+
+class TestInstallerCli(unittest.TestCase):
+    """Test suite for install.sh CLI options and life-cycle."""
+
+    def test_lang_en_ru_status_doctor(self):
+        """(a) Test --lang en, --lang ru, --status, and --doctor in isolated temp dirs."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            plugins_dir = os.path.join(tmp_dir, "plugins")
+            config_dir = os.path.join(tmp_dir, "config")
+            env = dict(os.environ)
+            env["AGY_PLUGINS_DIR"] = plugins_dir
+            env["AGY_CONFIG_DIR"] = config_dir
+            env["HOME"] = tmp_dir
+
+            # --lang en
+            p_en = subprocess.run([INSTALL_SCRIPT, "--lang", "en"], capture_output=True, text=True, env=env)
+            self.assertEqual(p_en.returncode, 0, p_en.stderr)
+            link_path = os.path.join(plugins_dir, "agy-mpm-core")
+            self.assertTrue(os.path.islink(link_path))
+            self.assertEqual(os.path.realpath(link_path), os.path.realpath(REPO_DIR))
+
+            # --lang ru
+            p_ru = subprocess.run([INSTALL_SCRIPT, "--lang", "ru"], capture_output=True, text=True, env=env)
+            self.assertEqual(p_ru.returncode, 0, p_ru.stderr)
+            self.assertEqual(os.path.realpath(link_path), os.path.realpath(os.path.join(REPO_DIR, "ru")))
+
+            # --status
+            p_stat = subprocess.run([INSTALL_SCRIPT, "--status"], capture_output=True, text=True, env=env)
+            self.assertEqual(p_stat.returncode, 0, p_stat.stderr)
+            self.assertIn("INSTALLED (valid symlink)", p_stat.stdout)
+            self.assertIn("Russian edition", p_stat.stdout)
+            self.assertIn("Hook Guard  : ACTIVE", p_stat.stdout)
+
+            # --doctor
+            if os.environ.get("AGY_MPM_SKIP_DOCTOR_TESTS") == "1":
+                # Break recursion when invoked from inside install.sh --doctor
+                return
+
+            p_doc = subprocess.run([INSTALL_SCRIPT, "--doctor"], capture_output=True, text=True, env=env)
+            self.assertEqual(p_doc.returncode, 0, p_doc.stderr)
+            self.assertIn("Guard Smoke   : PASS", p_doc.stdout)
+            self.assertIn("Test Suite    : PASS", p_doc.stdout)
+            self.assertIn("All doctor health checks passed", p_doc.stdout)
+
+    def test_custom_python_and_uninstall(self):
+        """(b) Test --python <sys.executable> and --uninstall."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            plugins_dir = os.path.join(tmp_dir, "plugins")
+            config_dir = os.path.join(tmp_dir, "config")
+            env = dict(os.environ)
+            env["AGY_PLUGINS_DIR"] = plugins_dir
+            env["AGY_CONFIG_DIR"] = config_dir
+            env["HOME"] = tmp_dir
+
+            p_inst = subprocess.run(
+                [INSTALL_SCRIPT, "--lang", "en", "--python", sys.executable],
+                capture_output=True,
+                text=True,
+                env=env,
+            )
+            self.assertEqual(p_inst.returncode, 0, p_inst.stderr)
+            pin_file = os.path.join(config_dir, "agy-mpm-core.env")
+            self.assertTrue(os.path.isfile(pin_file))
+            with open(pin_file, "r") as f:
+                content = f.read()
+            self.assertIn(sys.executable, content)
+
+            p_un = subprocess.run([INSTALL_SCRIPT, "--uninstall"], capture_output=True, text=True, env=env)
+            self.assertEqual(p_un.returncode, 0, p_un.stderr)
+            link_path = os.path.join(plugins_dir, "agy-mpm-core")
+            self.assertFalse(os.path.exists(link_path))
+            self.assertFalse(os.path.exists(pin_file))
+
+    def test_migrate_and_check_projects(self):
+        """(c) Test --migrate --check-projects <stale_mock_repo> flags outdated GEMINI.md & missing .agents/teamwork/."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            plugins_dir = os.path.join(tmp_dir, "plugins")
+            config_dir = os.path.join(tmp_dir, "config")
+            env = dict(os.environ)
+            env["AGY_PLUGINS_DIR"] = plugins_dir
+            env["AGY_CONFIG_DIR"] = config_dir
+            env["HOME"] = tmp_dir
+
+            stale_repo = os.path.join(tmp_dir, "stale_mock_project")
+            os.makedirs(stale_repo, exist_ok=True)
+            with open(os.path.join(stale_repo, ".gitignore"), "w") as f:
+                f.write(".DS_Store\nnode_modules/\n")
+            with open(os.path.join(stale_repo, "GEMINI.md"), "w") as f:
+                f.write("# Legacy Project Adapter (v2.2.0)\n")
+
+            p_mig = subprocess.run(
+                [INSTALL_SCRIPT, "--migrate", "--check-projects", stale_repo],
+                capture_output=True,
+                text=True,
+                env=env,
+            )
+            self.assertEqual(p_mig.returncode, 0, p_mig.stderr)
+            self.assertIn("Missing '.agents/teamwork/' in .gitignore", p_mig.stdout)
+            self.assertIn("Stale pre-v2.3 adapter in GEMINI.md", p_mig.stdout)
+            self.assertIn("/kit-bootstrap --migrate", p_mig.stdout)
+
+    def test_venv_stdlib_creation(self):
+        """(d) Test --venv=stdlib creates isolated .venv quickly without network calls."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            plugins_dir = os.path.join(tmp_dir, "plugins")
+            config_dir = os.path.join(tmp_dir, "config")
+            env = dict(os.environ)
+            env["AGY_PLUGINS_DIR"] = plugins_dir
+            env["AGY_CONFIG_DIR"] = config_dir
+            env["HOME"] = tmp_dir
+
+            mock_repo = os.path.join(tmp_dir, "mock_kit")
+            os.makedirs(os.path.join(mock_repo, "scripts"), exist_ok=True)
+            shutil.copy(INSTALL_SCRIPT, os.path.join(mock_repo, "install.sh"))
+            shutil.copy(MPM_PY_SCRIPT, os.path.join(mock_repo, "scripts", "mpm-py"))
+            shutil.copy(GUARD_SCRIPT, os.path.join(mock_repo, "scripts", "destructive-cmd-guard.py"))
+            shutil.copy(os.path.join(REPO_DIR, "plugin.json"), os.path.join(mock_repo, "plugin.json"))
+            shutil.copy(os.path.join(REPO_DIR, "hooks.json"), os.path.join(mock_repo, "hooks.json"))
+
+            p_venv = subprocess.run(
+                [os.path.join(mock_repo, "install.sh"), "--venv=stdlib", "--no-pin"],
+                capture_output=True,
+                text=True,
+                env=env,
+            )
+            self.assertEqual(p_venv.returncode, 0, p_venv.stderr)
+            venv_py3 = os.path.join(mock_repo, ".venv", "bin", "python3")
+            venv_py = os.path.join(mock_repo, ".venv", "bin", "python")
+            self.assertTrue(os.path.exists(venv_py3) or os.path.exists(venv_py))
 
 
 if __name__ == "__main__":

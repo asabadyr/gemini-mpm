@@ -6,11 +6,11 @@
 
 **[🇬🇧 English](README.md) | [🇷🇺 Русский](README.ru.md)**
 
-`v2.2.0` · **MIT License** · **Native PreToolUse Deletion Shield & 0 Daemon Overhead** · **`~4.8K` Startup Tokens (`<26%` Budget)** · **EN + RU Editions**
+`v2.3.0` · **MIT License** · **Native PreToolUse Deletion Shield & 0 Daemon Overhead** · **`~4.8K` Startup Tokens (`<26%` Budget)** · **EN + RU Editions**
 
 ---
 
-`gemini-mpm` (`agy-mpm-kit`) packages battle-tested multi-agent engineering discipline into **100% native Google Antigravity primitives**: a native `PreToolUse` Deletion Shield hook (`hooks.json` -> `scripts/destructive-cmd-guard.py`) with zero-dependency git snapshot, audit, and restore tooling (`scripts/mpm-git-guard.py`), Caveman-compressed `rules/` (with 3-mode orchestration across `T0` inline, `teamwork`/`swarm` exact model+effort pinning, and coarse `invoke_subagent` fallback, live `Promote-on-Review` dynamic escalation, 180s adaptive watchdog, milestone child visibility, pre-wave safety snapshot & scope-escape tilt kill switch, Reference-Aware `Read-Once` & `Symbol-First` reading protocol, knowledge-first subagent boot, safe multi-core batch & test parallelism, and zero-idle-cost polyglot `glob` packs `20..28`), cross-surface `/kit-bootstrap`, `/kit-architecture` & `/kit-handoff` `skills/`, and a context-isolated adversarial `code-critic` subagent (`agents/code-critic.md`). Install it once globally as a local plugin, scaffold thin per-repository adapters in ~90 seconds, and keep full architectural cleanliness, cost efficiency, and verification rigor across every repository on your machine without bloating your context window.
+`gemini-mpm` (`agy-mpm-kit`) packages battle-tested multi-agent engineering discipline into **100% native Google Antigravity primitives**: a native `PreToolUse` Deletion Shield hook (`hooks.json` -> `scripts/mpm-py` -> `scripts/destructive-cmd-guard.py`) with environment-resilient Python auto-pinning, zero-dependency git snapshot, audit, and restore tooling (`scripts/mpm-git-guard.py`), Caveman-compressed `rules/` (with 3-mode orchestration across `T0` inline, `teamwork`/`swarm` exact model+effort pinning, and coarse `invoke_subagent` fallback, live `Promote-on-Review` dynamic escalation, 180s adaptive watchdog, milestone child visibility, pre-wave safety snapshot & scope-escape tilt kill switch, Reference-Aware `Read-Once` & `Symbol-First` reading protocol, knowledge-first subagent boot, safe multi-core batch & test parallelism, and zero-idle-cost polyglot `glob` packs `20..28`), cross-surface `/kit-bootstrap`, `/kit-architecture` & `/kit-handoff` `skills/`, and a context-isolated adversarial `code-critic` subagent (`agents/code-critic.md`). Install it once globally as a local plugin, scaffold thin per-repository adapters in ~90 seconds, and keep full architectural cleanliness, cost efficiency, and verification rigor across every repository on your machine without bloating your context window.
 
 ### 30-Second Quickstart
 
@@ -42,6 +42,7 @@ Then open any repository in **Google Antigravity** (IDE, App, or `agy` CLI) and 
 4. [Architecture Diagram & Token Budget](#4-architecture-diagram--token-budget)
 5. [Native Bilingual Support (`EN` Root vs `RU` `./ru/` Edition)](#5-native-bilingual-support-en-root-vs-ru-ru-edition)
 6. [Four Installation & Multi-Project Topologies (`realpath` Guide)](#6-four-installation--multi-project-topologies-realpath-guide)
+   - [Python Runtime, Package Managers & Virtual Environments (`v2.3.0`)](#python-runtime-package-managers--virtual-environments-v230)
 7. [Day-to-Day Workflows](#7-day-to-day-workflows)
 8. [Repository Structure Map (`/` EN & `/ru` RU)](#8-repository-structure-map--en--ru-ru)
 9. [Customization & Extending the Kit](#9-customization--extending-the-kit)
@@ -75,9 +76,9 @@ In Claude Code, `claude-mpm` had to grow into a ~250-file Click/FastAPI/Socket.I
 2. An upstream model-routing bug ignored subagent frontmatter `model:` fields, requiring Python `PreToolUse` hooks to route model tiers.
 3. Subagents were stateless one-shot calls (`~95K`-token cold reload on every lint/test rework), and monitoring required an external Socket.IO + Svelte web server.
 
-**Google Antigravity solves orchestration, stateful reactive subagents, and slash UI natively.** Rather than running a monolithic external Python CLI or socket server, `agy-mpm-kit v2.2.0` leverages native plugin primitives plus a lightweight, pure Python standard library **`PreToolUse` Deletion Shield hook (`hooks.json` -> `scripts/destructive-cmd-guard.py`)** and git safety helper (`scripts/mpm-git-guard.py`):
+**Google Antigravity solves orchestration, stateful reactive subagents, and slash UI natively.** Rather than running a monolithic external Python CLI or socket server, `agy-mpm-kit v2.3.0` leverages native plugin primitives plus a lightweight, pure Python standard library **`PreToolUse` Deletion Shield hook (`hooks.json` -> `scripts/mpm-py` -> `scripts/destructive-cmd-guard.py`)** and git safety helper (`scripts/mpm-git-guard.py`):
 
-| Capability | `claude-mpm` (`v6.5+`) | `agy-mpm-kit` on Google Antigravity (`v2.2.0`) |
+| Capability | `claude-mpm` (`v6.5+`) | `agy-mpm-kit` on Google Antigravity (`v2.3.0`) |
 |---|---|---|
 | **Pre-Turn Rule Loading & Progressive Disclosure** | Python CLI wrapper assembling system prompts + `build-agent.py` | Native pre-turn `GEMINI.md` / `.agents/rules/*.md` / Plugin `rules/` with `always_on`, `model_decision`, `glob`, and `manual` triggers + `@[label](path)` includes |
 | **Dynamic Subagent Model & Sandbox Routing** | Python `PreToolUse` hook (`model_tier_hook.py`) | Native `invoke_subagent(Model="flash_lite"\|"flash"\|"pro"\|"inherit", Workspace="inherit"\|"branch"\|"share")` |
@@ -361,6 +362,47 @@ If your environment permits `.agents/rules/*.md` only (no `skills/` directory):
 | **Mode C: Stealth Overlay** | `~/.gemini/config/plugins/agy-mpm-core` symlink | Local `<repo>/GEMINI.md` + `.agents/` in `.git/info/exclude` | Single physical Core copy + local Git exclude | Yes (`/kit-*`) |
 | **Mode D: Zero-Skill Fallback** | `rules/` + `90..92-playbook-*.md` (`manual`) | `<repo>/GEMINI.md` + `.agents/knowledge/` | Single rule directory | IDE & App only (`@90...`) |
 
+### Python Runtime, Package Managers & Virtual Environments (`v2.3.0`)
+
+`agy-mpm-kit v2.3.0` introduces an environment-resilient Python execution architecture designed to operate reliably across arbitrary system setups, virtual environment managers, and GUI IDE Dock launches with empty shell `$PATH` environments.
+
+#### Requirements & Zero Runtime Dependencies
+- **`Python >= 3.8` (Standard Library Only)**: All safety hooks, audit tools, and continuous monitors (`scripts/destructive-cmd-guard.py`, `scripts/mpm-git-guard.py`, `scripts/mpm-live-watch.py`, `scripts/guard_common.py`) are implemented strictly using the Python standard library (`os`, `sys`, `json`, `subprocess`, `re`, `tarfile`, `time`, `pathlib`).
+- **Zero PyPI Runtime Dependencies**: No `pip install` or external package installation is required to run the kit. Optional development dependencies (`pytest>=7`, `ruff>=0.4`) are defined in `pyproject.toml` under `[project.optional-dependencies] dev`.
+
+#### How `scripts/mpm-py` & `install.sh` Resolve Python
+Antigravity executes `PreToolUse` hooks registered in `hooks.json`. When the Antigravity IDE or 2.0 App is launched from a desktop GUI launcher (macOS Dock, Finder, Linux desktop entry), the process does not inherit shell profile variables (`.zshrc`, `.bashrc`) and runs with a minimal system `$PATH`. To eliminate crashes without modifying tracked repository files, `hooks.json` routes execution through `./scripts/mpm-py`.
+
+`scripts/mpm-py` automatically resolves a valid `Python >= 3.8` executable through a prioritized fallback chain:
+1. **`$AGY_MPM_PYTHON`**: Explicit shell environment variable override.
+2. **Pinned Environment File (`~/.gemini/config/agy-mpm-core.env`)**: Written automatically by `./install.sh` upon installation or edition switch. Pins the exact verified Python binary path across all sessions.
+3. **Kit-Local Virtual Environment (`<kit-root>/.venv/bin/python`)**: Used when an isolated virtual environment is provisioned within the kit repository.
+4. **Active Virtual Environment**: Detects and respects an active `$VIRTUAL_ENV/bin/python` or `$CONDA_PREFIX/bin/python`.
+5. **System & Toolchain Search**: Checks `PATH` (`python3`, `python`), Homebrew (`/opt/homebrew/bin/python3`, `/usr/local/bin/python3`), system (`/usr/bin/python3`), and popular toolchain shims (`$HOME/.pyenv/shims/python3`, `$HOME/.asdf/shims/python3`, `~/.local/share/uv/python/*/bin/python3`, `~/.local/share/mise/installs/python/*/bin/python3`, or `uv python find '>=3.8'`).
+
+#### Package & Environment Managers
+
+`install.sh` seamlessly supports all major package and environment managers:
+
+| Environment / Tool | Recommended Setup Command | How It Works |
+|---|---|---|
+| **System / Homebrew** | `./install.sh --lang en` | Discovers and pins system or Homebrew `python3 >= 3.8` automatically. |
+| **`virtualenv` / stdlib `venv`** | `./install.sh --venv=stdlib`<br>*(or `virtualenv .venv && ./install.sh --python .venv/bin/python`)* | Provisions an isolated `.venv` inside the kit directory and pins it in `agy-mpm-core.env`. |
+| **`uv`** | `./install.sh --venv=uv`<br>*(or `uv venv && ./install.sh --venv=uv`)* | Fast virtualenv creation via `uv`. Can also auto-install managed Python runtimes (`uv python install 3.12`). |
+| **`poetry` / `pdm` / `hatch`** | `./install.sh --python "$(poetry run which python)"` | Pins an existing Poetry, PDM, or Hatch project virtualenv executable. |
+| **`conda` / `mamba`** | `./install.sh --python "$CONDA_PREFIX/bin/python"` | Pins the active Conda or Mamba environment interpreter into the pin file. |
+| **`pyenv` / `mise` / `asdf`** | `./install.sh --python "$(pyenv which python3)"` | Resolves and pins the version manager's selected Python binary directly. |
+
+#### Workspace `.venv` Coexistence
+A fundamental design invariant in `v2.3.0` is **decoupled interpreter isolation**:
+- **Plugin Hooks & Guards**: Always execute via `scripts/mpm-py`, resolving the kit's pinned interpreter from `agy-mpm-core.env` (or kit `.venv`).
+- **Workspace Repositories & Tests**: Antigravity agents running project verification commands (`pytest`, `npm test`, `cargo test`, `go test`) run within the active target repository environment and virtualenv.
+- **Zero Interference**: Activating an arbitrary virtual environment or alternative Python version in a target project never breaks the global plugin's guards or hooks.
+
+#### Health Diagnostics: `--doctor` & `--status`
+- **`./install.sh --status`**: Inspects installation topology, active edition (`EN` or `RU`), resolved Python binary, and `PreToolUse` hook registration.
+- **`./install.sh --doctor`**: Runs a full 7-step diagnostic verifying symlinks, `agy-mpm-core.env` pin validity, Python version compatibility (`>= 3.8`), standard library imports, live `destructive-cmd-guard.py` hook smoke execution, and project adapter readiness.
+
 ---
 
 ## 7. Day-to-Day Workflows
@@ -408,13 +450,45 @@ Consolidates legacy or cross-agent setups into a clean Tier-2 Project Adapter in
 | Free up context window mid-session (pair with `/kit-handoff pause`) | `/compact` |
 | Promote a project discovery into a reusable global skill or rule | `/learn` |
 
-### 7.6 Upgrading Existing Installs & Projects (`v1.x` / `v2.0` / `v2.1.0` -> `v2.2.0`)
+### 7.6 Upgrading & Migrating Existing Installs (Pre-v2.0 v1.x / v2.0–v2.2 -> v2.3.0)
+
+#### Dedicated Migration Steps for Pre-v2.0 (`v1.x`) Users
+Pre-v2.0 (`v1.x`) installations had zero Python dependencies, may have copied directories physically without symlinks, and lacked `hooks.json` lifecycle hooks. Follow this 4-step migration path to upgrade safely to `v2.3.0`:
+
+1. **Pull Latest Release**:
+   ```bash
+   cd ~/Projects/gemini-mpm
+   git pull --ff-only
+   ```
+2. **Execute Automated Migration**:
+   ```bash
+   ./install.sh --migrate --lang en
+   ```
+   `--migrate` automatically:
+   - Detects if `~/.gemini/config/plugins/agy-mpm-core` is a legacy real directory and archives it with a timestamped backup (`.bak.<timestamp>`).
+   - Creates a clean symlink to the repository.
+   - Discovers and pins a verified `Python >= 3.8` interpreter into `~/.gemini/config/agy-mpm-core.env` (or creates an isolated `.venv` via `uv`, `virtualenv`, or stdlib `venv`).
+   - Runs a live smoke test of `destructive-cmd-guard.py` **before** activating hooks to guarantee zero disruption.
+3. **Verify Environment Health**:
+   ```bash
+   ./install.sh --doctor
+   ```
+4. **Scan and Migrate Project Workspaces**:
+   ```bash
+   ./install.sh --check-projects ~/Projects/*
+   ```
+   For any repository flagged with missing gitignores or legacy rules, open the workspace in Antigravity and execute:
+   ```text
+   /kit-bootstrap --migrate
+   ```
+
+#### Upgrade Reference Matrix
 
 | Layer | Auto-Updated on `git pull`? | Action Required for Existing Users / Repos |
 |---|---|---|
-| **Global Plugin (`00..04`, `20..28`, `hooks.json`, `scripts/`, `code-critic`, `/kit-*`)** | **Yes** *(if symlinked via `./install.sh`)* | Run `git pull --ff-only` inside your cloned `gemini-mpm` folder (or re-run `./install.sh --force` if copied without a symlink; verify via `./install.sh --status` to confirm `Hook Guard: ACTIVE`). If you used Mode D fallback, refresh copied `90..92` playbooks. |
-| **PreToolUse Deletion Shield Hook (`hooks.json`)** | **Immediate** | Intercepts `run_command` across all sessions and child subagents automatically. *Authoring Note*: Always author and test target guard scripts (`python3 ./scripts/destructive-cmd-guard.py`) *before* registering them in `hooks.json`, because Antigravity begins executing hooks immediately once configured. |
-| **Existing Bootstrapped Repos (`GEMINI.md`, `.gitignore`)** | **No** *(local repo files stay on bootstrap version)* | Open the repo and run **`/kit-bootstrap --migrate`** — backs up current files to `scratch/`, ensures `.agents/teamwork/` is in `.gitignore`, and refreshes `GEMINI.md` with `PreToolUse` Deletion Shield, `mpm-git-guard` snapshot/audit/restore, continuous `mpm-live-watch` OS monitor, `Read-Once`, local-branch `teamwork` commit lifecycle, and `v2.2.0` Contract-First DISPATCH, frozen acceptance checks, and Pre-Dispatch T1 trivial opt-in & hard veto gate without losing repo invariants. |
+| **Global Plugin (`00..04`, `20..28`, `hooks.json`, `scripts/`, `code-critic`, `/kit-*`)** | **Yes** *(if symlinked via `./install.sh`)* | Run `git pull --ff-only` inside your cloned `gemini-mpm` folder (or re-run `./install.sh --force` if copied without a symlink; verify via `./install.sh --status` to confirm `Hook Guard: ACTIVE` and Python runtime pinned). If you used Mode D fallback, refresh copied `90..92` playbooks. |
+| **PreToolUse Deletion Shield Hook (`hooks.json` -> `scripts/mpm-py`)** | **Immediate** | Intercepts `run_command` across all sessions and child subagents automatically via `./scripts/mpm-py` wrapper. Pins `Python >= 3.8` stdlib without modifying tracked repo files or breaking on project virtualenvs. |
+| **Existing Bootstrapped Repos (`GEMINI.md`, `.gitignore`)** | **No** *(local repo files stay on bootstrap version)* | Open the repo and run **`/kit-bootstrap --migrate`** — backs up current files to `scratch/`, ensures `.agents/teamwork/` is in `.gitignore`, and refreshes `GEMINI.md` with `PreToolUse` Deletion Shield, portable `mpm-py` wrapper, `mpm-git-guard` snapshot/audit/restore, continuous `mpm-live-watch` OS monitor, `Read-Once`, local-branch `teamwork` commit lifecycle, and `v2.3.0` Contract-First DISPATCH, frozen acceptance checks, and Pre-Dispatch T1 trivial opt-in & hard veto gate without losing repo invariants. |
 | **Long Open Chats / Feature Worktrees** | Core rules reload on next turn | Run `/compact` (or open a fresh chat) to clear stale in-context habits; merge/rebase `main` into long-lived research worktrees when ready to sync `GEMINI.md`. |
 
 ---
@@ -423,15 +497,17 @@ Consolidates legacy or cross-agent setups into a clean Tier-2 Project Adapter in
 
 ```text
 gemini-mpm/
-├── plugin.json                                     # EN plugin manifest (agy-mpm-core v2.2.0)
-├── hooks.json                                      # PreToolUse Deletion Shield lifecycle hook (run_command)
-├── install.sh                                      # Safe symlink installer & EN/RU switcher (--lang en|ru, --status, --uninstall)
+├── pyproject.toml                                  # Python packaging & tool metadata (Python >=3.8, optional dev extras)
+├── plugin.json                                     # EN plugin manifest (agy-mpm-core v2.3.0)
+├── hooks.json                                      # PreToolUse Deletion Shield lifecycle hook (invokes ./scripts/mpm-py)
+├── install.sh                                      # Safe installer & switcher (--lang, --venv, --doctor, --migrate, --check-projects)
 ├── LICENSE                                         # MIT License + claude-mpm conceptual attribution
 ├── README.md                                       # English flagship documentation
 ├── README.ru.md                                    # Russian flagship documentation (100% parity)
 ├── assets/
 │   └── logo.svg                                    # 256x256 square plugin icon (~12.5% safe margin)
 ├── scripts/                                        # Pure Python 3 stdlib guards & continuous OS watchdogs
+│   ├── mpm-py                                      # Environment-resilient Python wrapper (auto-pins Python >=3.8)
 │   ├── guard_common.py                             # Shared regex patterns, git porcelain parsers & baseline checks
 │   ├── destructive-cmd-guard.py                    # PreToolUse hook script (hard-deny destructive git/rm, force-ask)
 │   ├── mpm-git-guard.py                            # CLI helper: snapshot, audit, restore, secret-scan
@@ -472,6 +548,7 @@ gemini-mpm/
 │       └── 92-playbook-architecture.md
 └── ru/                                             # Complete standalone Russian plugin edition (--lang ru)
     ├── plugin.json
+    ├── scripts -> ../scripts                       # Symlink to shared scripts (pure Python stdlib guards & mpm-py)
     ├── assets/logo.svg
     ├── rules/{00..04,20..28}-*.md                  # Native Russian core & polyglot rules
     ├── skills/{kit-architecture,kit-bootstrap,kit-handoff}/ # Native Russian skills, guides & adapter templates

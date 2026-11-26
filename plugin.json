@@ -1,14 +1,14 @@
 {
   "name": "agy-mpm-core",
   "displayName": "AGY MPM Core Kit",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "author": {
     "name": "asabadyr",
     "url": "https://github.com/asabadyr"
   },
   "homepage": "https://github.com/asabadyr/gemini-mpm",
   "repository": "https://github.com/asabadyr/gemini-mpm",
-  "description": "Portable Multi-Agent Project Management (MPM) rule, skill, and adversarial code-critic bundle for Google Antigravity (EN + RU editions) with PreToolUse Deletion Shield hook, mpm-git-guard snapshot/audit/restore, zero-token mpm-live-watch OS continuous watchdog (1–2s Reactive Wakeup), local-branch teamwork commits (zero push), 3-mode orchestration (T0 inline, teamwork/swarm exact model+effort pinning, coarse fallback), Pre-Dispatch T1 trivial opt-in & hard veto gate, live Promote-on-Review escalation, 180s adaptive watchdog fallback, milestone child visibility, pre-wave safety snapshot & scope-escape tilt kill switch, Reference-Aware Read-Once & Symbol-First reading protocol, knowledge-first subagent boot, safe multi-core batch & test parallelism, and --lite, --full, --migrate project adapter scaffolding. Includes clean-architecture/OOP/DRY guardrails, /kit-architecture, and polyglot domain packs (20..28).",
+  "description": "Portable Multi-Agent Project Management (MPM) rule, skill, and adversarial code-critic bundle for Google Antigravity (EN + RU editions) with PreToolUse Deletion Shield hook, portable mpm-py Python wrapper & environment pinning, mpm-git-guard snapshot/audit/restore, zero-token mpm-live-watch OS continuous watchdog (1–2s Reactive Wakeup), local-branch teamwork commits (zero push), 3-mode orchestration (T0 inline, teamwork/swarm exact model+effort pinning, coarse fallback), Pre-Dispatch T1 trivial opt-in & hard veto gate, live Promote-on-Review escalation, 180s adaptive watchdog fallback, milestone child visibility, pre-wave safety snapshot & scope-escape tilt kill switch, Reference-Aware Read-Once & Symbol-First reading protocol, knowledge-first subagent boot, safe multi-core batch & test parallelism, and --lite, --full, --migrate project adapter scaffolding. Includes clean-architecture/OOP/DRY guardrails, /kit-architecture, and polyglot domain packs (20..28).",
   "logo": "assets/logo.svg",
   "suggestedPrompts": [
     "/kit-bootstrap --migrate",

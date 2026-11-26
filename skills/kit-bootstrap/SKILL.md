@@ -97,9 +97,13 @@ Read templates from `./resources/` and write concrete repo values (zero `{{...}}
    - Target `~1.8–3.8 KB`: Workspace Identity + `agy-mpm-core` adapter note, Top 3–5 `🔴` Project Red Lines (including Git & Subagent/`teamwork` Topology with Velocity-Optimized 5-Role Matrix, Promote-on-Review ladder, Milestone Child Visibility `conversation://<id>`, 180s adaptive watchdog, and Pre-Wave Snapshot + Scope-Escape Kill Switch if configured, plus `Read-Once` + `read_anchors` boot note), Directory/Sub-Project Map table, Single-Path Canonical Commands, and `.agents/knowledge/` links.
 2. **`<workspace>/.agents/knowledge/memories.md`** (from [`./resources/memories.template.md`](./resources/memories.template.md)):
    - Seed with 3–5 verified facts discovered in Step 1 (topology, test runner, deploy target) under the standard 5-section FIFO header (`CRITICAL`, `Environment`, `Decisions`, `Patterns`, `Gotchas`, `<=4 KB`).
-3. **Git Integration**:
+3. **Git Integration & v2.3.0 Migration Checklist**:
    - If `Personal overlay` selected: append `GEMINI.md`, `AGENTS.md`, and `.agents/` to `<workspace>/.git/info/exclude` ONLY when `<workspace>/.git` exists as a real Git directory (never create a fake `.git/info/exclude` in a non-git multi-repo umbrella root, where root adapter files are already outside child git repos!).
    - If `Solo / Team` selected and `<workspace>/.git` exists: append `.agents/handoffs/` and `.agents/teamwork/` to `<workspace>/.gitignore` (idempotently ensuring both directories are present while preserving existing lines).
+   - **v2.3.0 Migration Checklist (`--migrate`)**:
+     * **PreToolUse Guard**: Verify `hooks.json` executes via the portable `./scripts/mpm-py` wrapper (which pins `Python >= 3.8` stdlib-only in `~/.gemini/config/agy-mpm-core.env` or kit `.venv`, preventing breakage when project `.venv`s activate or when launching from GUI IDE Dock with empty `PATH`).
+     * **Gitignore Hygiene**: Ensure `.agents/teamwork/` and `.agents/handoffs/` are both ignored in `.gitignore`.
+     * **Multi-Project Check Reminder**: Remind the user they can audit all existing local repositories at once by running `./install.sh --check-projects ~/Projects/*` from the kit repository.
 
 ### B. Extended Files for `--full` and `--migrate`
 1. **`<workspace>/.agents/rules/10-project-operations.md`** (from [`./resources/10-project-operations.template.md`](./resources/10-project-operations.template.md)):

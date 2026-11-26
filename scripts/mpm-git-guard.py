@@ -226,7 +226,10 @@ def cmd_restore(args: argparse.Namespace) -> None:
             dest = os.path.join(repo, member.name)
             if args.only_missing and os.path.exists(dest):
                 continue
-            tar.extract(member, path=repo)
+            if sys.version_info >= (3, 12):
+                tar.extract(member, path=repo, filter="data")
+            else:
+                tar.extract(member, path=repo)
             restored += 1
 
     mode_str = "missing only" if args.only_missing else "forced overwrite"

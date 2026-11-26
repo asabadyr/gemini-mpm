@@ -28,10 +28,10 @@ Walk every gate on the changed scope before issuing a verdict:
 5. **OWASP + Multi-Tenant Security Escalation** *(mandatory whenever diff touches auth/JWT/sessions, crypto/secrets, SQL/NoSQL queries, shell/subprocess exec, file paths/uploads, deserialization, or tenant boundaries)*:
    - Check injection vectors, authn/authz bypasses, missing `tenantId`/`companyId` scoping, path traversal, hardcoded/logged secrets, and conditional `NODE_ENV` auth skips.
 6. **Deletion Shield, Working-Tree, Scope-Escape & Local-Commit Discipline**:
-   - Run `python3 ./scripts/mpm-git-guard.py audit --repo . --baseline <scratch>` and verify `git diff --diff-filter=D`: unapproved deletions of tracked files or missing baseline untracked files => mandatory `CRITICAL` `BLOCK`.
+   - Run `<mpm-scripts>/mpm-py <mpm-scripts>/mpm-git-guard.py audit --repo . --baseline <scratch>` (where `<mpm-scripts> = ${AGY_PLUGINS_DIR:-$HOME/.gemini/config/plugins}/agy-mpm-core/scripts`) and verify `git diff --diff-filter=D`: unapproved deletions of tracked files or missing baseline untracked files => mandatory `CRITICAL` `BLOCK`.
    - Run `git status -s` / `git diff --stat` vs `scope_allowlist`: verify zero unapproved out-of-scope edits occurred (`scope_escape` => mandatory `CRITICAL` `BLOCK`).
    - Verify zero scratch/spike/helper scripts were created in repository root (must live in `<scratch_dir>` / `<appDataDir>/scratch/<slug>/` or be tracked in `created_paths.txt`).
-   - Run `git status -s` (and `git show --stat HEAD` if a commit was created) in touched repos to verify zero pre-existing user WIP was reverted or swept into wildcard commits. For post-`teamwork` commits, verify commits are strictly on local branch with zero unexpected push and pass `mpm-git-guard.py secret-scan`.
+   - Run `git status -s` (and `git show --stat HEAD` if a commit was created) in touched repos to verify zero pre-existing user WIP was reverted or swept into wildcard commits. For post-`teamwork` commits, verify commits are strictly on local branch with zero unexpected push and pass `<mpm-scripts>/mpm-py <mpm-scripts>/mpm-git-guard.py secret-scan`.
 
 ## 3. 80% Confidence Filter & Strict Verdict Rules
 - **Noise Suppression**: Report **ONLY** findings where your evidence-backed confidence is **`>= 80%`**. Omit subjective style nitpicks.

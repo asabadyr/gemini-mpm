@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ./scripts/destructive-cmd-guard.py",
+            "command": "./scripts/mpm-py ./scripts/destructive-cmd-guard.py",
             "timeout": 10
           }
         ]

@@ -1,0 +1,153 @@
+#!/usr/bin/env sh
+# agy-mpm-kit portable Python >=3.8 resolver & execution wrapper.
+# Resolves Python across pinned env, venv, PATH, and common toolchains.
+
+# Resolve repository root portably even if invoked via symlink
+PRG="$0"
+while [ -L "$PRG" ]; do
+  PRG_DIR="$(cd -P "$(dirname "$PRG")" 2>/dev/null && pwd)"
+  PRG="$(readlink "$PRG")"
+  case "$PRG" in
+    /*) ;;
+    *) PRG="$PRG_DIR/$PRG" ;;
+  esac
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$PRG")" 2>/dev/null && pwd)"
+KIT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+if [ -n "${AGY_CONFIG_DIR:-}" ]; then
+  CONFIG_DIR="${AGY_CONFIG_DIR}"
+elif [ -n "${AGY_PLUGINS_DIR:-}" ]; then
+  CONFIG_DIR="$(dirname "${AGY_PLUGINS_DIR}")"
+else
+  CONFIG_DIR="${HOME}/.gemini/config"
+fi
+PIN_FILE="${CONFIG_DIR}/agy-mpm-core.env"
+
+is_valid_py() {
+  _candidate="$1"
+  [ -n "$_candidate" ] && [ -x "$_candidate" ] && "$_candidate" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1
+}
+
+py=""
+
+# 1) $AGY_MPM_PYTHON (env override)
+if [ -n "${AGY_MPM_PYTHON:-}" ] && is_valid_py "${AGY_MPM_PYTHON}"; then
+  py="${AGY_MPM_PYTHON}"
+fi
+
+# 2) AGY_MPM_PYTHON extracted safely via sed from $PIN_FILE (unless AGY_MPM_IGNORE_PIN=1)
+if [ -z "$py" ] && [ "${AGY_MPM_IGNORE_PIN:-0}" != "1" ] && [ -f "$PIN_FILE" ]; then
+  pin_val="$(sed -n -e 's/^[[:space:]]*AGY_MPM_PYTHON[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' \
+                    -e 's/^[[:space:]]*AGY_MPM_PYTHON[[:space:]]*=[[:space:]]*'\''\([^'\'']*\)'\''.*/\1/p' \
+                    -e 's/^[[:space:]]*AGY_MPM_PYTHON[[:space:]]*=[[:space:]]*\([^[:space:]#]*\).*/\1/p' "$PIN_FILE" 2>/dev/null | head -n 1)"
+  if is_valid_py "$pin_val"; then
+    py="$pin_val"
+  fi
+fi
+
+# 3) Kit-local venv
+if [ -z "$py" ]; then
+  for candidate in "$KIT_ROOT/.venv/bin/python3" "$KIT_ROOT/.venv/bin/python"; do
+    if is_valid_py "$candidate"; then
+      py="$candidate"
+      break
+    fi
+  done
+fi
+
+# 4) Active workspace virtual/conda env
+if [ -z "$py" ]; then
+  for base_env in "${VIRTUAL_ENV:-}" "${CONDA_PREFIX:-}"; do
+    if [ -n "$base_env" ]; then
+      for candidate in "$base_env/bin/python3" "$base_env/bin/python"; do
+        if is_valid_py "$candidate"; then
+          py="$candidate"
+          break 2
+        fi
+      done
+    fi
+  done
+fi
+
+# 5) PATH and 6) Common toolchain locations (skipped if AGY_MPM_DISABLE_SYSTEM=1)
+if [ -z "$py" ] && [ "${AGY_MPM_DISABLE_SYSTEM:-0}" != "1" ]; then
+  # 5) PATH
+  for name in python3 python; do
+    candidate="$(command -v "$name" 2>/dev/null || true)"
+    if is_valid_py "$candidate"; then
+      py="$candidate"
+      break
+    fi
+  done
+
+  # 6) Common toolchain locations (GUI IDE Dock launches lack shell PATH)
+  if [ -z "$py" ]; then
+    for candidate in \
+      /opt/homebrew/bin/python3 \
+      /usr/local/bin/python3 \
+      /usr/bin/python3 \
+      "$HOME/.pyenv/shims/python3" \
+      "$HOME/.asdf/shims/python3"; do
+      if is_valid_py "$candidate"; then
+        py="$candidate"
+        break
+      fi
+    done
+  fi
+
+  if [ -z "$py" ]; then
+    for candidate in \
+      "$HOME"/.local/share/uv/python/*/bin/python3 \
+      "$HOME"/.local/share/mise/installs/python/*/bin/python3; do
+      if is_valid_py "$candidate"; then
+        py="$candidate"
+        break
+      fi
+    done
+  fi
+
+  if [ -z "$py" ] && command -v uv >/dev/null 2>&1; then
+    uv_py="$(uv python find '>=3.8' 2>/dev/null || true)"
+    if is_valid_py "$uv_py"; then
+      py="$uv_py"
+    fi
+  fi
+fi
+
+# Helper modes
+first_arg="${1:-}"
+
+if [ "$first_arg" = "--print-python" ]; then
+  if [ -n "$py" ]; then
+    printf '%s\n' "$py"
+    exit 0
+  else
+    exit 1
+  fi
+fi
+
+if [ "$first_arg" = "--version" ]; then
+  if [ -n "$py" ]; then
+    exec "$py" --version
+  else
+    printf "agy-mpm-core: Python >=3.8 is required but was not found. Run '%s/install.sh --doctor' or '%s/install.sh --venv'.\n" "$KIT_ROOT" "$KIT_ROOT" >&2
+    exit 1
+  fi
+fi
+
+# If no valid Python >=3.8 found
+if [ -z "$py" ]; then
+  printf "agy-mpm-core: Python >=3.8 is required but was not found. Run '%s/install.sh --doctor' or '%s/install.sh --venv'.\n" "$KIT_ROOT" "$KIT_ROOT" >&2
+  case "$first_arg" in
+    *destructive-cmd-guard.py)
+      printf '{"decision": "force_ask", "reason": "agy-mpm-core Deletion Shield: Python >=3.8 not found. Run install.sh --doctor or --venv."}\n'
+      exit 0
+      ;;
+    *)
+      exit 1
+      ;;
+  esac
+fi
+
+exec "$py" "$@"

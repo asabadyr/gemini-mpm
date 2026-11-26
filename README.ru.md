@@ -6,11 +6,11 @@
 
 **[🇬🇧 English](README.md) | [🇷🇺 Русский](README.ru.md)**
 
-`v2.2.0` · **Лицензия MIT** · **0 строк внешних CLI-обёрток** · **`~4.8K` стартовых токенов (`<26%` бюджета)** · **Редакции EN + RU**
+`v2.3.0` · **Лицензия MIT** · **0 строк внешних CLI-обёрток** · **`~4.8K` стартовых токенов (`<26%` бюджета)** · **Редакции EN + RU**
 
 ---
 
-`gemini-mpm` (`agy-mpm-kit`) упаковывает проверенные продакшеном практики мультиагентной разработки в **100% нативные примитивы Google Antigravity**: сжатые по методу Caveman правила `rules/` (с 3 режимами исполнения: `T0` inline, точные модели `teamwork`/`swarm` и резервный `invoke_subagent`, динамическим повышением `Promote-on-Review`, прозрачностью по вехам Milestone Visibility, адаптивным 180s Watchdog, Pre-Wave снимком и Scope-Escape Tilt Kill Switch, безопасным многоядерным параллелизмом батчей и тестов, протоколом чтения `Read-Once` и по референсам `Symbol-First`, протоколом Knowledge-First Boot и языковыми пакетами `20..28` с нулевым расходом токенов в простое), кросс-интерфейсные слэш-скиллы `/kit-bootstrap`, `/kit-architecture` и `/kit-handoff` (`skills/`) и контекстно-изолированного субагента-ревьюера `code-critic` (`agents/code-critic.md`). Установите ядро один раз глобально как локальный плагин, разворачивайте тонкие проектные адаптеры за ~90 секунд и сохраняйте архитектурную чистоту, экономию бюджета моделей и строгий контроль качества во всех репозиториях без раздувания контекстного окна.
+`gemini-mpm` (`agy-mpm-kit`) упаковывает проверенные продакшеном практики мультиагентной разработки в **100% нативные примитивы Google Antigravity**: нативный `PreToolUse` хук Deletion Shield (`hooks.json` -> `scripts/mpm-py` -> `scripts/destructive-cmd-guard.py`) с авто-пиннингом Python, устойчивым к окружению, бескомпромиссные инструменты Git-снимков, аудита и отката без внешних зависимостей (`scripts/mpm-git-guard.py`), сжатые по методу Caveman правила `rules/` (с 3 режимами исполнения: `T0` inline, точные модели `teamwork`/`swarm` и резервный `invoke_subagent`, динамическим повышением `Promote-on-Review`, прозрачностью по вехам Milestone Visibility, адаптивным 180s Watchdog, Pre-Wave снимком и Scope-Escape Tilt Kill Switch, безопасным многоядерным параллелизмом батчей и тестов, протоколом чтения `Read-Once` и по референсам `Symbol-First`, протоколом Knowledge-First Boot и языковыми пакетами `20..28` с нулевым расходом токенов в простое), кросс-интерфейсные слэш-скиллы `/kit-bootstrap`, `/kit-architecture` и `/kit-handoff` (`skills/`) и контекстно-изолированного субагента-ревьюера `code-critic` (`agents/code-critic.md`). Установите ядро один раз глобально как локальный плагин, разворачивайте тонкие проектные адаптеры за ~90 секунд и сохраняйте архитектурную чистоту, экономию бюджета моделей и строгий контроль качества во всех репозиториях без раздувания контекстного окна.
 
 ### Быстрый старт за 30 секунд
 
@@ -42,6 +42,7 @@ cd ~/Projects/gemini-mpm
 4. [Диаграмма архитектуры и бюджет токенов](#4-диаграмма-архитектуры-и-бюджет-токенов)
 5. [Нативная двуязычность (`EN` в корне vs `RU` в `./ru/`)](#5-нативная-двуязычность-en-в-корне-vs-ru-в-ru)
 6. [Четыре топологии установки и мультипроектной работы (гид по `realpath`)](#6-четыре-топологии-установки-и-мультипроектной-работы-гид-по-realpath)
+   - [Python-окружение, менеджеры пакетов и виртуальные среды (`v2.3.0`)](#python-окружение-менеджеры-пакетов-и-виртуальные-среды-v230)
 7. [Повседневные рабочие процессы](#7-повседневные-рабочие-процессы)
 8. [Полная карта репозитория (`/` EN и `/ru` RU)](#8-полная-карта-репозитория--en-и-ru-ru)
 9. [Кастомизация и расширение набора](#9-кастомизация-и-расширение-набора)
@@ -75,9 +76,9 @@ cd ~/Projects/gemini-mpm
 2. Из-за апстрим-бага маршрутизации поле `model:` во фронтматтере субагентов игнорировалось, требуя Python-хука `PreToolUse` (`model_tier_hook.py`).
 3. Субагенты были одноразовыми вызовами без сохранения состояния (перезагрузка `~95K` токенов на каждую правку по линтеру/тестам), а для мониторинга требовался отдельный Socket.IO + Svelte веб-сервер.
 
-**Google Antigravity решает оркестрацию, стейтфул-субагентов и слэш-UI нативно.** Вместо монолитной внешней Python CLI-обёртки и веб-сервера `agy-mpm-kit v2.2.0` опирается на нативные примитивы плагина плюс лёгкий zero-dependency **`PreToolUse`-хук Deletion Shield (`hooks.json` -> `scripts/destructive-cmd-guard.py`)**, git-хелпер (`scripts/mpm-git-guard.py`) и непрерывный OS-монитор (`scripts/mpm-live-watch.py`) на чистой стандартной библиотеке Python 3:
+**Google Antigravity решает оркестрацию, стейтфул-субагентов и слэш-UI нативно.** Вместо монолитной внешней Python CLI-обёртки и веб-сервера `agy-mpm-kit v2.3.0` опирается на нативные примитивы плагина плюс лёгкий zero-dependency **`PreToolUse`-хук Deletion Shield (`hooks.json` -> `scripts/mpm-py` -> `scripts/destructive-cmd-guard.py`)** и git-хелпер (`scripts/mpm-git-guard.py`):
 
-| Механизм | `claude-mpm` (`v6.5+`) | `agy-mpm-kit` в Google Antigravity (`v2.2.0`) |
+| Механизм | `claude-mpm` (`v6.5+`) | `agy-mpm-kit` в Google Antigravity (`v2.3.0`) |
 |---|---|---|
 | **Загрузка правил до хода и прогрессивное раскрытие** | Python CLI-обёртка сборки промпта + скрипт `build-agent.py` | Нативная загрузка `GEMINI.md` / `.agents/rules/*.md` / `rules/` плагина с триггерами `always_on`, `model_decision`, `glob`, `manual` и `@[label](path)` |
 | **Маршрутизация моделей и песочниц субагентов** | Python-хук `PreToolUse` (`model_tier_hook.py`) | Нативный `invoke_subagent(Model="flash_lite"\|"flash"\|"pro"\|"inherit", Workspace="inherit"\|"branch"\|"share")` |
@@ -354,6 +355,47 @@ ln -s ~/Projects/gemini-mpm/ru ~/.gemini/config/plugins/agy-mpm-core
 | **Режим C: Невидимый оверлей** | Симлинк `~/.gemini/config/plugins/agy-mpm-core` | Локальные `GEMINI.md` + `.agents/` в `.git/info/exclude` | Единственная копия ядра + локальный exclude | Да (`/kit-*`) |
 | **Режим D: Фоллбэк без скиллов** | `rules/` + `90..92-playbook-*.md` (`manual`) | `<repo>/GEMINI.md` + `.agents/knowledge/` | Единый каталог правил | Только IDE и App (`@90...`) |
 
+### Python-окружение, менеджеры пакетов и виртуальные среды (`v2.3.0`)
+
+В `agy-mpm-kit v2.3.0` реализована отказоустойчивая архитектура исполнения Python, рассчитанная на надёжную работу в любых системных конфигурациях, с произвольными менеджерами виртуальных окружений и при запуске графического интерфейса IDE из macOS Dock или Application Launcher с урезанным системным `$PATH`.
+
+#### Требования и 0 зависимостей в рантайме
+- **`Python >= 3.8` (только стандартная библиотека)**: Все хуки безопасности, инструменты аудита и непрерывные мониторы (`scripts/destructive-cmd-guard.py`, `scripts/mpm-git-guard.py`, `scripts/mpm-live-watch.py`, `scripts/guard_common.py`) реализованы строго на базе стандартной библиотеки Python (`os`, `sys`, `json`, `subprocess`, `re`, `tarfile`, `time`, `pathlib`).
+- **0 внешних зависимостей PyPI в рантайме**: Для работы плагина не требуется выполнять `pip install` или устанавливать внешние пакеты. Опциональные зависимости для разработки (`pytest>=7`, `ruff>=0.4`) вынесены в `pyproject.toml` в секцию `[project.optional-dependencies] dev`.
+
+#### Принцип работы `scripts/mpm-py` и пиннинга интерпретатора
+Antigravity запускает хуки жизненного цикла `PreToolUse`, зарегистрированные в `hooks.json`. При запуске IDE или 2.0 App из графической оболочки (macOS Dock, Finder, системное меню Linux) процесс не наследует переменные из профилей оболочки (`.zshrc`, `.bashrc`) и стартует с минимальным `$PATH`. Чтобы исключить сбои запуска без изменения отслеживаемых файлов репозитория, `hooks.json` направляет вызовы через `./scripts/mpm-py`.
+
+Скрипт `scripts/mpm-py` автоматически разрешает интерпретатор `Python >= 3.8` по приоритетной цепочке фоллбэков:
+1. **`$AGY_MPM_PYTHON`**: Прямое переопределение через переменную окружения шелла.
+2. **Файл пиннинга (`~/.gemini/config/agy-mpm-core.env`)**: Автоматически создаётся скриптом `./install.sh` при установке или переключении языковой редакции. Фиксирует абсолютный проверенный путь к бинарнику Python для всех последующих сессий.
+3. **Локальный venv кита (`<kit-root>/.venv/bin/python`)**: Используется при создании изолированного окружения внутри каталога самого плагина.
+4. **Активное виртуальное окружение**: Учитывает активный `$VIRTUAL_ENV/bin/python` или `$CONDA_PREFIX/bin/python`.
+5. **Поиск по системе и тулчейнам**: Проверяет `$PATH` (`python3`, `python`), Homebrew (`/opt/homebrew/bin/python3`, `/usr/local/bin/python3`), системный Python (`/usr/bin/python3`), а также популярные шимы (`$HOME/.pyenv/shims/python3`, `$HOME/.asdf/shims/python3`, `~/.local/share/uv/python/*/bin/python3`, `~/.local/share/mise/installs/python/*/bin/python3` или `uv python find '>=3.8'`).
+
+#### Поддержка менеджеров пакетов и сред
+
+Скрипт `install.sh` поддерживает любые менеджеры пакетов и виртуальных сред:
+
+| Среда / Инструмент | Команда установки | Как это работает |
+|---|---|---|
+| **Системный / Homebrew** | `./install.sh --lang ru` | Автоматически находит и пинит системный или Homebrew `python3 >= 3.8`. |
+| **`virtualenv` / stdlib `venv`** | `./install.sh --lang ru --venv=stdlib`<br>*(или `virtualenv .venv && ./install.sh --lang ru --python .venv/bin/python`)* | Создаёт изолированный `.venv` внутри каталога плагина и пинит его в `agy-mpm-core.env`. |
+| **`uv`** | `./install.sh --lang ru --venv=uv`<br>*(или `uv venv && ./install.sh --lang ru --venv=uv`)* | Быстрое создание `.venv` через `uv`. Поддерживает автоскачивание сред (`uv python install 3.12`). |
+| **`poetry` / `pdm` / `hatch`** | `./install.sh --lang ru --python "$(poetry run which python)"` | Пинит исполняемый файл из окружения Poetry, PDM или Hatch. |
+| **`conda` / `mamba`** | `./install.sh --lang ru --python "$CONDA_PREFIX/bin/python"` | Пинит интерпретатор активной среды Conda или Mamba в файл окружения. |
+| **`pyenv` / `mise` / `asdf`** | `./install.sh --lang ru --python "$(pyenv which python3)"` | Находит и напрямую пинит бинарник выбранной версии Python. |
+
+#### Совместимость с `.venv` рабочих проектов
+Ключевой архитектурный инвариант `v2.3.0` — **полное разделение сред**:
+- **Хуки и гарды плагина**: Всегда запускаются через `scripts/mpm-py`, используя запиненный интерпретатор из `agy-mpm-core.env` (или `.venv` плагина).
+- **Проектные репозитории и тесты**: Агенты Antigravity, выполняющие проверочные команды проекта (`pytest`, `npm test`, `cargo test`, `go test`), запускают их в рабочем окружении целевого проекта.
+- **Ноль конфликтов**: Активация любого виртуального окружения или другой версии Python в целевом проекте никогда не ломает гарды и хуки глобального плагина.
+
+#### Диагностика здоровья: `--doctor` и `--status`
+- **`./install.sh --status`**: Выводит топологию установки, активную редакцию (`EN` или `RU`), запиненный Python и статус хука `PreToolUse`.
+- **`./install.sh --doctor`**: Запускает комплексную 7-этапную диагностику: проверяет симлинки, валидность пина `agy-mpm-core.env`, версию Python (`>= 3.8`), импорты стандартной библиотеки, тестовый прогон хука `destructive-cmd-guard.py` и готовность проектных адаптеров.
+
 ---
 
 ## 7. Повседневные рабочие процессы
@@ -401,13 +443,45 @@ ln -s ~/Projects/gemini-mpm/ru ~/.gemini/config/plugins/agy-mpm-core
 | Сжатие контекста длинной сессии (отлично работает в паре с `/kit-handoff pause`) | `/compact` |
 | Закрепление важного исправления в виде переиспользуемого скилла или правила | `/learn` |
 
-### 7.6 Обновление существующих установок и проектов (`v1.x` / `v2.0` / `v2.1.0` -> `v2.2.0`)
+### 7.6 Обновление и миграция существующих установок (версии до v2.0 v1.x / v2.0–v2.2 -> v2.3.0)
+
+#### Пошаговый маршрут миграции для пользователей версий до `v2.0` (`v1.x`)
+В версиях до `v2.0` (`v1.x`) отсутствовал слой Python, плагин мог быть скопирован в каталог конфигурации вручную без симлинка, а хуки жизненного цикла `hooks.json` ещё не поддерживались. Следуйте проверенному 4-шаговому маршруту для безопасного перехода на `v2.3.0`:
+
+1. **Получите актуальный релиз**:
+   ```bash
+   cd ~/Projects/gemini-mpm
+   git pull --ff-only
+   ```
+2. **Запустите автоматическую миграцию**:
+   ```bash
+   ./install.sh --migrate --lang ru
+   ```
+   Флаг `--migrate` выполняет следующие действия:
+   - Обнаруживает, если `~/.gemini/config/plugins/agy-mpm-core` является устаревшей реальной директорией (а не симлинком), и создаёт резервную копию с таймстампом (`.bak.<timestamp>`).
+   - Создаёт чистый симлинк на выбранную редакцию репозитория (`ru/`).
+   - Находит и пинит проверенный интерпретатор `Python >= 3.8` в файл `~/.gemini/config/agy-mpm-core.env` (либо создаёт изолированный `.venv` через `uv`, `virtualenv` или `venv`).
+   - Прогоняет тестовый smoke-запуск `destructive-cmd-guard.py` **ДО** регистрации хуков в Antigravity, гарантируя отсутствие сбоев.
+3. **Проверьте корректность окружения**:
+   ```bash
+   ./install.sh --doctor
+   ```
+4. **Просканируйте и обновите проектные адаптеры**:
+   ```bash
+   ./install.sh --check-projects ~/Projects/*
+   ```
+   Для каждого проекта, где утилита обнаружит устаревший адаптер или отсутствие записей в `.gitignore`, откройте репозиторий в Antigravity и выполните:
+   ```text
+   /kit-bootstrap --migrate
+   ```
+
+#### Справочная матрица обновления
 
 | Уровень | Обновляется само после `git pull`? | Что нужно сделать пользователю / в проекте |
 |---|---|---|
-| **Глобальный плагин (`00..04`, `20..28`, `hooks.json`, `scripts/`, `code-critic`, `/kit-*`)** | **Да** *(если подключён симлинком через `./install.sh`)* | Выполните `git pull --ff-only` в клоне `gemini-mpm` (или `./install.sh --force`, если копировали папку без симлинка; проверить: `./install.sh --status`, подтвердив `Hook Guard: ACTIVE`). Для Режима D обновите скопированные плейбуки `90..92`. |
-| **Хук Deletion Shield в PreToolUse (`hooks.json`)** | **Сразу же** | Автоматически перехватывает `run_command` во всех сессиях и дочерних субагентах. *Важное правило разработки*: всегда создавайте и тестируйте целевые скрипты-гарды (`python3 ./scripts/destructive-cmd-guard.py`) *до* их регистрации в `hooks.json`, так как Antigravity начинает выполнять хуки сразу после их появления в конфиге. |
-| **Уже настроенные проекты (`GEMINI.md`, `.gitignore`)** | **Нет** *(локальные файлы репозитория остаются на версии установки)* | Откройте проект и запустите **`/kit-bootstrap --migrate`** — сохранит бэкап в `scratch/`, допишет `.agents/teamwork/` в `.gitignore` и без потерь обновит `GEMINI.md` (`PreToolUse` Deletion Shield, `mpm-git-guard` snapshot/audit/restore, непрерывный монитор `mpm-live-watch`, `Read-Once`, локальный цикл коммитов `teamwork` без push, а также `v2.2.0` Contract-First DISPATCH, замороженные проверки и шлюз Pre-Dispatch T1 trivial opt-in & hard veto). |
+| **Глобальный плагин (`00..04`, `20..28`, `hooks.json`, `scripts/`, `code-critic`, `/kit-*`)** | **Да** *(если подключён симлинком через `./install.sh`)* | Выполните `git pull --ff-only` в клоне `gemini-mpm` (или `./install.sh --force`, если копировали папку без симлинка; проверить: `./install.sh --status`, подтвердив `Hook Guard: ACTIVE` и запиненный Python). Для Режима D обновите скопированные плейбуки `90..92`. |
+| **Хук Deletion Shield в PreToolUse (`hooks.json` -> `scripts/mpm-py`)** | **Сразу же** | Автоматически перехватывает `run_command` во всех сессиях и дочерних субагентах через обёртку `./scripts/mpm-py`. Пинит `Python >= 3.8` stdlib без изменения файлов репозитория и без конфликтов с проектными виртуальными окружениями. |
+| **Уже настроенные проекты (`GEMINI.md`, `.gitignore`)** | **Нет** *(локальные файлы репозитория остаются на версии установки)* | Откройте проект и запустите **`/kit-bootstrap --migrate`** — сохранит бэкап в `scratch/`, допишет `.agents/teamwork/` в `.gitignore` и без потерь обновит `GEMINI.md` (`PreToolUse` Deletion Shield, переносимая обёртка `mpm-py`, `mpm-git-guard` snapshot/audit/restore, непрерывный монитор `mpm-live-watch`, `Read-Once`, локальный цикл коммитов `teamwork` без push, а также `v2.3.0` Contract-First DISPATCH, замороженные проверки и шлюз Pre-Dispatch T1 trivial opt-in & hard veto). |
 | **Старые длинные чаты и ветки worktree** | Правила перечитываются на следующем ходе | В длинном старом чате выполните `/compact` (или откройте новый чат); в долгоживущие ветки `git worktree` подлейте `main` по готовности обновить `GEMINI.md`. |
 
 ---
@@ -416,15 +490,17 @@ ln -s ~/Projects/gemini-mpm/ru ~/.gemini/config/plugins/agy-mpm-core
 
 ```text
 gemini-mpm/
-├── plugin.json                                     # Манифест EN-плагина (agy-mpm-core v2.2.0)
-├── hooks.json                                      # Хук PreToolUse Deletion Shield для run_command
-├── install.sh                                      # Установщик симлинка и переключатель EN/RU (--lang en|ru, --status, --uninstall)
+├── pyproject.toml                                  # Метаданные пакета Python (Python >=3.8, опциональные dev-зависимости)
+├── plugin.json                                     # Манифест EN-плагина (agy-mpm-core v2.3.0)
+├── hooks.json                                      # Хук PreToolUse Deletion Shield для run_command (вызывает ./scripts/mpm-py)
+├── install.sh                                      # Установщик и переключатель (--lang, --venv, --doctor, --migrate, --check-projects)
 ├── LICENSE                                         # Лицензия MIT + атрибуция концепций claude-mpm
 ├── README.md                                       # Флагманская документация на английском языке
 ├── README.ru.md                                    # Флагманская документация на русском языке (100% паритет)
 ├── assets/
 │   └── logo.svg                                    # Квадратная иконка плагина 256x256 (безопасное поле ~12.5%)
 ├── scripts/                                        # Чистые скрипты стандартной библиотеки Python 3 и мониторы ОС
+│   ├── mpm-py                                      # Отказоустойчивая обёртка Python (авто-пиннинг Python >=3.8)
 │   ├── guard_common.py                             # Общие регулярные выражения, парсеры porcelain Git и базовые проверки
 │   ├── destructive-cmd-guard.py                    # Скрипт хука PreToolUse (жёсткий отказ destructive git/rm, force-ask)
 │   ├── mpm-git-guard.py                            # CLI-хелпер: snapshot, audit, restore, secret-scan
@@ -464,7 +540,8 @@ gemini-mpm/
 │       ├── 91-playbook-handoff.md
 │       └── 92-playbook-architecture.md
 └── ru/                                             # Полная автономная русская редакция плагина (--lang ru)
-    ├── plugin.json                                 # Манифест RU-плагина (agy-mpm-core-ru v2.0.0)
+    ├── plugin.json                                 # Манифест RU-плагина (agy-mpm-core-ru v2.3.0)
+    ├── scripts -> ../scripts                       # Симлинк на общие скрипты (чистый Python stdlib и mpm-py)
     ├── hooks.json                                  # Хук PreToolUse Deletion Shield (русскоязычные сообщения)
     ├── assets/logo.svg
     ├── rules/{00..04,20..28}-*.md                  # Нативные ядро и языковые правила на русском языке
