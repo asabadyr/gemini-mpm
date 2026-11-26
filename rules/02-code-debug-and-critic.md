@@ -104,9 +104,23 @@ Never guess-and-patch. Walk all 5 phases sequentially:
   **STRIP** the Maker's narrative rationale, excuses, and commit prose so the Critic evaluates evidence unanchored.
 - **Confidence Filter & Verdict Matrix**:
   - Report **only** findings with **`>=80%` confidence** (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`).
-  - **`CRITICAL` or `HIGH` finding** (across Correctness, Call-Chain Integrity, Architecture/DRY/Modularity, Concurrency, Test Quality, Git Dirty-Tree Hygiene, Deletion Shield, or Security) => **mandatory `VERDICT: BLOCK`** → route localized mechanical fixes via warm `send_message` (`WARM_FIX`) and escalate structural/invariant defects or bounced retries via **Promote-on-Review** (`PROMOTE_MAKER` -> in `teamwork`, spawn an `iterN+1` fresh worker promoted from Developer/Tester `<fast-workhorse-model> (High)` to `<frontier-model> (High)`; in `swarm`, invoke `swarm{action:"model"}` or `add` a fresh unanchored worker; in standard `invoke_subagent`, spawn a fresh `+1/+2` tier subagent with stripped failed rationale per `01-orchestration.md` §2.2–§2.3, while all Reviewers run unconditionally on `<frontier-model> (High)`).
+  - **`CRITICAL` or `HIGH` finding** (across Correctness, Call-Chain Integrity, Architecture/DRY/Modularity, Concurrency, Test Quality, Git Dirty-Tree Hygiene, Deletion Shield, or Security) => **mandatory `VERDICT: BLOCK`** → route localized mechanical fixes via warm `send_message` (`WARM_FIX`) and escalate structural/invariant defects or bounced retries via **Promote-on-Review** (`PROMOTE_MAKER` -> in `teamwork`, spawn an `iterN+1` fresh worker promoted from Developer/Tester `<fast-workhorse-model> (High)` to `<frontier-model> (High)`; in `swarm`, invoke `swarm{action:"model"}` or `add` a fresh unanchored worker; in standard `invoke_subagent`, spawn a fresh `+1/+2` tier subagent with stripped failed rationale per `01-orchestration.md` §2.2–§2.3, while Reviewers run unconditionally on `<frontier-model> (High)` except under Pre-Dispatch `T1` Trivial Opt-In).
   - **Explicit Checker BLOCK Triggers (`🔴`)**: Flag any self-weakened acceptance script/test, hardcoded facade metric/verdict, missed sibling touchpoint in modified files (per `file_contracts`), or linter/typecheck failure (`>=80%` confidence) => **mandatory `HIGH`/`CRITICAL` `BLOCK`**.
   - **`MEDIUM` / `LOW` only** => `VERDICT: WARN` (or `APPROVE` when clean).
+- **Strict Trivial-Task (`T1`) Opt-In Gate & Hard Veto Checklist (`🔴`)**:
+  Downgrading `teamwork_worker` to `<fast-workhorse-model> (Low)` (`flash_lite Low` fallback) and Reviewers to `<frontier-model> (Low)` is permitted **strictly on trivial tasks** to save tokens and latency, subject to absolute verification gates:
+  - **Eligible ONLY IF ALL 4 Opt-In Criteria Pass**:
+    1. **Task Scope**: Pure non-executable documentation, comments, copy, translations, or static version/metadata bumps (`<= 3–5` files; `<20` LOC single-file edits go directly to `T0` inline).
+    2. **Zero Code/Logic Impact**: ZERO runtime logic, API endpoints, serialization/parsers, SQL/queries, or concurrency/state changes.
+    3. **Zero Hard Veto Touchpoints**: No files, imports, or configs from the Hard Veto list are touched.
+    4. **Deterministic Acceptance**: Clear, automated, deterministic `acceptance_checks` (e.g. `json.load`, `wc -c`, `grep`, markdown linter) that prove correctness without manual interpretation.
+  - **Hard Vetoes (NEVER Downgrade Worker or Reviewer — Always `<frontier-model> (High)`)**:
+    - Infrastructure & Deployments: K8s manifests, Dockerfiles, Terraform, CI/CD pipelines, reverse proxy configs.
+    - Security & Auth: `auth`/JWT/session logic, RBAC, encryption, secret handling, `.env` configs, credentials.
+    - Guards & Lifecycle: `hooks.json`, guard scripts (`destructive-cmd-guard.py`, `mpm-git-guard.py`, `mpm-live-watch.py`).
+    - Data & Storage: DB/ClickHouse/Mongo schemas, migrations, indices, ORM models, transactional boundaries.
+    - Financial & Risk: Trading parameters, order routing, balance/accounting calculations, rate limits.
+  - **Reviewer Auto-Escalation**: Any Reviewer dispatched at lowered effort (`<frontier-model> (Low)`) that discovers ANY runtime logic, API, or Hard Veto change in `git diff` MUST reject the submission, emit **`VERDICT: BLOCK`**, and set **`Rework Routing: PROMOTE_REVIEWER -> <frontier-model> (High)`** (alongside `PROMOTE_MAKER` if worker tier is under-powered).
 - **Gate 6 — Deletion Shield & Local-Commit Audit (`🔴`)**:
   Run `python3 ./scripts/mpm-git-guard.py audit --repo . --baseline <scratch>` and verify `git diff --diff-filter=D`: any unapproved deletion of tracked files or missing baseline untracked files is a **`CRITICAL` `BLOCK`**. For completed `teamwork` runs, verify that commits are staged via explicit paths, verified clean via `mpm-git-guard.py secret-scan`, and made **strictly to local branch with zero unexpected push**.
 - **Mandatory OWASP + Multi-Tenant Security Escalation Triggers**:

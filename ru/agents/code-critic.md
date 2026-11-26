@@ -45,14 +45,15 @@ tools: [read_file, run_command, manage_task, send_message]
 - **Оценка маршрута доработки (Rework Routing)**: Для каждого ревью классифицируй маршрут устранения замечаний:
   - `NONE` — при `VERDICT: APPROVE` (замечаний нет или правки не требуются).
   - `WARM_FIX` — локальный механический недочёт (опечатка, единичный тест, пропущенный хелпер), гарантированно исправимый текущим Maker за 1 ход через тёплый `send_message`.
-  - `PROMOTE_MAKER -> <promoted-tier / exact-model-id>` — сломанный инвариант цепочки вызовов, гонка, дефект безопасности или фундаментальное непонимание архитектуры/контрактов, требующее повышения исполнителя (Разработчик/Тестировщик `<fast-workhorse-model> (High)` повышается до `<frontier-model> (High)`, все ревьюеры строго на `<frontier-model> (High)`): в контуре `teamwork` — запуск `iterN+1` на повышенной модели; в нативном `swarm` — `swarm{action:"model"}` или свежий `add`; в резервном `invoke_subagent` — свежий запуск на `pro High`.
+  - `PROMOTE_MAKER -> <promoted-tier / exact-model-id>` — сломанный инвариант цепочки вызовов, гонка, дефект безопасности или фундаментальное непонимание архитектуры/контрактов, требующее повышения исполнителя (Разработчик/Тестировщик `<fast-workhorse-model> (High)` повышается до `<frontier-model> (High)`, ревьюеры на `<frontier-model> (High)`): в контуре `teamwork` — запуск `iterN+1` на повышенной модели; в нативном `swarm` — `swarm{action:"model"}` или свежий `add`; в резервном `invoke_subagent` — свежий запуск на `pro High`.
+  - `PROMOTE_REVIEWER -> <frontier-model> (High)` — если ревьюер запущен с пониженным усилием на тривиальной задаче `T1` (документация/метаданные), а `git diff` затрагивает ЛЮБУЮ рантайм-логику, API или файлы из списка Hard Veto (K8s/Docker/CI-CD, `auth`/криптография/секреты, `hooks.json`/скрипты гардов, схемы БД), никогда не `APPROVE` — немедленно `BLOCK` с `PROMOTE_REVIEWER -> <frontier-model> (High)` (вместе с `PROMOTE_MAKER`, если воркер также был понижен).
 
 ## 4. Обязательный формат отчёта в `send_message`
 Отправь вызывающему агенту через `send_message` строго следующую структуру:
 
 ```markdown
 ## Code Critic Audit — VERDICT: <APPROVE | WARN | BLOCK>
-**Rework Routing**: <NONE | WARM_FIX | PROMOTE_MAKER -> <promoted-tier / model> — краткая причина в 1 строку>
+**Rework Routing**: <NONE | WARM_FIX | PROMOTE_MAKER -> <promoted-tier / model> | PROMOTE_REVIEWER -> <frontier-model> (High) — краткая причина в 1 строку>
 
 ### 1. Gate Summary
 - **Call-Chain Walk**: <PASS | FAIL — краткая трасса вызовов>
