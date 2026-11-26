@@ -20,7 +20,7 @@ description: "Activate when writing or refactoring code, designing modules, refa
 | Context / Scope | Allowed Architecture & Enforcement |
 |---|---|
 | **Production Mainline**<br>*(DEFAULT whenever ambiguous)* | `src/`, `app/`, `pkg/`, `internal/`, `lib/`, services. Requires full SOLID/OOP/DI boundaries, hard LOC & complexity caps, zero copy-paste duplication, proven design patterns over ad-hoc branching, full `code-critic` enforcement. |
-| **Prototype / Scratch / One-Off** | `scratch/`, `scripts/oneoff*`, user-labeled throwaway PoC/spike. Single cohesive file (`<200-300` LOC) allowed without speculative factories/DI; **MUST NEVER** be imported by or merged into mainline production code without modularization. **Repo-Root Scratch Ban**: NEVER create scratch/spike/helper scripts in repository root—use `<scratch_dir>` (e.g. `<brain>/<id>/scratch/` or `mktemp -d`); track any required repo-root additions in `created_paths.txt` (never blanket cleanup). |
+| **Prototype / Scratch / One-Off** | `scratch/`, `scripts/oneoff*`, user-labeled throwaway PoC/spike. Single cohesive file (`<200-300` LOC) allowed without speculative factories/DI; **MUST NEVER** be imported by or merged into mainline production code without modularization. **Repo-Root Scratch Ban**: NEVER create scratch/spike/helper scripts in repository root—use `<scratch_dir>` (e.g. `<appDataDir>/scratch/<slug>/` or `mktemp -d`); track any required repo-root additions in `created_paths.txt` (never blanket cleanup). |
 
 ### 1.3. Hard Modularity, Size & Complexity Caps (Mainline Code)
 | Scope | Thresholds & Guardrails |
@@ -61,6 +61,15 @@ task: "<one-sentence objective>"
 scope_allowlist: ["exact/path/file1.ts", "exact/path/file1.test.ts"]
 knowledge_refs: ["GEMINI.md", ".agents/knowledge/00-INDEX.md", ".agents/knowledge/memories.md"]
 read_anchors: ["exact/path/file1.ts:120-185 (Class.method -> ref)"] # optional exact line/symbol anchors
+file_contracts: # Per-File Acceptance Checklist (touchpoints, boundary specs, schema keys)
+  - path: "exact/path/file1.ts"
+    touchpoints: ["sibling branch 1 (e.g. registration)", "sibling branch 2 (e.g. drop/cleanup handler)"]
+    boundary_specs: ["exact HTTP/error codes (e.g. 400 vs clamp)", "None/NaN/empty input handling"]
+    schema_keys: ["exact JSON keys", "CSV/XLSX columns"]
+acceptance_checks: # Frozen Stage 3.5 Gate (pre-written immutable commands/assertions + lint/typecheck; NEVER weaken/bypass)
+  - "<immutable test/verification command or test file outside worker write scope>"
+  - "<mandatory linter/typecheck command>"
+scratch_dir: "<appDataDir>/scratch/<slug>/" # shared multi-agent scratch path (never parent brain/<uuid>/)
 contracts: ["<pre/postconditions, invariants, untouched constraints>"]
 forbidden_ops: ["edits outside scope_allowlist", "git checkout/reset/clean", "destructive shell/DB/cluster ops"] # optional explicit red lines
 observable: "<exact command/HTTP/DB/file output that proves runtime behavior>"
@@ -68,6 +77,12 @@ return: ["git diff --stat", "verbatim lint/typecheck/test stdout", "observable p
 context: |
   <concise background, relevant .agents/knowledge/ pointers, raw error logs>
 ```
+
+### 2.1. Pre-Handoff Anti-Facade Self-Audit (`🟡`)
+Before reporting completion or handing off to Checker, Maker **MUST** run:
+1. **Working-Tree Parity**: Run `git status -s` to confirm edits are strictly within `baseline + scope_allowlist` (zero unintended file touches or untracked artifacts outside `<scratch_dir>`).
+2. **Anti-Facade Check**: Check that zero hardcoded verdicts, mock numbers, or placeholder metrics exist in report/summary generators or deliverables.
+3. **Frozen Gate Execution**: Execute all `acceptance_checks` verbatim (confirming test count `> 0`, zero silent skips on target code, and passing lint/typecheck). Maker **MUST NEVER** weaken, rewrite, or bypass frozen `acceptance_checks`!
 
 ## 3. 5-Phase Systematic Debugging Gate (`🔴`)
 Never guess-and-patch. Walk all 5 phases sequentially:
@@ -90,6 +105,7 @@ Never guess-and-patch. Walk all 5 phases sequentially:
 - **Confidence Filter & Verdict Matrix**:
   - Report **only** findings with **`>=80%` confidence** (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`).
   - **`CRITICAL` or `HIGH` finding** (across Correctness, Call-Chain Integrity, Architecture/DRY/Modularity, Concurrency, Test Quality, Git Dirty-Tree Hygiene, Deletion Shield, or Security) => **mandatory `VERDICT: BLOCK`** → route localized mechanical fixes via warm `send_message` (`WARM_FIX`) and escalate structural/invariant defects or bounced retries via **Promote-on-Review** (`PROMOTE_MAKER` -> in `teamwork`, spawn an `iterN+1` fresh worker promoted from Developer/Tester `<fast-workhorse-model> (High)` to `<frontier-model> (High)`; in `swarm`, invoke `swarm{action:"model"}` or `add` a fresh unanchored worker; in standard `invoke_subagent`, spawn a fresh `+1/+2` tier subagent with stripped failed rationale per `01-orchestration.md` §2.2–§2.3, while all Reviewers run unconditionally on `<frontier-model> (High)`).
+  - **Explicit Checker BLOCK Triggers (`🔴`)**: Flag any self-weakened acceptance script/test, hardcoded facade metric/verdict, missed sibling touchpoint in modified files (per `file_contracts`), or linter/typecheck failure (`>=80%` confidence) => **mandatory `HIGH`/`CRITICAL` `BLOCK`**.
   - **`MEDIUM` / `LOW` only** => `VERDICT: WARN` (or `APPROVE` when clean).
 - **Gate 6 — Deletion Shield & Local-Commit Audit (`🔴`)**:
   Run `python3 ./scripts/mpm-git-guard.py audit --repo . --baseline <scratch>` and verify `git diff --diff-filter=D`: any unapproved deletion of tracked files or missing baseline untracked files is a **`CRITICAL` `BLOCK`**. For completed `teamwork` runs, verify that commits are staged via explicit paths, verified clean via `mpm-git-guard.py secret-scan`, and made **strictly to local branch with zero unexpected push**.

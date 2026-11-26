@@ -6,7 +6,7 @@
 
 **[🇬🇧 English](README.md) | [🇷🇺 Русский](README.ru.md)**
 
-`v2.0.0` · **MIT License** · **Native PreToolUse Deletion Shield & 0 Daemon Overhead** · **`~4.8K` Startup Tokens (`<26%` Budget)** · **EN + RU Editions**
+`v2.1.0` · **MIT License** · **Native PreToolUse Deletion Shield & 0 Daemon Overhead** · **`~4.8K` Startup Tokens (`<26%` Budget)** · **EN + RU Editions**
 
 ---
 
@@ -38,7 +38,7 @@ Then open any repository in **Google Antigravity** (IDE, App, or `agy` CLI) and 
 
 1. [Motivation: Why Monolithic Instruction Files Break at Scale](#1-motivation-why-monolithic-instruction-files-break-at-scale)
 2. [Origins & Inspiration (`bobmatnyc/claude-mpm`) — Why `0` Wrapper Code](#2-origins--inspiration-bobmatnycclaude-mpm--why-0-wrapper-code)
-3. [Fifteen Core Innovations Inside `agy-mpm-kit`](#3-fifteen-core-innovations-inside-agy-mpm-kit)
+3. [Sixteen Core Innovations Inside `agy-mpm-kit`](#3-sixteen-core-innovations-inside-agy-mpm-kit)
 4. [Architecture Diagram & Token Budget](#4-architecture-diagram--token-budget)
 5. [Native Bilingual Support (`EN` Root vs `RU` `./ru/` Edition)](#5-native-bilingual-support-en-root-vs-ru-ru-edition)
 6. [Four Installation & Multi-Project Topologies (`realpath` Guide)](#6-four-installation--multi-project-topologies-realpath-guide)
@@ -75,9 +75,9 @@ In Claude Code, `claude-mpm` had to grow into a ~250-file Click/FastAPI/Socket.I
 2. An upstream model-routing bug ignored subagent frontmatter `model:` fields, requiring Python `PreToolUse` hooks to route model tiers.
 3. Subagents were stateless one-shot calls (`~95K`-token cold reload on every lint/test rework), and monitoring required an external Socket.IO + Svelte web server.
 
-**Google Antigravity solves orchestration, stateful reactive subagents, and slash UI natively.** Rather than running a monolithic external Python CLI or socket server, `agy-mpm-kit v2.0.0` leverages native plugin primitives plus a lightweight, pure Python standard library **`PreToolUse` Deletion Shield hook (`hooks.json` -> `scripts/destructive-cmd-guard.py`)** and git safety helper (`scripts/mpm-git-guard.py`):
+**Google Antigravity solves orchestration, stateful reactive subagents, and slash UI natively.** Rather than running a monolithic external Python CLI or socket server, `agy-mpm-kit v2.1.0` leverages native plugin primitives plus a lightweight, pure Python standard library **`PreToolUse` Deletion Shield hook (`hooks.json` -> `scripts/destructive-cmd-guard.py`)** and git safety helper (`scripts/mpm-git-guard.py`):
 
-| Capability | `claude-mpm` (`v6.5+`) | `agy-mpm-kit` on Google Antigravity (`v2.0.0`) |
+| Capability | `claude-mpm` (`v6.5+`) | `agy-mpm-kit` on Google Antigravity (`v2.1.0`) |
 |---|---|---|
 | **Pre-Turn Rule Loading & Progressive Disclosure** | Python CLI wrapper assembling system prompts + `build-agent.py` | Native pre-turn `GEMINI.md` / `.agents/rules/*.md` / Plugin `rules/` with `always_on`, `model_decision`, `glob`, and `manual` triggers + `@[label](path)` includes |
 | **Dynamic Subagent Model & Sandbox Routing** | Python `PreToolUse` hook (`model_tier_hook.py`) | Native `invoke_subagent(Model="flash_lite"\|"flash"\|"pro"\|"inherit", Workspace="inherit"\|"branch"\|"share")` |
@@ -88,7 +88,7 @@ In Claude Code, `claude-mpm` had to grow into a ~250-file Click/FastAPI/Socket.I
 
 ---
 
-## 3. Fifteen Core Innovations Inside `agy-mpm-kit`
+## 3. Sixteen Core Innovations Inside `agy-mpm-kit`
 
 ### 1. Caveman Table-Driven Prompt Compression & HSDF Messaging
 Grounded in empirical MPM benchmarks where converting verbose prose rules (`47 KB` / `~12.7K` tokens) into dense decision tables (`10.8 KB` / `~2.7K` tokens) cut system-prompt tokens by **`-77%`**, reduced total session tokens by **`-47%`**, and **improved QA rubric adherence by `+17%` (`3.75/5 -> 4.40/5`)**. Subagent delegations use **HSDF (Hybrid Structured Delegation Format)** (`tier`, `Effort`, `task`, `scope_allowlist`, `contracts`, `observable`, `return`, `context`), keeping prompts compact while never compressing exact file paths, line numbers, tool names, or stack traces.
@@ -188,6 +188,15 @@ Multi-layered hardware defense against destructive commands, rogue subagent loop
   * Runs as a background watcher (`WaitMsBeforeAsync=500`, 0 LLM tokens while clean) polling transcript growth and git working tree every `1.5s`.
   * Exits immediately with JSON alert and exit codes `10..15` (`DELETION_DETECTED`, `DANGEROUS_COMMAND`, `ERROR_LOOP`, `READ_ONLY_TILT`, `IDLE_COMA`, `SCOPE_ESCAPE`), triggering **`~1–2s` `Reactive Wakeup`** in orchestrator instead of waiting for a 180s timer.
 - **Mandatory `teamwork` Local-Branch Commit Lifecycle (Zero Push)**: Isolate tasks in `teamwork/<slug>` branch or dedicated worktree, enforce audit + secret scan, and commit strictly to local branch without unexpected push.
+
+### 16. Contract-First DISPATCH, Frozen Acceptance Checks & Pre-Dispatch T3 Escalation (v2.1.0)
+Eliminates micro-requirement omission, test tampering, and multi-agent churn across delegated engineering turns:
+- **Contract-First `DISPATCH` (`file_contracts:`)**: In multi-agent workflows (`teamwork`, `swarm`), `Explorer` or `Task Setter` (`<frontier-model> (Medium)`) compresses multi-file prose specifications into structured `file_contracts:` inside `DISPATCH.md` / HSDF delegations. Each entry specifies explicit `touchpoints` (all sibling branches/callers e.g. both registration and drop/cleanup handlers across modified files), `boundary_specs` (exact HTTP/error codes e.g. `400` vs clamp, `None`/`NaN`/empty input handling), and `schema_keys` (exact JSON keys, CSV/XLSX columns), ensuring lower-tier Makers do not drop requirements buried across multiple long documents.
+- **Frozen Stage 3.5 Acceptance Checks (`acceptance_checks:`)**: Orchestrators specify pre-written immutable verification commands and assertions before Maker dispatch (stored read-only or outside worker write scope). Makers are strictly forbidden from weakening, rewriting, or bypassing `acceptance_checks`.
+- **Pre-Handoff Anti-Facade Self-Audit**: Before handing off to Checker, Maker executes a 3-point self-audit: (1) `git status -s` parity check ensuring edits match `baseline + scope_allowlist`, (2) anti-facade verification that zero hardcoded mock verdicts/metrics exist in report generators, and (3) verbatim execution of frozen `acceptance_checks`.
+- **Pre-Dispatch `T3` Escalation**: When `Explorer` or `Task Setter` identifies `async locks / RwLock / shutdown coordination`, `auth/crypto/tenant boundaries`, or multi-table schema migrations, initial workers are dispatched directly on `<frontier-model> (High)`, skipping wasteful `Iter1 -> BLOCK -> Iter2` churn on `<fast-workhorse-model>`.
+- **Shared Multi-Agent Scratch Path**: Shared multi-agent scratch deliverables and intermediate test outputs reside under `<appDataDir>/scratch/<slug>/` (rather than parent conversation directories), preventing child write-permission traps and shell-redirect workarounds.
+- **Code Critic Enforcement**: `code-critic` strictly maps self-weakened acceptance tests, hardcoded facade metrics, missed sibling touchpoints in modified files, and linter/typecheck failures to mandatory `HIGH`/`CRITICAL` `BLOCK` verdicts.
 
 ---
 
@@ -389,13 +398,13 @@ Consolidates legacy or cross-agent setups into a clean Tier-2 Project Adapter in
 | Free up context window mid-session (pair with `/kit-handoff pause`) | `/compact` |
 | Promote a project discovery into a reusable global skill or rule | `/learn` |
 
-### 7.6 Upgrading Existing Installs & Projects (`v1.x` -> `v2.0.0`)
+### 7.6 Upgrading Existing Installs & Projects (`v1.x` / `v2.0` -> `v2.1.0`)
 
 | Layer | Auto-Updated on `git pull`? | Action Required for Existing Users / Repos |
 |---|---|---|
 | **Global Plugin (`00..04`, `20..28`, `hooks.json`, `scripts/`, `code-critic`, `/kit-*`)** | **Yes** *(if symlinked via `./install.sh`)* | Run `git pull --ff-only` inside your cloned `gemini-mpm` folder (or re-run `./install.sh --force` if copied without a symlink; verify via `./install.sh --status` to confirm `Hook Guard: ACTIVE`). If you used Mode D fallback, refresh copied `90..92` playbooks. |
 | **PreToolUse Deletion Shield Hook (`hooks.json`)** | **Immediate** | Intercepts `run_command` across all sessions and child subagents automatically. *Authoring Note*: Always author and test target guard scripts (`python3 ./scripts/destructive-cmd-guard.py`) *before* registering them in `hooks.json`, because Antigravity begins executing hooks immediately once configured. |
-| **Existing Bootstrapped Repos (`GEMINI.md`, `.gitignore`)** | **No** *(local repo files stay on bootstrap version)* | Open the repo and run **`/kit-bootstrap --migrate`** — backs up current files to `scratch/`, ensures `.agents/teamwork/` is in `.gitignore`, and refreshes `GEMINI.md` with `PreToolUse` Deletion Shield, `mpm-git-guard` snapshot/audit/restore, continuous `mpm-live-watch` OS monitor, `Read-Once`, and local-branch `teamwork` commit lifecycle without losing repo invariants. |
+| **Existing Bootstrapped Repos (`GEMINI.md`, `.gitignore`)** | **No** *(local repo files stay on bootstrap version)* | Open the repo and run **`/kit-bootstrap --migrate`** — backs up current files to `scratch/`, ensures `.agents/teamwork/` is in `.gitignore`, and refreshes `GEMINI.md` with `PreToolUse` Deletion Shield, `mpm-git-guard` snapshot/audit/restore, continuous `mpm-live-watch` OS monitor, `Read-Once`, local-branch `teamwork` commit lifecycle, and `v2.1.0` Contract-First DISPATCH & frozen acceptance checks without losing repo invariants. |
 | **Long Open Chats / Feature Worktrees** | Core rules reload on next turn | Run `/compact` (or open a fresh chat) to clear stale in-context habits; merge/rebase `main` into long-lived research worktrees when ready to sync `GEMINI.md`. |
 
 ---
@@ -404,7 +413,7 @@ Consolidates legacy or cross-agent setups into a clean Tier-2 Project Adapter in
 
 ```text
 gemini-mpm/
-├── plugin.json                                     # EN plugin manifest (agy-mpm-core v2.0.0)
+├── plugin.json                                     # EN plugin manifest (agy-mpm-core v2.1.0)
 ├── hooks.json                                      # PreToolUse Deletion Shield lifecycle hook (run_command)
 ├── install.sh                                      # Safe symlink installer & EN/RU switcher (--lang en|ru, --status, --uninstall)
 ├── LICENSE                                         # MIT License + claude-mpm conceptual attribution

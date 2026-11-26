@@ -1,14 +1,14 @@
 {
   "name": "agy-mpm-core-ru",
   "displayName": "AGY MPM Core Kit (RU)",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "author": {
     "name": "asabadyr",
     "url": "https://github.com/asabadyr"
   },
   "homepage": "https://github.com/asabadyr/gemini-mpm",
   "repository": "https://github.com/asabadyr/gemini-mpm",
-  "description": "Нативная русскоязычная редакция правил, слэш-скиллов и ревьюера code-critic (MPM) для Antigravity: хук Deletion Shield (PreToolUse), mpm-git-guard (snapshot/audit/restore), нулевой по токенам вотчдог ОС mpm-live-watch (пробуждение за 1–2 с), коммиты teamwork в локальную ветку (zero push), 3 режима оркестрации (T0 inline, скоростная матрица teamwork/swarm с Promote-on-Review, резервный invoke_subagent), адаптивный вотчдог 180s, прозрачность по вехам, Pre-Wave снимок и Tilt Kill Switch, протоколы Reference-Aware Read-Once и Knowledge-First Boot, параллелизм батчей/тестов, /kit-bootstrap (--lite, --full, --migrate) и передача сессий.",
+  "description": "Нативная русскоязычная редакция правил, слэш-скиллов и ревьюера code-critic (MPM) для Antigravity: хук Deletion Shield (PreToolUse), mpm-git-guard (snapshot/audit/restore), нулевой по токенам вотчдог ОС mpm-live-watch (пробуждение за 1–2 с), коммиты teamwork в локальную ветку (zero push), 3 режима оркестрации (T0 inline, скоростная матрица teamwork/swarm с Promote-on-Review, резервный invoke_subagent), Contract-First DISPATCH (file_contracts), замороженные acceptance_checks, Pre-Dispatch T3 Escalation, адаптивный вотчдог 180s, прозрачность по вехам, Pre-Wave снимок и Tilt Kill Switch, протоколы Reference-Aware Read-Once и Knowledge-First Boot, параллелизм батчей/тестов, /kit-bootstrap (--lite, --full, --migrate) и передача сессий.",
   "logo": "assets/logo.svg",
   "suggestedPrompts": [
     "/kit-bootstrap --migrate",
