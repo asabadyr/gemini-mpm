@@ -47,6 +47,17 @@ REASONS = {
 WRAPPERS = {"sudo", "time", "nohup", "command", "builtin"}
 SHELL_WRAPPERS = {"sh", "bash", "zsh"}
 DANGEROUS_PYTHON = ("os.remove", "os.unlink", "shutil.rmtree", ".unlink(")
+COMMENT_BOUNDARY_CHARS = set(" \t\r\n;|&({")
+HEREDOC_RE = re.compile(r"<<(-)?[ \t]*(?:'([^'\n]+)'|\"([^\"\n]+)\"|([A-Za-z0-9_.-]+))")
+UNPARSEABLE_DESTRUCTIVE_GIT_RE = re.compile(
+    r"(?:^|[\s;|&(])git(?:\s+-[^\s]+|\s+--[^\s=]+(?:=\S+)?)*\s+"
+    r"(?:clean(?:\s|$)|reset\s+[^\n]*(?:--hard|--merge)|"
+    r"checkout\s+(?:[^\n]*--\s*|\.(?:\s|$)|[^\n]*\bHEAD\b)|restore(?:\s|$)|"
+    r"push\b[^\n]*(?:\s-[a-zA-Z]*f|\s--force(?:-with-lease)?\b))"
+)
+UNPARSEABLE_RM_RE = re.compile(r"(?:^|[\s;|&(])(?:rm|rmdir|unlink|shred)(?:\s|$)")
+UNPARSEABLE_FIND_DELETE_RE = re.compile(r"(?:^|[\s;|&(])find\b[^\n]*\s-delete(?:\s|$)")
+UNPARSEABLE_PYTHON_RE = re.compile(r"(?:^|[\s;|&(/])python[0-9.]*(?:\s|$)")
 
 
 def get_reason(key: str, lang: str) -> str:
@@ -55,10 +66,46 @@ def get_reason(key: str, lang: str) -> str:
     return lang_dict.get(key, REASONS["en"].get(key, "Operation requires confirmation."))
 
 
-def split_shell_statements(cmd_str: str) -> List[str]:
-    """Split shell command line into individual statements outside quotes."""
-    statements: List[str] = []
+def _consume_heredoc_bodies(
+    cmd_str: str, start_idx: int, pending: List[Tuple[int, str, bool]]
+) -> Tuple[List[Tuple[int, str]], int]:
+    """Consume heredoc lines after a newline for queued (stmt_idx, delimiter, strip_tabs) specs."""
+    length = len(cmd_str)
+    pos = start_idx
+    collected: List[Tuple[int, str]] = []
+
+    for stmt_idx, delim, strip_tabs in pending:
+        lines: List[str] = []
+        while pos < length:
+            next_nl = cmd_str.find("\n", pos)
+            if next_nl == -1:
+                line = cmd_str[pos:]
+                pos = length
+            else:
+                line = cmd_str[pos:next_nl]
+                pos = next_nl + 1
+
+            stripped = line.rstrip("\r")
+            if strip_tabs:
+                stripped = stripped.lstrip("\t")
+            if stripped == delim:
+                break
+            lines.append(line + "\n")
+        collected.append((stmt_idx, "".join(lines)))
+
+    return collected, pos
+
+
+def parse_shell_statements(cmd_str: str) -> List[Tuple[str, str]]:
+    """Parse shell command into (statement, heredoc_body) pairs.
+
+    Handles POSIX # comments outside quotes, backslash-newline continuations
+    outside single quotes, and <<EOF / <<-EOF heredoc bodies cleanly so comments
+    or script payloads never break statement splitting.
+    """
+    statements: List[Tuple[str, str]] = []
     current: List[str] = []
+    pending_heredocs: List[Tuple[int, str, bool]] = []
     in_single = False
     in_double = False
     escaped = False
@@ -74,10 +121,40 @@ def split_shell_statements(cmd_str: str) -> List[str]:
             continue
 
         if ch == "\\" and not in_single:
+            if cmd_str.startswith("\\\n", i):
+                i += 2
+                continue
+            if cmd_str.startswith("\\\r\n", i):
+                i += 3
+                continue
             escaped = True
             current.append(ch)
             i += 1
             continue
+
+        if not in_single and not in_double:
+            if ch == "#" and (i == 0 or cmd_str[i - 1] in COMMENT_BOUNDARY_CHARS):
+                nl = cmd_str.find("\n", i)
+                if nl == -1:
+                    i = length
+                else:
+                    i = nl
+                continue
+
+            if cmd_str.startswith("<<", i) and not cmd_str.startswith("<<<", i) and (i == 0 or cmd_str[i - 1] != "<"):
+                m = HEREDOC_RE.match(cmd_str, i)
+                if m:
+                    strip_tabs = bool(m.group(1))
+                    delim = m.group(2) or m.group(3) or m.group(4) or ""
+                    eol = cmd_str.find("\n", m.end())
+                    if eol != -1 and delim:
+                        prefix_tab = r"[ \t]*" if strip_tabs else ""
+                        end_pat = re.compile(r"(?m)^" + prefix_tab + re.escape(delim) + r"[ \t]*\r?$")
+                        if end_pat.search(cmd_str, eol + 1):
+                            pending_heredocs.append((len(statements), delim, strip_tabs))
+                            current.append(m.group(0))
+                            i = m.end()
+                            continue
 
         if ch == "'" and not in_double:
             in_single = not in_single
@@ -92,24 +169,40 @@ def split_shell_statements(cmd_str: str) -> List[str]:
             continue
 
         if not in_single and not in_double:
-            if ch in (";", "\n"):
+            if ch == "\n":
                 stmt = "".join(current).strip()
                 if stmt:
-                    statements.append(stmt)
+                    statements.append((stmt, ""))
+                current = []
+                if pending_heredocs:
+                    bodies, i = _consume_heredoc_bodies(cmd_str, i + 1, pending_heredocs)
+                    for target_idx, body_txt in bodies:
+                        if 0 <= target_idx < len(statements):
+                            prev_stmt, prev_body = statements[target_idx]
+                            merged = f"{prev_body}{body_txt}" if prev_body else body_txt
+                            statements[target_idx] = (prev_stmt, merged)
+                    pending_heredocs = []
+                else:
+                    i += 1
+                continue
+            if ch == ";":
+                stmt = "".join(current).strip()
+                if stmt:
+                    statements.append((stmt, ""))
                 current = []
                 i += 1
                 continue
             if cmd_str.startswith("&&", i) or cmd_str.startswith("||", i):
                 stmt = "".join(current).strip()
                 if stmt:
-                    statements.append(stmt)
+                    statements.append((stmt, ""))
                 current = []
                 i += 2
                 continue
             if ch == "|" and not cmd_str.startswith("||", i):
                 stmt = "".join(current).strip()
                 if stmt:
-                    statements.append(stmt)
+                    statements.append((stmt, ""))
                 current = []
                 i += 1
                 continue
@@ -119,8 +212,13 @@ def split_shell_statements(cmd_str: str) -> List[str]:
 
     last_stmt = "".join(current).strip()
     if last_stmt:
-        statements.append(last_stmt)
+        statements.append((last_stmt, ""))
     return statements
+
+
+def split_shell_statements(cmd_str: str) -> List[str]:
+    """Split shell command line into individual statements outside quotes."""
+    return [stmt for stmt, _ in parse_shell_statements(cmd_str)]
 
 
 def unwrap_command_tokens(tokens: List[str]) -> Tuple[List[str], Optional[str]]:
@@ -309,33 +407,61 @@ def resolve_allowed_dirs(payload: Dict[str, Any]) -> Tuple[List[str], Optional[s
     return real_allowed, brain_root
 
 
-def is_path_inside_allowed(
-    target: str, cwd: str, allowed_dirs: List[str], brain_root: Optional[str] = None
+def _is_dir_inside_allowed(
+    norm_dir: str,
+    allowed_dirs: List[str],
+    brain_root: Optional[str] = None,
+    allow_exact_root: bool = False,
 ) -> bool:
-    """Check if target resolves inside allowed_dirs or <brain>/<uuid>/scratch/*."""
-    if any(ch in target for ch in ("*", "?", "[", "]")) or "$" in target:
-        return False
-
-    abs_path = target if os.path.isabs(target) else os.path.join(cwd, target)
-    norm_path = os.path.realpath(os.path.abspath(abs_path))
-
+    """Return True if resolved norm_dir sits inside allowed_dirs or brain scratch."""
     for base in allowed_dirs:
         try:
-            rel = os.path.relpath(norm_path, base)
-            if not rel.startswith("..") and rel != ".":
+            rel = os.path.relpath(norm_dir, base)
+            if not rel.startswith("..") and (allow_exact_root or rel != "."):
                 return True
         except ValueError:
             continue
 
     if brain_root:
         try:
-            rel_brain = os.path.relpath(norm_path, brain_root)
+            rel_brain = os.path.relpath(norm_dir, brain_root)
             parts = rel_brain.split(os.sep)
             if len(parts) >= 3 and not parts[0].startswith("..") and parts[1] == "scratch":
+                return True
+            if allow_exact_root and len(parts) == 2 and not parts[0].startswith("..") and parts[1] == "scratch":
                 return True
         except ValueError:
             pass
     return False
+
+
+def is_path_inside_allowed(
+    target: str, cwd: str, allowed_dirs: List[str], brain_root: Optional[str] = None
+) -> bool:
+    """Check if target resolves inside allowed_dirs or <brain>/<uuid>/scratch/*."""
+    if "$" in target:
+        return False
+
+    glob_indices = [target.find(ch) for ch in ("*", "?", "[", "]") if ch in target]
+    if glob_indices:
+        prefix = target[: min(glob_indices)]
+        if prefix.endswith("/"):
+            prefix_dir = prefix.rstrip("/") or "/"
+            prefix_base = ""
+        else:
+            prefix_dir = os.path.dirname(prefix)
+            prefix_base = os.path.basename(prefix)
+        if not prefix_dir:
+            return False
+        abs_dir = prefix_dir if os.path.isabs(prefix_dir) else os.path.join(cwd, prefix_dir)
+        norm_dir = os.path.realpath(os.path.abspath(abs_dir))
+        return _is_dir_inside_allowed(
+            norm_dir, allowed_dirs, brain_root, allow_exact_root=bool(prefix_base)
+        )
+
+    abs_path = target if os.path.isabs(target) else os.path.join(cwd, target)
+    norm_path = os.path.realpath(os.path.abspath(abs_path))
+    return _is_dir_inside_allowed(norm_path, allowed_dirs, brain_root, allow_exact_root=False)
 
 
 def check_rm_targets(
@@ -357,24 +483,52 @@ def check_rm_targets(
     return None, None
 
 
-def check_python_inline(tokens: List[str], raw_stmt: str) -> Tuple[Optional[str], Optional[str]]:
-    """Audit python inline scripts for deletion methods."""
+def check_python_inline(
+    tokens: List[str], raw_stmt: str, heredoc_body: str = ""
+) -> Tuple[Optional[str], Optional[str]]:
+    """Audit python inline scripts and heredocs for deletion methods."""
     cmd_name = os.path.basename(tokens[0])
     if cmd_name.startswith("python"):
+        combined = f"{raw_stmt}\n{heredoc_body}" if heredoc_body else raw_stmt
         for dang in DANGEROUS_PYTHON:
-            if dang in raw_stmt:
+            if dang in combined:
                 return "force_ask", "python_deletion"
     return None, None
 
 
+def evaluate_unparseable_statement(
+    stmt: str, heredoc_body: str = ""
+) -> Tuple[Optional[str], Optional[str]]:
+    """Fallback guard for complex bash constructs when shlex.split fails.
+
+    Allows benign commands (curl, kubectl, pytest, bash arrays) while retaining
+    force_ask protection if any destructive pattern is detected.
+    """
+    if UNPARSEABLE_DESTRUCTIVE_GIT_RE.search(stmt):
+        return "force_ask", "parse_failure"
+    if UNPARSEABLE_RM_RE.search(stmt):
+        return "force_ask", "parse_failure"
+    if UNPARSEABLE_FIND_DELETE_RE.search(stmt):
+        return "force_ask", "rm_find_delete"
+    if UNPARSEABLE_PYTHON_RE.search(stmt):
+        combined = f"{stmt}\n{heredoc_body}" if heredoc_body else stmt
+        if any(dang in combined for dang in DANGEROUS_PYTHON):
+            return "force_ask", "python_deletion"
+    return None, None
+
+
 def evaluate_single_statement(
-    stmt: str, cwd: str, allowed_dirs: List[str], brain_root: Optional[str] = None
+    stmt: str,
+    cwd: str,
+    allowed_dirs: List[str],
+    brain_root: Optional[str] = None,
+    heredoc_body: str = "",
 ) -> Tuple[Optional[str], Optional[str]]:
     """Evaluate one shell statement. Returns (decision, reason_key) or (None, None)."""
     try:
         tokens = shlex.split(stmt, posix=True)
     except Exception:
-        return "force_ask", "parse_failure"
+        return evaluate_unparseable_statement(stmt, heredoc_body)
 
     if not tokens:
         return None, None
@@ -397,7 +551,7 @@ def evaluate_single_statement(
     if base_cmd == "find" and "-delete" in unwrapped:
         return "force_ask", "rm_find_delete"
 
-    py_dec, py_reason = check_python_inline(unwrapped, stmt)
+    py_dec, py_reason = check_python_inline(unwrapped, stmt, heredoc_body)
     if py_dec:
         return py_dec, py_reason
 
@@ -408,9 +562,11 @@ def evaluate_command_line(
     cmd_str: str, cwd: str, allowed_dirs: List[str], brain_root: Optional[str] = None
 ) -> Tuple[Optional[str], Optional[str]]:
     """Evaluate whole command line by splitting statements and checking each."""
-    statements = split_shell_statements(cmd_str)
-    for stmt in statements:
-        dec, reason_key = evaluate_single_statement(stmt, cwd, allowed_dirs, brain_root)
+    statements = parse_shell_statements(cmd_str)
+    for stmt, heredoc_body in statements:
+        dec, reason_key = evaluate_single_statement(
+            stmt, cwd, allowed_dirs, brain_root, heredoc_body=heredoc_body
+        )
         if dec == "deny":
             return "deny", reason_key
         if dec == "force_ask":

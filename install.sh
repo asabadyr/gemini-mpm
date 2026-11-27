@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# agy-mpm-kit installer, runtime doctor & edition switcher for Google Antigravity (v2.3.0).
+# agy-mpm-kit installer, runtime doctor & edition switcher for Google Antigravity (v2.3.1).
 # Manages the ~/.gemini/config/plugins/agy-mpm-core symlink and Python pin file.
 # NEVER reads or modifies ~/.gemini/config/config.json.
 
@@ -34,7 +34,7 @@ REPO_ROOT="$(resolve_script_dir)"
 
 usage() {
   cat <<'EOF'
-agy-mpm-kit — Installer & Edition Switcher (v2.3.0)
+agy-mpm-kit — Installer & Edition Switcher (v2.3.1)
 
 Usage:
   ./install.sh [--lang en|ru] [--python <path>] [--venv[=<backend>]] [--no-pin] [--force]
@@ -426,7 +426,7 @@ cmd_migrate() {
   local source_dir="${REPO_ROOT}"
   [ "${lang}" = "ru" ] && source_dir="${REPO_ROOT}/ru"
 
-  printf "=== Antigravity MPM Kit Migration (v2.3.0) ===\n\n"
+  printf "=== Antigravity MPM Kit Migration (v2.3.1) ===\n\n"
 
   # 1. Back up legacy non-symlink slot if encountered
   if [ -L "${TARGET_LINK}" ]; then
@@ -488,7 +488,7 @@ cmd_migrate() {
     cmd_check_projects "${CHECK_PROJECT_DIRS[@]}"
   fi
 
-  printf "\nMigration to v2.3.0 completed successfully!\n"
+  printf "\nMigration to v2.3.1 completed successfully!\n"
 }
 
 cmd_uninstall() {

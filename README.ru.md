@@ -6,7 +6,7 @@
 
 **[🇬🇧 English](README.md) | [🇷🇺 Русский](README.ru.md)**
 
-`v2.3.0` · **Лицензия MIT** · **0 строк внешних CLI-обёрток** · **`~4.8K` стартовых токенов (`<26%` бюджета)** · **Редакции EN + RU**
+`v2.3.1` · **Лицензия MIT** · **0 строк внешних CLI-обёрток** · **`~4.8K` стартовых токенов (`<26%` бюджета)** · **Редакции EN + RU**
 
 ---
 
@@ -480,7 +480,7 @@ Antigravity запускает хуки жизненного цикла `PreTool
 | Уровень | Обновляется само после `git pull`? | Что нужно сделать пользователю / в проекте |
 |---|---|---|
 | **Глобальный плагин (`00..04`, `20..28`, `hooks.json`, `scripts/`, `code-critic`, `/kit-*`)** | **Да** *(если подключён симлинком через `./install.sh`)* | Выполните `git pull --ff-only` в клоне `gemini-mpm` (или `./install.sh --force`, если копировали папку без симлинка; проверить: `./install.sh --status`, подтвердив `Hook Guard: ACTIVE` и запиненный Python). Для Режима D обновите скопированные плейбуки `90..92`. |
-| **Хук Deletion Shield в PreToolUse (`hooks.json` -> `scripts/mpm-py`)** | **Сразу же** | Автоматически перехватывает `run_command` во всех сессиях и дочерних субагентах через обёртку `./scripts/mpm-py`. Пинит `Python >= 3.8` stdlib без изменения файлов репозитория и без конфликтов с проектными виртуальными окружениями. |
+| **Хук Deletion Shield в PreToolUse (`hooks.json` -> `scripts/mpm-py`)** | **Сразу же** | Автоматически перехватывает `run_command` во всех сессиях и дочерних субагентах через обёртку `./scripts/mpm-py`. Пинит `Python >= 3.8` stdlib без изменения файлов репозитория и без конфликтов с проектными виртуальными окружениями. В патче `v2.3.1` устранены ложные срабатывания `parse_failure` при комментариях `#`, переносах строк `\`, heredoc (`<<EOF`), bash-массивах, безопасных glob `/tmp/prefix_*` и недеструктивных непарсируемых командах. |
 | **Уже настроенные проекты (`GEMINI.md`, `.gitignore`)** | **Нет** *(локальные файлы репозитория остаются на версии установки)* | Откройте проект и запустите **`/kit-bootstrap --migrate`** — сохранит бэкап в `scratch/`, допишет `.agents/teamwork/` в `.gitignore` и без потерь обновит `GEMINI.md` (`PreToolUse` Deletion Shield, переносимая обёртка `mpm-py`, `mpm-git-guard` snapshot/audit/restore, непрерывный монитор `mpm-live-watch`, `Read-Once`, локальный цикл коммитов `teamwork` без push, а также `v2.3.0` Contract-First DISPATCH, замороженные проверки и шлюз Pre-Dispatch T1 trivial opt-in & hard veto). |
 | **Старые длинные чаты и ветки worktree** | Правила перечитываются на следующем ходе | В длинном старом чате выполните `/compact` (или откройте новый чат); в долгоживущие ветки `git worktree` подлейте `main` по готовности обновить `GEMINI.md`. |
 
@@ -491,7 +491,7 @@ Antigravity запускает хуки жизненного цикла `PreTool
 ```text
 gemini-mpm/
 ├── pyproject.toml                                  # Метаданные пакета Python (Python >=3.8, опциональные dev-зависимости)
-├── plugin.json                                     # Манифест EN-плагина (agy-mpm-core v2.3.0)
+├── plugin.json                                     # Манифест EN-плагина (agy-mpm-core v2.3.1)
 ├── hooks.json                                      # Хук PreToolUse Deletion Shield для run_command (вызывает ./scripts/mpm-py)
 ├── install.sh                                      # Установщик и переключатель (--lang, --venv, --doctor, --migrate, --check-projects)
 ├── LICENSE                                         # Лицензия MIT + атрибуция концепций claude-mpm
@@ -540,7 +540,7 @@ gemini-mpm/
 │       ├── 91-playbook-handoff.md
 │       └── 92-playbook-architecture.md
 └── ru/                                             # Полная автономная русская редакция плагина (--lang ru)
-    ├── plugin.json                                 # Манифест RU-плагина (agy-mpm-core-ru v2.3.0)
+    ├── plugin.json                                 # Манифест RU-плагина (agy-mpm-core-ru v2.3.1)
     ├── scripts -> ../scripts                       # Симлинк на общие скрипты (чистый Python stdlib и mpm-py)
     ├── hooks.json                                  # Хук PreToolUse Deletion Shield (русскоязычные сообщения)
     ├── assets/logo.svg

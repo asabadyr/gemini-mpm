@@ -119,6 +119,90 @@ class TestDestructiveCmdGuard(unittest.TestCase):
         res = self.run_guard('python3 -c "import os; os.remove(\'src/a.py\')"')
         self.assertEqual(res.get("decision"), "force_ask")
 
+    def test_shell_comment_with_apostrophe_allow(self):
+        cmd = (
+            "set -e\n"
+            "# Note: when auth is enabled, let's probe health and AI endpoints\n"
+            "kubectl -n smc port-forward svc/gateway 18086:8080 >/tmp/pf.log 2>&1 &\n"
+            "curl -fsS http://127.0.0.1:18086/healthz\n"
+        )
+        res = self.run_guard(cmd)
+        self.assertEqual(res.get("decision"), "allow")
+
+    def test_shell_comment_still_blocks_following_destructive_cmd(self):
+        cmd = "# Note: let's inspect first\ngit clean -fd\n"
+        res = self.run_guard(cmd)
+        self.assertEqual(res.get("decision"), "deny")
+
+    def test_backslash_line_continuation_before_and_allow(self):
+        cmd = (
+            'git add \\\n'
+            '  src/a.py \\\n'
+            '  && git commit -m "ok" \\\n'
+            '  && git status -s'
+        )
+        res = self.run_guard(cmd)
+        self.assertEqual(res.get("decision"), "allow")
+
+    def test_bash_array_assignment_and_commit_allow(self):
+        cmd = (
+            'FILES=(\n'
+            '  crates/gw/src/main.rs\n'
+            '  web/src/App.tsx\n'
+            ')\n'
+            'git add "${FILES[@]}" \\\n'
+            '&& git commit -m "feat: safe commit" \\\n'
+            '&& git status -s'
+        )
+        res = self.run_guard(cmd)
+        self.assertEqual(res.get("decision"), "allow")
+
+    def test_heredoc_file_write_with_apostrophes_and_semicolons_allow(self):
+        cmd = (
+            "cat << 'EOF' > /tmp/check_cyrillic.py\n"
+            "import re\n"
+            "# don't match comments; keep 'quotes' clean\n"
+            "msg = \"it's fine; really\"\n"
+            "print(msg)\n"
+            "EOF\n"
+            "python3 /tmp/check_cyrillic.py"
+        )
+        res = self.run_guard(cmd)
+        self.assertEqual(res.get("decision"), "allow")
+
+    def test_heredoc_python_safe_vs_destructive(self):
+        safe_cmd = (
+            "python3 - << 'PY'\n"
+            "txt = \"don't fail; parse cleanly\"\n"
+            "print(txt)\n"
+            "PY"
+        )
+        self.assertEqual(self.run_guard(safe_cmd).get("decision"), "allow")
+
+        chained_bad = (
+            "python3 - << 'PY' && echo done\n"
+            "import os\n"
+            "os.remove('src/important.py')\n"
+            "PY"
+        )
+        self.assertEqual(self.run_guard(chained_bad).get("decision"), "force_ask")
+
+    def test_arithmetic_bitshift_not_mistaken_for_heredoc(self):
+        cmd = "echo $((1 << 2)) && git clean -fd"
+        res = self.run_guard(cmd)
+        self.assertEqual(res.get("decision"), "deny")
+
+    def test_unparseable_fallback_allows_benign_flags_destructive(self):
+        self.assertEqual(self.run_guard('curl -sS "http://127.0.0.1:8080/health?x=unbalanced\'quote').get("decision"), "allow")
+        self.assertEqual(self.run_guard('rm -rf "unbalanced_quote', cwd="/opt/repo").get("decision"), "force_ask")
+        self.assertEqual(self.run_guard('git reset --hard "unbalanced_quote').get("decision"), "force_ask")
+
+    def test_tmp_glob_prefix_allow_vs_broad_tmp_wildcard_force_ask(self):
+        self.assertEqual(self.run_guard("rm -f /tmp/app_probe_*.log").get("decision"), "allow")
+        self.assertEqual(self.run_guard("rm -rf /tmp/*").get("decision"), "force_ask")
+        self.assertEqual(self.run_guard("rm -rf $TMPDIR/*").get("decision"), "force_ask")
+        self.assertEqual(self.run_guard("rm -f src/*.py", cwd="/opt/repo").get("decision"), "force_ask")
+
 
 class TestMpmGitGuard(unittest.TestCase):
     """Test suite for mpm-git-guard.py CLI subcommands."""

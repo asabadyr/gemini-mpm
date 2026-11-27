@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agy-mpm-kit"
-version = "2.3.0"
+version = "2.3.1"
 description = "Portable multi-agent rule, skill, and safety guard kit for Google Antigravity"
 readme = "README.md"
 license = { file = "LICENSE" }

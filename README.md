@@ -6,7 +6,7 @@
 
 **[🇬🇧 English](README.md) | [🇷🇺 Русский](README.ru.md)**
 
-`v2.3.0` · **MIT License** · **Native PreToolUse Deletion Shield & 0 Daemon Overhead** · **`~4.8K` Startup Tokens (`<26%` Budget)** · **EN + RU Editions**
+`v2.3.1` · **MIT License** · **Native PreToolUse Deletion Shield & 0 Daemon Overhead** · **`~4.8K` Startup Tokens (`<26%` Budget)** · **EN + RU Editions**
 
 ---
 
@@ -487,7 +487,7 @@ Pre-v2.0 (`v1.x`) installations had zero Python dependencies, may have copied di
 | Layer | Auto-Updated on `git pull`? | Action Required for Existing Users / Repos |
 |---|---|---|
 | **Global Plugin (`00..04`, `20..28`, `hooks.json`, `scripts/`, `code-critic`, `/kit-*`)** | **Yes** *(if symlinked via `./install.sh`)* | Run `git pull --ff-only` inside your cloned `gemini-mpm` folder (or re-run `./install.sh --force` if copied without a symlink; verify via `./install.sh --status` to confirm `Hook Guard: ACTIVE` and Python runtime pinned). If you used Mode D fallback, refresh copied `90..92` playbooks. |
-| **PreToolUse Deletion Shield Hook (`hooks.json` -> `scripts/mpm-py`)** | **Immediate** | Intercepts `run_command` across all sessions and child subagents automatically via `./scripts/mpm-py` wrapper. Pins `Python >= 3.8` stdlib without modifying tracked repo files or breaking on project virtualenvs. |
+| **PreToolUse Deletion Shield Hook (`hooks.json` -> `scripts/mpm-py`)** | **Immediate** | Intercepts `run_command` across all sessions and child subagents automatically via `./scripts/mpm-py` wrapper. Pins `Python >= 3.8` stdlib without modifying tracked repo files or breaking on project virtualenvs. Patch `v2.3.1` eliminates false `parse_failure` prompts on `#` comments, `\` line continuations, heredocs (`<<EOF`), bash arrays, scoped `/tmp/prefix_*` globs, and non-destructive unparseable commands. |
 | **Existing Bootstrapped Repos (`GEMINI.md`, `.gitignore`)** | **No** *(local repo files stay on bootstrap version)* | Open the repo and run **`/kit-bootstrap --migrate`** — backs up current files to `scratch/`, ensures `.agents/teamwork/` is in `.gitignore`, and refreshes `GEMINI.md` with `PreToolUse` Deletion Shield, portable `mpm-py` wrapper, `mpm-git-guard` snapshot/audit/restore, continuous `mpm-live-watch` OS monitor, `Read-Once`, local-branch `teamwork` commit lifecycle, and `v2.3.0` Contract-First DISPATCH, frozen acceptance checks, and Pre-Dispatch T1 trivial opt-in & hard veto gate without losing repo invariants. |
 | **Long Open Chats / Feature Worktrees** | Core rules reload on next turn | Run `/compact` (or open a fresh chat) to clear stale in-context habits; merge/rebase `main` into long-lived research worktrees when ready to sync `GEMINI.md`. |
 
@@ -498,7 +498,7 @@ Pre-v2.0 (`v1.x`) installations had zero Python dependencies, may have copied di
 ```text
 gemini-mpm/
 ├── pyproject.toml                                  # Python packaging & tool metadata (Python >=3.8, optional dev extras)
-├── plugin.json                                     # EN plugin manifest (agy-mpm-core v2.3.0)
+├── plugin.json                                     # EN plugin manifest (agy-mpm-core v2.3.1)
 ├── hooks.json                                      # PreToolUse Deletion Shield lifecycle hook (invokes ./scripts/mpm-py)
 ├── install.sh                                      # Safe installer & switcher (--lang, --venv, --doctor, --migrate, --check-projects)
 ├── LICENSE                                         # MIT License + claude-mpm conceptual attribution
